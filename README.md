@@ -202,7 +202,34 @@ Below is a comprehensive description of the columns present in the various CSV f
 
 
 
-#### **Input File Details: `cardano_pools_4.csv`**
+#### **`cardano_pools_3.csv`**
+
+- **File Type**: CSV
+- **Delimiter**: `,`
+- **Columns**:
+  - **`EPOCH`**:
+    - Type: Integer
+    - Description: Epoch number.
+  - **`POOL_HASH_BECH32`**:
+    - Type: String
+    - Description: Bech32-formatted pool hash.
+  - **`POOL_STAKES`**:
+    - Type: Integer
+    - Description: Total amount of ADA staked in the pool during the epoch.
+  - **`POOL_REWARDS`**:
+    - Type: Integer
+    - Description: Total rewards distributed by the pool during the epoch.
+  - **`NUM_OF_DELEGATORS`**:
+    - Type: Integer
+    - Description: Number of unique delegator addresses staking in the pool.
+  - **`NUM_OF_REWARDERS`**:
+    - Type: Integer
+    - Description: Number of unique rewarder addresses receiving rewards from the pool.
+
+
+
+
+#### **`cardano_pools_4.csv`**
 - **File Type**: CSV
 - **Delimiter**: `|`
 - **Columns**:
