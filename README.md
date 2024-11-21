@@ -87,7 +87,6 @@ Each ‘code’ file consists of multiple cells. Almost for all cells, there is 
 
 Below is a comprehensive description of the columns present in the various CSV files (`cardano_TXs_All_MAs_?.csv`, `cardano_TXs_MAs_?.csv`, `cardano_TXs_NFTs_?.csv`, `cardano_TXs_?.csv`).
 
----
 
 #### **1. Common Columns Across All Files**
 - **`TX_ID`**:
@@ -97,7 +96,6 @@ Below is a comprehensive description of the columns present in the various CSV f
 - **`EPOCH_NO`**:
   - The epoch number associated with the block containing the transaction.
 
----
 
 #### **2. Specific Columns by File Type**
 
@@ -151,7 +149,6 @@ Below is a comprehensive description of the columns present in the various CSV f
     - `Stake_Addr`: Stake address hash, if applicable.
   - Semicolon-separated for multiple outputs.
 
----
 
 ##### **`cardano_TXs_MAs_?.csv`**
 - **`TX_INPUT_MAs`**:
@@ -175,7 +172,6 @@ Below is a comprehensive description of the columns present in the various CSV f
 - **`MINT_FTs`**:
   - Details of FTs (fungible tokens) minted, formatted similarly to `MINT_NFTs`.
 
----
 
 ##### **`cardano_TXs_NFTs_?.csv`**
 - **`NFTs`**:
@@ -185,7 +181,6 @@ Below is a comprehensive description of the columns present in the various CSV f
 - **`FTs`**:
   - Details of FTs in the transaction, formatted similarly to `NFTs`.
 
----
 
 ##### **`cardano_TXs_?.csv`**
 - **`INPUTs`**:
@@ -193,7 +188,6 @@ Below is a comprehensive description of the columns present in the various CSV f
 - **`OUTPUTs`**:
   - Detailed outputs, formatted as in `cardano_TXs_All_MAs_?.csv`.
 
----
 
 #### Notes on Delimiters and Encoding:
 1. **Semicolon (`;`)**:
