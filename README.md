@@ -74,3 +74,8 @@ Below is an overview of the `code` files included in the **code** folder. Detail
 
 - **`14_Velocity`**  
   Analyzes the distribution of holding ADA.
+
+
+***
+
+Each ‘code’ file consists of multiple cells. Almost for all cells, there is a comment at top, documenting what analysis/operation the cell does. Also, in each cell, whenever necessary, the sub-operations are commented to explain their activity and give enough information about the details of the steps taken in the code. Additionally, the variable names have been chosen in a way to be well-self-descriptive, helping to better understand the logic of the code. 
