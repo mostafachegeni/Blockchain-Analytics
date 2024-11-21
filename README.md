@@ -4,7 +4,7 @@
 
 # List of `code` Files
 
-Below is an overview of the `code` files included in the **code** folder. Detailed descriptions of the methods are provided in the relevant papers. The analysis steps are well-documented within the code through comments and self-descriptive variable names to facilitate understanding. Additional documentation for these `code` files is presented in the `doc` folder.
+Below is an overview of the `code` files included in the **code** folder. Detailed descriptions of the methods are provided in the relevant papers. The analysis steps are well-documented within the code through comments and self-descriptive variable names to facilitate understanding. Additional documentation for each `code` file is presented in the `doc` folder under a similar filename.
 
 ### File Descriptions
 
