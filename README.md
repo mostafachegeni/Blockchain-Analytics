@@ -85,7 +85,7 @@ Each ‘code’ file consists of multiple cells. Almost for all cells, there is 
 
 ### Detailed Description of CSV File Columns for Cardano Transaction Data
 
-Below is a comprehensive description of the columns present in the various CSV files (`cardano_TXs_All_MAs_?.csv`, `cardano_TXs_MAs_?.csv`, `cardano_TXs_NFTs_?.csv`, `cardano_TXs_?.csv`).
+Below is a comprehensive description of the columns present in the various CSV files (`cardano_TXs_All_MAs_?.csv`, `cardano_TXs_MAs_?.csv`, `cardano_TXs_NFTs_?.csv`, `cardano_TXs_?.csv`, cardano_pools_3.csv, cardano_pools_4.csv).
 
 
 #### **1. Common Columns Across All Files**
