@@ -1061,123 +1061,656 @@ print('done!')
 ```
 
 
-
 ***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
-
-
-
-***
-
-
+### Calculate "Active Delegators (Stake Addresses)" Per Epoch
+
+This cell calculates the total number of active delegator addresses per epoch using data from the `cardano_pools_3.csv` file.
+
+
+#### **Input File Details: `cardano_pools_3.csv`**
+
+- **File Type**: CSV
+- **Delimiter**: `,`
+- **Columns**:
+  - **`EPOCH`**:
+    - Type: Integer
+    - Description: Epoch number.
+  - **`POOL_HASH_BECH32`**:
+    - Type: String
+    - Description: Bech32-formatted pool hash.
+  - **`POOL_STAKES`**:
+    - Type: Integer
+    - Description: Total amount of ADA staked in the pool during the epoch.
+  - **`POOL_REWARDS`**:
+    - Type: Integer
+    - Description: Total rewards distributed by the pool during the epoch.
+  - **`NUM_OF_DELEGATORS`**:
+    - Type: Integer
+    - Description: Number of unique delegator addresses staking in the pool.
+  - **`NUM_OF_REWARDERS`**:
+    - Type: Integer
+    - Description: Number of unique rewarder addresses receiving rewards from the pool.
+
+
+#### **Explanation of the Code**
+
+1. **Epoch Range**:
+   - Epochs processed range from:
+     - `first_epoch_no = 210` (2020-08-08)
+     - `last_epoch_no = 391` (2023-01-30).
+
+2. **Steps**:
+   - **Initialization**:
+     - Create an array `active_delegator_addresses_per_epoch` to store the count of active delegators for each epoch.
+   - **Processing Rows**:
+     - For each row in the CSV file:
+       - Extract the epoch number (`EPOCH`) and the number of delegators (`NUM_OF_DELEGATORS`).
+       - Add the count of delegators for the pool to the total for the corresponding epoch.
+   - **Epoch Filtering**:
+     - Skip rows for epochs outside the specified range.
+
+3. **Purpose**:
+   - Provides a time-series view of the number of active delegator addresses per epoch.
+
+
+
+#### **Cell Code**
+```python
+# "Active Delegators (Stake Addresses)" Per Epoch:
+
+print('----------------------')
+
+# Store current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+print('----------------------')
+
+# Initialize epoch ranges and dates
+first_epoch_no = 210
+last_epoch_no = 391
+FIRST_DATE_POOLS_STAKING = datetime.datetime.strptime('2020-08-08 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+LAST_DATE_POOLS_STAKING = datetime.datetime.strptime('2023-01-30 21:46:16', '%Y-%m-%d %H:%M:%S').date()
+
+total_num_of_epochs = int(last_epoch_no - first_epoch_no + 1)
+
+epochs_array = list(range(first_epoch_no, last_epoch_no + 1))
+epochs_date_array = [FIRST_DATE_POOLS_STAKING + datetime.timedelta(days=(i * 5)) for i in range(total_num_of_epochs)]
+
+# Initialize array for active delegators per epoch
+active_delegator_addresses_per_epoch = [0 for _ in range(total_num_of_epochs)]
+
+current_epoch = first_epoch_no
+
+# Load CSV file
+file_name = BASE_ADDRESS + '/cardano_pools_3.csv'
+df = pd.read_csv(file_name, delimiter=',')
+
+# Process each row in the CSV file
+for index, row in tqdm(df.iterrows()):
+    EPOCH = int(df.loc[index, 'EPOCH'])
+    NUM_OF_DELEGATORS = int(df.loc[index, 'NUM_OF_DELEGATORS'])
+
+    # Skip epochs outside the range
+    if EPOCH < first_epoch_no:
+        continue
+    if EPOCH > last_epoch_no:
+        break
+
+    # Update active delegators count for the epoch
+    active_delegator_addresses_per_epoch[EPOCH - first_epoch_no] += NUM_OF_DELEGATORS
+
+# Calculate total elapsed time
+et = datetime.datetime.now() - ct
+print("Total elapsed time: ", et)
+print('----------------------')
+print('done!')
+```
 
 
 
 ***
 
+### Calculate "Active Delegators (Entities)" Per Epoch
+
+This cell computes the number of unique active delegator entities per epoch, based on data from the `cardano_pools_4.csv` file. It also stores the staking amounts by entity for each epoch.
+
+
+#### **Input File Details: `cardano_pools_4.csv`**
+
+- **File Type**: CSV
+- **Delimiter**: `|`
+- **Columns**:
+  - **`EPOCH`**:
+    - Type: Integer
+    - Description: Epoch number.
+  - **`POOL_ID`**:
+    - Type: Integer
+    - Description: Unique identifier for the staking pool.
+  - **`POOL_HASH_BECH32`**:
+    - Type: String
+    - Description: Bech32-formatted pool hash.
+  - **`POOL_STAKES`**:
+    - Type: Integer
+    - Description: Total ADA staked in the pool during the epoch.
+  - **`POOL_REWARDS`**:
+    - Type: Integer
+    - Description: Total rewards distributed by the pool during the epoch.
+  - **`NUM_OF_DELEGATORS`**:
+    - Type: Integer
+    - Description: Number of unique delegator addresses staking in the pool.
+  - **`NUM_OF_REWARDERS`**:
+    - Type: Integer
+    - Description: Number of unique rewarder addresses receiving rewards from the pool.
+  - **`DELEGATORs`**:
+    - Type: String
+    - Description: Semicolon-separated list of delegator details. Each entry contains:
+      - `Delegator_ID,Stake_Amount,Delegator_Stake_Addr`
+  - **`REWARDERs`**:
+    - Type: String
+    - Description: Semicolon-separated list of rewarder details. Each entry contains:
+      - `Rewarder_ID,Reward_Amount,Rewarder_Stake_Addr`
+
+
+#### **Explanation of the Code**
+
+1. **Epoch Range**:
+   - Epochs processed range from:
+     - `first_epoch_no = 210` (2020-08-08)
+     - `last_epoch_no = 391` (2023-01-30).
+
+2. **Steps**:
+   - **Initialization**:
+     - Create arrays to count unique active delegator entities and addresses for each epoch.
+     - Initialize sets to track unique delegators for the current epoch.
+   - **Processing Rows**:
+     - For each row in the CSV file:
+       - Extract delegator details (`DELEGATORs`).
+       - Use `BinarySearch` and `entity_of_stake_addresses` to map stake addresses to entity indices.
+       - Track unique delegators at both address and entity levels.
+       - Accumulate staking amounts by entity in `stake_deleg_by_entities`.
+   - **Epoch Transitions**:
+     - At the end of each epoch:
+       - Store counts of unique delegators (addresses and entities).
+       - Save staking amounts by entity to a file.
+       - Reset tracking sets for the next epoch.
+   - **Output**:
+     - Writes staking and reward distributions by entity into separate text files for each epoch.
+
+3. **File Output**:
+   - **Staking and Rewards Per Entity**:
+     - File format: Text (`.txt`).
+     - Filename examples:
+       - `StakeDelegPerEntityEpoch_<Epoch>__Cardano_TXs_All.txt`
+       - `RewardPerEntityEpoch_<Epoch>__Cardano_TXs_All.txt`
+     - Content:
+       - Array of staking/reward amounts for each entity.
+
+
+#### **Cell Code**
+```python
+# Calculate "Active Delegators (Entities)" Per Epoch
+
+print('----------------------')
+
+# Store current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+print('----------------------')
+
+# Initialize epoch ranges and dates
+first_epoch_no = 210
+last_epoch_no = 391
+FIRST_DATE_POOLS_STAKING = datetime.datetime.strptime('2020-08-08 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+LAST_DATE_POOLS_STAKING = datetime.datetime.strptime('2023-01-30 21:46:16', '%Y-%m-%d %H:%M:%S').date()
+
+total_num_of_epochs = int(last_epoch_no - first_epoch_no + 1)
+epochs_array = list(range(first_epoch_no, last_epoch_no + 1))
+epochs_date_array = [FIRST_DATE_POOLS_STAKING + datetime.timedelta(days=(i * 5)) for i in range(total_num_of_epochs)]
+
+# Initialize counters
+num_delegator_addresses_per_epoch = [0 for _ in range(total_num_of_epochs)]
+num_delegator_entities_per_epoch = [0 for _ in range(total_num_of_epochs)]
+
+current_epoch = first_epoch_no
+
+# Load CSV file
+file_name = BASE_ADDRESS + '/cardano_pools_4.csv'
+df = pd.read_csv(file_name, delimiter='|')
+
+# Initialize sets and arrays for tracking data
+delegator_addresses_per_epoch_SET = set()
+delegator_entities_per_epoch_SET = set()
+stake_deleg_by_entities = [0] * (np.amax(clustering_array) + 1)
+
+# Process each row in the CSV file
+for index, row in tqdm(df.iterrows()):
+    EPOCH = int(df.loc[index, 'EPOCH'])
+    DELEGATORs = list(df.loc[index, 'DELEGATORs'].split(';'))
+
+    # Skip epochs outside the range
+    if EPOCH < first_epoch_no:
+        continue
+
+    if EPOCH > current_epoch:
+        # Save epoch data
+        num_delegator_addresses_per_epoch[current_epoch - first_epoch_no] = len(delegator_addresses_per_epoch_SET)
+        num_delegator_entities_per_epoch[current_epoch - first_epoch_no] = len(delegator_entities_per_epoch_SET)
+
+        delegator_addresses_per_epoch_SET.clear()
+        delegator_entities_per_epoch_SET.clear()
+
+        # Save staking data
+        output_filename = BASE_ADDRESS + f'/YuZhang_Cardano_StakeDelegation_Entities/StakeDelegPerEntityEpoch_{str(current_epoch).zfill(4)}__Cardano_TXs_All.txt'
+        store_array_to_file(stake_deleg_by_entities, output_filename)
+        stake_deleg_by_entities = [0] * (np.amax(clustering_array) + 1)
+
+        current_epoch = EPOCH
+
+    # Process delegators
+    for delegator in DELEGATORs:
+        deleg_stake_addr = delegator.split(',')[2]
+        deleg_addr_indx = BinarySearch(unique_delegation_addresses, deleg_stake_addr, debug=False)
+        if deleg_addr_indx != -1:
+            deleg_entity_indx = entity_of_stake_addresses[deleg_addr_indx][0]
+            stake_deleg_by_entities[deleg_entity_indx] += int(delegator.split(',')[1])
+            delegator_addresses_per_epoch_SET.add(deleg_addr_indx)
+            delegator_entities_per_epoch_SET.add(deleg_entity_indx)
+
+et = datetime.datetime.now() - ct
+print("Total elapsed time: ", et)
+print('----------------------')
+print('done!')
+
+```
+
+
+
+***
+
+### Load/Store Aggregated Metrics Per Epoch
+
+This cell handles the loading and storing of the following metrics per epoch:
+
+1. **`num_delegator_addresses_per_epoch`**: Number of delegator addresses.
+2. **`num_delegator_entities_per_epoch`**: Number of delegator entities.
+3. **`num_rewarder_addresses_per_epoch`**: Number of rewarder addresses.
+4. **`num_rewarder_entities_per_epoch`**: Number of rewarder entities.
+
+
+#### **Explanation of the Code**
+
+1. **File Format**:
+   - **File Type**: Text file (`.txt`).
+   - **Delimiter**: One value per line.
+   - **Content**: Array values representing the respective metric for each epoch.
+
+2. **Storing Metrics**:
+   - Each metric array is stored in a separate text file.
+   - Filenames include a timestamp for versioning:
+     - Example: `Num_Delegator_addresses_per_epoch__Cardano_TXs_All__YYYY-MM-DD_HHMMSS.txt`
+   - The `store_array_to_file` function writes the arrays to disk.
+
+3. **Loading Metrics**:
+   - Metrics are loaded from corresponding text files.
+   - The `load_file_to_array` function is used to read the arrays into memory.
+
+4. **Purpose**:
+   - Allows persistence of calculated metrics for further analysis without recalculating.
+   - Facilitates reproducibility and version control with timestamped files.
+
+
+
+#### **Cell Code**
+```python
+# Load/Store "num_delegator_addresses_per_epoch",
+#            "num_delegator_entities_per_epoch",
+#            "num_rewarder_addresses_per_epoch",
+#            "num_rewarder_entities_per_epoch" from/into file:
+
+print('----------------------')
+ct = datetime.datetime.now()
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+
+# Store metrics into files:
+'''
+output_filename = BASE_ADDRESS + '/Num_Delegator_addresses_per_epoch__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+store_array_to_file(num_delegator_addresses_per_epoch, output_filename)
+
+output_filename = BASE_ADDRESS + '/Num_Delegator_entities_per_epoch__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+store_array_to_file(num_delegator_entities_per_epoch, output_filename)
+
+output_filename = BASE_ADDRESS + '/Num_Rewarder_addresses_per_epoch__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+store_array_to_file(num_rewarder_addresses_per_epoch, output_filename)
+
+output_filename = BASE_ADDRESS + '/Num_Rewarder_entities_per_epoch__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+store_array_to_file(num_rewarder_entities_per_epoch, output_filename)
+'''
+
+# Load metrics from files:
+file_name = BASE_ADDRESS + '/Num_Delegator_addresses_per_epoch__Cardano_TXs_All__2023-12-17_094541.txt'
+num_delegator_addresses_per_epoch = load_file_to_array(file_name)
+
+file_name = BASE_ADDRESS + '/Num_Delegator_entities_per_epoch__Cardano_TXs_All__2023-12-17_094541.txt'
+num_delegator_entities_per_epoch = load_file_to_array(file_name)
+
+file_name = BASE_ADDRESS + '/Num_Rewarder_addresses_per_epoch__Cardano_TXs_All__2023-12-17_132620.txt'
+num_rewarder_addresses_per_epoch = load_file_to_array(file_name)
+
+file_name = BASE_ADDRESS + '/Num_Rewarder_entities_per_epoch__Cardano_TXs_All__2023-12-17_132620.txt'
+num_rewarder_entities_per_epoch = load_file_to_array(file_name)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+```
+
+
+
+***
+
+
+### Find Number of New Entities Over Time
+
+This cell determines the number of new entities created each day, based on transaction data from multiple CSV files.
+
+
+#### **Explanation of the Code**
+
+1. **Objective**:
+   - To calculate when each entity is first observed (i.e., the day it becomes "active").
+   - Store the result in an array `entities_new_per_day_array`.
+
+2. **Input Data**:
+   - **Transaction CSV Files**:
+     - Format: `cardano_TXs_<file_number>.csv`.
+     - Delimiter: `|`
+     - Key Columns:
+       - `TX_ID`: Transaction ID.
+       - `BLOCK_TIME`: Block timestamp of the transaction.
+       - `EPOCH_NO`: Epoch number of the transaction.
+       - `OUTPUTs`: Semicolon-separated list of transaction outputs. Each output contains:
+         - `Output_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
+
+3. **Steps**:
+   - **Initialization**:
+     - `entities_new_per_day_array`: Array initialized with a placeholder value (`999999999999`).
+     - `current_delta_day`: Tracks the current day in terms of elapsed days since the start of the Cardano network (`INITIAL_DATE_CARDANO`).
+   - **Processing CSV Files**:
+     - For each file:
+       - Load the file into a DataFrame.
+       - For each transaction output:
+         - Extract the payment address (`address_payment_part`) and map it to an entity using `clustering_array_heur1and2`.
+         - If the entity has not been observed before (`place_holder`), record the current day in the `entities_new_per_day_array`.
+   - **Epoch Filtering**:
+     - Exclude addresses associated with smart contracts (`address_has_script != 'f'`).
+
+4. **Purpose**:
+   - Tracks the time evolution of new entities in the network.
+   - Useful for analyzing adoption and growth over time.
+
+
+#### **Cell Code**
+```python
+# Find Number of New "Entities" Over Time
+
+print('----------------------')
+
+# Store current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+print('----------------------')
+
+# Initialize constants
+INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+FINAL_DATE_CARDANO = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
+total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+
+current_delta_day = 0
+place_holder = 999999999999
+entities_new_per_day_array = np.array([place_holder] * (max(clustering_array_heur1and2)[0] + 1))
+
+CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_'
+NUMBER_OF_CSV_FILES = 6
+CSV_FILES_SUFFIX = '.csv'
+
+# Process each CSV file
+for i in range(1, NUMBER_OF_CSV_FILES + 1):
+    ct_temp = datetime.datetime.now()
+
+    # Load CSV file
+    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+    df = pd.read_csv(file_name, delimiter='|')
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
+
+    ct_temp = datetime.datetime.now()
+
+    # Process each row in the DataFrame
+    for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
+        BLOCK_TIME = datetime.datetime.strptime(str(df.loc[index, 'BLOCK_TIME']), '%Y-%m-%d %H:%M:%S').date()
+        tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
+
+        if tx_delta_day != current_delta_day:
+            current_delta_day = tx_delta_day
+
+        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
+        for tx_output in outputs_list:
+            address_raw = tx_output.split(',')[1]
+            address_has_script = tx_output.split(',')[4]
+            payment_cred = tx_output.split(',')[5]
+            stake_address = tx_output.split(',')[6]
+
+            if address_has_script == 'f':  # Exclude smart contract addresses
+                [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                if address_payment_part != '':
+                    addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
+                    entity_indx = clustering_array_heur1and2[addr_indx][0]
+                    if entities_new_per_day_array[entity_indx] == place_holder:
+                        entities_new_per_day_array[entity_indx] = current_delta_day
+
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (New Entities over Time from CSV File " + file_name + "): ", et_temp)
+
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (New Entities over Time): ", et)
+print('----------------------')
+print('done!')
+
+```
+
+
+
+***
+
+
+### Load/Store `entities_new_per_day_array` From/Into File
+
+This cell handles the persistence of the `entities_new_per_day_array` data, which tracks the day each entity is first observed. The data can be stored into or loaded from a text file.
+
+
+#### **File Format**
+
+- **File Type**: Text file (`.txt`)
+- **Delimiter**: One value per line
+- **Content**:
+  - Array values representing the day each entity was first observed. The index corresponds to the entity index, and the value represents the day since the start of the Cardano network (`INITIAL_DATE_CARDANO`).
+
+
+#### **Steps**
+
+1. **Storing Data**:
+   - Write the `entities_new_per_day_array` to a text file.
+   - File is named with a timestamp for version control:
+     - Example: `newPerDay_Entities__Cardano_TXs_All__YYYY-MM-DD_HHMMSS.txt`.
+
+2. **Loading Data**:
+   - Load the array from a specified file.
+   - Use the `load_file_to_array` function to restore the array into memory.
+
+
+#### **Cell Code**
+```python
+# Load/Store "entities_new_per_day_array" from/into file
+
+print('----------------------')
+ct = datetime.datetime.now()
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+
+# Store "entities_new_per_day_array" into file:
+'''
+output_filename = BASE_ADDRESS + '/newPerDay_Entities__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+store_array_to_file(entities_new_per_day_array, output_filename)
+'''
+
+# Load "entities_new_per_day_array" from file:
+file_name = BASE_ADDRESS + '/newPerDay_Entities__Cardano_TXs_All__2023-04-22_012525.txt'
+entities_new_per_day_array = load_file_to_array(file_name)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+```
+
+
+
+***
+
+
+### Find Number of New "Byron", "Shelley", and "Stake" Addresses Over Time
+
+This cell calculates the number of new addresses (Byron, Shelley, and Stake) observed each day using data from multiple transaction CSV files.
+
+
+#### **Explanation of the Code**
+
+1. **Objective**:
+   - Track the first observation day for each unique address type:
+     - **Raw Addresses**: All raw addresses in outputs.
+     - **Byron Payment Addresses**: Payment addresses specific to Byron-era transactions.
+     - **Shelley Payment Addresses**: Payment addresses specific to Shelley-era transactions.
+     - **Delegation (Stake) Addresses**: Stake addresses used in delegation.
+
+2. **Input Data**:
+   - **Transaction CSV Files**:
+     - Format: `cardano_TXs_<file_number>.csv`
+     - Delimiter: `|`
+     - Key Columns:
+       - `OUTPUTs`: Semicolon-separated list of transaction outputs. Each output contains:
+         - `Output_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
+
+3. **Steps**:
+   - **Initialization**:
+     - Arrays to store the first observation day for each address:
+       - `raw_addresses_new_per_day_array`
+       - `Byron_payment_addresses_new_per_day_array`
+       - `Shelley_payment_addresses_new_per_day_array`
+       - `delegation_addresses_new_per_day_array`
+     - Placeholders (`999999999999`) indicate unobserved addresses.
+   - **Processing CSV Files**:
+     - For each file:
+       - Load into a DataFrame.
+       - For each transaction output:
+         - Extract relevant address parts.
+         - Determine the type of the address (Byron, Shelley, or Stake).
+         - Update the corresponding array with the current day if the address is new.
+
+
+#### **Cell Code**
+```python
+# Find Number of New "Byron", "Shelley", and "Stake" Addresses Over Time
+
+print('----------------------')
+
+# Store current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+print('----------------------')
+
+# Initialize constants
+INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+FINAL_DATE_CARDANO = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
+total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+
+current_delta_day = 0
+place_holder = 999999999999
+
+# Arrays for first observation day
+raw_addresses_new_per_day_array = np.array([place_holder] * len(unique_raw_addresses))
+Byron_payment_addresses_new_per_day_array = np.array([place_holder] * len(unique_payment_addresses))
+Shelley_payment_addresses_new_per_day_array = np.array([place_holder] * len(unique_payment_addresses))
+delegation_addresses_new_per_day_array = np.array([place_holder] * len(unique_delegation_addresses))
+
+CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_'
+NUMBER_OF_CSV_FILES = 6
+CSV_FILES_SUFFIX = '.csv'
+
+# Process each CSV file
+for i in range(1, NUMBER_OF_CSV_FILES + 1):
+    ct_temp = datetime.datetime.now()
+
+    # Load CSV file
+    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+    df = pd.read_csv(file_name, delimiter='|')
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
+
+    ct_temp = datetime.datetime.now()
+
+    # Process each row in the DataFrame
+    for index, row in tqdm(df.iterrows()):
+        BLOCK_TIME = datetime.datetime.strptime(str(df.loc[index, 'BLOCK_TIME']), '%Y-%m-%d %H:%M:%S').date()
+        tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
+        if tx_delta_day != current_delta_day:
+            current_delta_day = tx_delta_day
+
+        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
+        for tx_output in outputs_list:
+            address_raw = tx_output.split(',')[1]
+            address_has_script = tx_output.split(',')[4]
+            payment_cred = tx_output.split(',')[5]
+            stake_address = tx_output.split(',')[6]
+
+            [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+
+            if address_raw != '':
+                addr_position = BinarySearch(unique_raw_addresses, address_raw)
+                if raw_addresses_new_per_day_array[addr_position] == place_holder:
+                    raw_addresses_new_per_day_array[addr_position] = current_delta_day
+
+            if address_payment_part != '':
+                if address_raw[2] == '8':  # Byron Address
+                    addr_position = BinarySearch(unique_payment_addresses, address_payment_part)
+                    if Byron_payment_addresses_new_per_day_array[addr_position] == place_holder:
+                        Byron_payment_addresses_new_per_day_array[addr_position] = current_delta_day
+                else:  # Shelley Address
+                    addr_position = BinarySearch(unique_payment_addresses, address_payment_part)
+                    if Shelley_payment_addresses_new_per_day_array[addr_position] == place_holder:
+                        Shelley_payment_addresses_new_per_day_array[addr_position] = current_delta_day
+
+            if address_delegation_part != '':
+                addr_position = BinarySearch(unique_delegation_addresses, address_delegation_part)
+                if delegation_addresses_new_per_day_array[addr_position] == place_holder:
+                    delegation_addresses_new_per_day_array[addr_position] = current_delta_day
+
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (New Addresses from CSV File " + file_name + "): ", et_temp)
+
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (New Addresses): ", et)
+print('----------------------')
+print('done!')
+
+```
 
 
 
@@ -1185,55 +1718,817 @@ print('done!')
 ***
 
 
+### Calculate Active Users and Entities Per Day
+
+This cell computes the number of unique active addresses and entities on a daily basis, using input transaction data from multiple CSV files.
+
+
+### Calculate "Number of NFT/FT/ADA Entity-Level Transactions" Over Time
+
+This code processes multiple transaction CSV files to compute the number of transactions involving ADA, NFTs, and FTs at the entity level over time.
+
+
+#### **File Format of Input CSV**
+- **File Type**: CSV (`.csv`)
+- **Delimiter**: `|`
+- **Columns**:
+  - `TX_ID`: Transaction ID.
+  - `BLOCK_TIME`: Timestamp of the transaction block (`YYYY-MM-DD HH:MM:SS`).
+  - `EPOCH_NO`: Epoch number.
+  - `INPUTs`: List of transaction inputs, delimited by `;`, where each input includes:
+    - `Input_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
+  - `OUTPUTs`: List of transaction outputs, delimited by `;`, where each output includes:
+    - `Output_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
+  - `TX_OUTPUT_MAs`: List of multi-asset outputs, delimited by `;`, where each MA includes:
+    - `Output_ID,MA_ID,Quantity,NFT_Name,FT_Name,MA_Name,MA_Policy,MA_Fingerprint`.
+
+
+#### **Workflow**
+1. **Initialization**:
+   - Choose the heuristic (`clustering_array_heur1and2`) for mapping payment addresses to entities.
+   - Initialize arrays:
+     - `balances_per_entity_array` to track balances.
+     - Lists for storing transactions involving ADA, NFTs, and FTs.
+
+2. **Processing Transactions**:
+   - Extract input entities for each transaction.
+   - Identify output entities receiving ADA, NFTs, and FTs.
+   - Record transactions, ensuring input and output entities are distinct.
+
+3. **Balances**:
+   - Update entity balances based on inputs and outputs.
+
+4. **Outputs**:
+   - Store the results in separate files:
+     - `balances_per_entity_array`
+     - `entity_level_ADA_Transactions`
+     - `entity_level_NFT_Transactions`
+     - `entity_level_FT_Transactions`
+
+5. **Parallel Processing**:
+   - Use multiprocessing to process multiple files simultaneously.
+   - Aggregate results across processes.
+
+
+#### **Outputs**
+1. **Balances File**:
+   - Tracks balances for each entity.
+
+2. **Transaction Files**:
+   - **ADA Transactions**:
+     - Day, Sender Entity, Receiver Entity, Sender Balance, Receiver Balance.
+   - **NFT/FT Transactions**:
+     - Day, Sender Entity, Receiver Entity, Sender Balance, Receiver Balance.
+
+3. **File Naming**:
+   - Outputs are stored with timestamped filenames for version control.
+
+
+#### **Cell Code**
+```python
+print('----------------------')
+
+def Find_ADA_NFT_FT_TXs_per_Entity_over_time(queue_):
+    in_args = queue_.get()
+    csv_file_name = in_args[0]
+    csv_file_basename = os.path.basename(csv_file_name)
+    
+    ct = datetime.datetime.now()
+    clustering_array = clustering_array_heur1and2
+
+    # Initialize outputs
+    balances_per_entity_array = np.array([0] * (np.amax(clustering_array) + 1))
+    entity_level_ADA_Transactions = []
+    entity_level_NFT_Transactions = []
+    entity_level_FT_Transactions = []
+
+    INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+    total_time_length_CARDANO = int((datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date() - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+
+    df = pd.read_csv(csv_file_name, delimiter='|')
+    for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
+        BLOCK_TIME = datetime.datetime.strptime(df.loc[index, 'BLOCK_TIME'], '%Y-%m-%d %H:%M:%S').date()
+        tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
+
+        inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
+        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
+
+        # Process input entities
+        input_entity_indx = []
+        for tx_input in inputs_list:
+            address_raw = tx_input.split(',')[4]
+            if tx_input.split(',')[7] == 'f':  # Non-smart contract address
+                addr_indx = BinarySearch(unique_payment_addresses, address_raw)
+                input_entity_indx.append(clustering_array[addr_indx][0])
+                break
+
+        # Process output entities
+        output_ADA_entities_indx = []
+        for tx_output in outputs_list:
+            address_raw = tx_output.split(',')[1]
+            if tx_output.split(',')[4] == 'f':  # Non-smart contract address
+                addr_indx = BinarySearch(unique_payment_addresses, address_raw)
+                output_ADA_entities_indx.append(clustering_array[addr_indx][0])
+
+        output_ADA_entities_indx = list(set(output_ADA_entities_indx))
+        if input_entity_indx[0] in output_ADA_entities_indx:
+            output_ADA_entities_indx.remove(input_entity_indx[0])
+
+        # Process balances
+        for i, tx_input in enumerate(inputs_list):
+            if tx_input.split(',')[7] == 'f':
+                addr_indx = BinarySearch(unique_payment_addresses, tx_input.split(',')[4])
+                entity_indx = clustering_array[addr_indx][0]
+                balances_per_entity_array[entity_indx] -= int(tx_input.split(',')[6])
+
+        for i, tx_output in enumerate(outputs_list):
+            if tx_output.split(',')[4] == 'f':
+                addr_indx = BinarySearch(unique_payment_addresses, tx_output.split(',')[1])
+                entity_indx = clustering_array[addr_indx][0]
+                balances_per_entity_array[entity_indx] += int(tx_output.split(',')[3])
+
+    # Save results
+    output_balances_filename = TEMP_ADDRESS + f'/balances_{csv_file_basename}_{ct.strftime("%Y%m%d_%H%M%S")}.txt'
+    pickle.dump(balances_per_entity_array, open(output_balances_filename, 'wb'))
+
+    output_adaTXs_filename = TEMP_ADDRESS + f'/ada_txs_{csv_file_basename}_{ct.strftime("%Y%m%d_%H%M%S")}.txt'
+    pickle.dump(entity_level_ADA_Transactions, open(output_adaTXs_filename, 'wb'))
+
+```
+#### **Explanation of the Code**
+
+1. **Objective**:
+   - Count the number of unique active addresses and entities per day.
+   - Active addresses and entities are determined from transaction inputs.
+
+2. **Input Data**:
+   - **Transaction CSV Files**:
+     - Format: `cardano_TXs_<file_number>.csv`
+     - Delimiter: `|`
+     - Key Columns:
+       - `BLOCK_TIME`: Date of the transaction block.
+       - `INPUTs`: Semicolon-separated list of transaction inputs. Each input contains:
+         - `Input_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
+
+3. **Steps**:
+   - **Initialization**:
+     - Arrays to store the daily counts:
+       - `active_addresses_per_day_array`
+       - `active_entities_per_day_array`
+   - **Processing CSV Files**:
+     - For each file:
+       - Load into a DataFrame.
+       - For each transaction input:
+         - Extract the raw address, payment credential, and stake address.
+         - Determine if the address is non-smart contract (`Has_Script = 'f'`).
+         - Map the address to an entity using `clustering_array`.
+         - Append the address and entity indices to daily tracking lists.
+     - At the end of each day (`BLOCK_TIME`):
+       - Calculate the number of unique active addresses and entities for the day.
+       - Reset the daily tracking lists for the next day.
+
+4. **Purpose**:
+   - Tracks daily activity levels of addresses and entities.
+   - Provides insight into the network's engagement and usage patterns.
+
+
+#### **Cell Code**
+```python
+# Active Users and Entities Per Day
+
+print('----------------------')
+
+# Store current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+print('----------------------')
+
+# Initialize constants
+INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+FINAL_DATE_CARDANO = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
+total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+
+current_delta_day = 0
+active_addresses = []
+active_entities = []
+
+# Arrays for active counts per day
+active_addresses_per_day_array = [0] * total_time_length_CARDANO
+active_entities_per_day_array = [0] * total_time_length_CARDANO
+
+CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_'
+NUMBER_OF_CSV_FILES = 6
+CSV_FILES_SUFFIX = '.csv'
+
+# Process each CSV file
+for i in range(1, NUMBER_OF_CSV_FILES + 1):
+    ct_temp = datetime.datetime.now()
+
+    # Load CSV file
+    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+    df = pd.read_csv(file_name, delimiter='|')
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
+
+    ct_temp = datetime.datetime.now()
+
+    # Process each row in the DataFrame
+    for index, row in tqdm(df.iterrows()):
+        BLOCK_TIME = datetime.datetime.strptime(str(df.loc[index, 'BLOCK_TIME']), '%Y-%m-%d %H:%M:%S').date()
+        tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
+
+        # If the day changes, update the daily arrays and reset trackers
+        if tx_delta_day > current_delta_day:
+            active_addresses_per_day_array[current_delta_day] = len(set(active_addresses))
+            active_entities_per_day_array[current_delta_day] = len(set(active_entities))
+            current_delta_day = tx_delta_day
+            active_addresses = []
+            active_entities = []
+
+        # Process transaction inputs
+        inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
+        for tx_input in inputs_list:
+            address_raw = tx_input.split(',')[4]
+            address_has_script = tx_input.split(',')[7]
+            payment_cred = tx_input.split(',')[8]
+            stake_address = tx_input.split(',')[9]
+
+            if address_has_script == 'f':  # Exclude smart contract addresses
+                [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                if address_payment_part != '':
+                    addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
+                    entity_indx = clustering_array[addr_indx][0]
+                    active_addresses.append(addr_indx)
+                    active_entities.append(entity_indx)
+
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Active Addresses from CSV File " + file_name + "): ", et_temp)
+
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Active Addresses): ", et)
+print('----------------------')
+print('done!')
+
+```
 
 
 
 ***
 
 
+### Calculate "Number of NFT/FT/ADA Entity-Level Transactions" Over Time
+
+This code processes multiple transaction CSV files to compute the number of transactions involving ADA, NFTs, and FTs at the entity level over time.
+
+
+#### **File Format of Input CSV**
+- **File Type**: CSV (`.csv`)
+- **Delimiter**: `|`
+- **Columns**:
+  - `TX_ID`: Transaction ID.
+  - `BLOCK_TIME`: Timestamp of the transaction block (`YYYY-MM-DD HH:MM:SS`).
+  - `EPOCH_NO`: Epoch number.
+  - `INPUTs`: List of transaction inputs, delimited by `;`, where each input includes:
+    - `Input_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
+  - `OUTPUTs`: List of transaction outputs, delimited by `;`, where each output includes:
+    - `Output_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
+  - `TX_OUTPUT_MAs`: List of multi-asset outputs, delimited by `;`, where each MA includes:
+    - `Output_ID,MA_ID,Quantity,NFT_Name,FT_Name,MA_Name,MA_Policy,MA_Fingerprint`.
+
+
+#### **Workflow**
+1. **Initialization**:
+   - Choose the heuristic (`clustering_array_heur1and2`) for mapping payment addresses to entities.
+   - Initialize arrays:
+     - `balances_per_entity_array` to track balances.
+     - Lists for storing transactions involving ADA, NFTs, and FTs.
+
+2. **Processing Transactions**:
+   - Extract input entities for each transaction.
+   - Identify output entities receiving ADA, NFTs, and FTs.
+   - Record transactions, ensuring input and output entities are distinct.
+
+3. **Balances**:
+   - Update entity balances based on inputs and outputs.
+
+4. **Outputs**:
+   - Store the results in separate files:
+     - `balances_per_entity_array`
+     - `entity_level_ADA_Transactions`
+     - `entity_level_NFT_Transactions`
+     - `entity_level_FT_Transactions`
+
+5. **Parallel Processing**:
+   - Use multiprocessing to process multiple files simultaneously.
+   - Aggregate results across processes.
+
+
+#### **Outputs**
+1. **Balances File**:
+   - Tracks balances for each entity.
+
+2. **Transaction Files**:
+   - **ADA Transactions**:
+     - Day, Sender Entity, Receiver Entity, Sender Balance, Receiver Balance.
+   - **NFT/FT Transactions**:
+     - Day, Sender Entity, Receiver Entity, Sender Balance, Receiver Balance.
+
+3. **File Naming**:
+   - Outputs are stored with timestamped filenames for version control.
+
+
+#### **Cell Code**
+```python
+print('----------------------')
+
+def Find_ADA_NFT_FT_TXs_per_Entity_over_time(queue_):
+    in_args = queue_.get()
+    csv_file_name = in_args[0]
+    csv_file_basename = os.path.basename(csv_file_name)
+    
+    ct = datetime.datetime.now()
+    clustering_array = clustering_array_heur1and2
+
+    # Initialize outputs
+    balances_per_entity_array = np.array([0] * (np.amax(clustering_array) + 1))
+    entity_level_ADA_Transactions = []
+    entity_level_NFT_Transactions = []
+    entity_level_FT_Transactions = []
+
+    INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+    total_time_length_CARDANO = int((datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date() - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+
+    df = pd.read_csv(csv_file_name, delimiter='|')
+    for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
+        BLOCK_TIME = datetime.datetime.strptime(df.loc[index, 'BLOCK_TIME'], '%Y-%m-%d %H:%M:%S').date()
+        tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
+
+        inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
+        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
+
+        # Process input entities
+        input_entity_indx = []
+        for tx_input in inputs_list:
+            address_raw = tx_input.split(',')[4]
+            if tx_input.split(',')[7] == 'f':  # Non-smart contract address
+                addr_indx = BinarySearch(unique_payment_addresses, address_raw)
+                input_entity_indx.append(clustering_array[addr_indx][0])
+                break
+
+        # Process output entities
+        output_ADA_entities_indx = []
+        for tx_output in outputs_list:
+            address_raw = tx_output.split(',')[1]
+            if tx_output.split(',')[4] == 'f':  # Non-smart contract address
+                addr_indx = BinarySearch(unique_payment_addresses, address_raw)
+                output_ADA_entities_indx.append(clustering_array[addr_indx][0])
+
+        output_ADA_entities_indx = list(set(output_ADA_entities_indx))
+        if input_entity_indx[0] in output_ADA_entities_indx:
+            output_ADA_entities_indx.remove(input_entity_indx[0])
+
+        # Process balances
+        for i, tx_input in enumerate(inputs_list):
+            if tx_input.split(',')[7] == 'f':
+                addr_indx = BinarySearch(unique_payment_addresses, tx_input.split(',')[4])
+                entity_indx = clustering_array[addr_indx][0]
+                balances_per_entity_array[entity_indx] -= int(tx_input.split(',')[6])
+
+        for i, tx_output in enumerate(outputs_list):
+            if tx_output.split(',')[4] == 'f':
+                addr_indx = BinarySearch(unique_payment_addresses, tx_output.split(',')[1])
+                entity_indx = clustering_array[addr_indx][0]
+                balances_per_entity_array[entity_indx] += int(tx_output.split(',')[3])
+
+    # Save results
+    output_balances_filename = TEMP_ADDRESS + f'/balances_{csv_file_basename}_{ct.strftime("%Y%m%d_%H%M%S")}.txt'
+    pickle.dump(balances_per_entity_array, open(output_balances_filename, 'wb'))
+
+    output_adaTXs_filename = TEMP_ADDRESS + f'/ada_txs_{csv_file_basename}_{ct.strftime("%Y%m%d_%H%M%S")}.txt'
+    pickle.dump(entity_level_ADA_Transactions, open(output_adaTXs_filename, 'wb'))
+
+```
 
 
 
 
+***
+
+### Calculate "NFTs Owned by Each Entity" and "Balances of Entities"
+
+This code processes multiple CSV files containing transaction details to compute the number of NFTs owned by each entity and the ADA balance of each entity over time.
+
+
+#### **Input CSV File Details**
+- **File Type**: CSV (`cardano_TXs_NFTs_?.csv`)
+- **Delimiter**: `|`
+- **Columns**:
+  - `TX_ID`: Transaction ID.
+  - `BLOCK_TIME`: Block timestamp (`YYYY-MM-DD HH:MM:SS`).
+  - `EPOCH_NO`: Epoch number.
+  - `INPUTs`: List of transaction inputs, delimited by `;`. Each input includes:
+    - `Input_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
+  - `OUTPUTs`: List of transaction outputs, delimited by `;`. Each output includes:
+    - `Output_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
+  - `TX_INPUT_MAs`: List of multi-asset inputs, delimited by `;`. Each MA includes:
+    - `Input_ID,MA_ID,Quantity,NFT_Name,FT_Name,MA_Name,MA_Policy,MA_Fingerprint`.
+  - `TX_OUTPUT_MAs`: List of multi-asset outputs, delimited by `;`. Each MA includes:
+    - `Output_ID,MA_ID,Quantity,NFT_Name,FT_Name,MA_Name,MA_Policy,MA_Fingerprint`.
+
+
+#### **Workflow**
+
+1. **Initialization**:
+   - Set `clustering_array` to map payment addresses to entities.
+   - Initialize:
+     - `NFTs_owned_per_entity_array`: List of NFTs owned by each entity.
+     - `count_NFTs_per_entity`: Count of NFTs owned by each entity.
+     - `balances_per_entity_array`: ADA balance for each entity.
+
+2. **Process Each CSV File**:
+   - Read the file and iterate over transactions.
+   - Extract and process inputs:
+     - Deduct NFT quantities and ADA values from the corresponding entities.
+   - Extract and process outputs:
+     - Add NFT quantities and ADA values to the corresponding entities.
+
+3. **Update Balances and Ownership**:
+   - For each transaction:
+     - Adjust `balances_per_entity_array` for ADA inputs and outputs.
+     - Update `NFTs_owned_per_entity_array` and `count_NFTs_per_entity`.
+
+4. **Time Tracking**:
+   - Measure and log the elapsed time for each CSV file.
+
+
+#### **Outputs**
+1. **NFT Ownership**:
+   - `NFTs_owned_per_entity_array`: List of NFTs owned by each entity.
+   - `count_NFTs_per_entity`: Total count of NFTs owned by each entity.
+
+2. **Entity Balances**:
+   - `balances_per_entity_array`: ADA balance for each entity.
+
+
+#### **Code**
+
+```python
+print('----------------------')
+
+# Initialize data structures
+clustering_array = clustering_array_heur1and2
+NFTs_owned_per_entity_array = [[] for _ in range(np.amax(clustering_array)+1)]
+count_NFTs_per_entity = [0] * len(NFTs_owned_per_entity_array)
+balances_per_entity_array = np.array([0] * (np.amax(clustering_array)+1))
+
+CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_NFTs_'
+NUMBER_OF_CSV_FILES = 6
+CSV_FILES_SUFFIX = '.csv'
+
+for i in range(1, NUMBER_OF_CSV_FILES + 1):
+    ct_temp = datetime.datetime.now()
+
+    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+    df = pd.read_csv(file_name, delimiter='|')
+
+    for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
+        BLOCK_TIME = datetime.datetime.strptime(df.loc[index, 'BLOCK_TIME'], '%Y-%m-%d %H:%M:%S').date()
+
+        # Process inputs
+        TX_INPUT_MAs_list = list(df.loc[index, 'TX_INPUT_MAs'].split(';'))
+        for INPUT_MAs in TX_INPUT_MAs_list:
+            MAs_list = list(INPUT_MAs.split(':'))
+            if MAs_list[0] == '':
+                continue
+            INPUT_ID = int(MAs_list.pop(0))
+            for MA in MAs_list:
+                MA_splited = MA.split(',')
+                if len(MA_splited) < 7:
+                    continue
+                MA_ID, quantity, NFT_name = MA_splited[0], MA_splited[1], MA_splited[2]
+                if NFT_name != '':
+                    entity_indx = find_entity(INPUT_ID, inputs_list, clustering_array)
+                    if MA_ID and entity_indx:
+                        count_NFTs_per_entity[entity_indx] -= int(quantity)
+
+        # Process outputs
+        TX_OUTPUT_MAs_list = list(df.loc[index, 'TX_OUTPUT_MAs'].split(';'))
+        for OUTPUT_MAs in TX_OUTPUT_MAs_list:
+            MAs_list = list(OUTPUT_MAs.split(':'))
+            if MAs_list[0] == '':
+                continue
+            OUTPUT_ID = int(MAs_list.pop(0))
+            for MA in MAs_list:
+                MA_splited = MA.split(',')
+                if len(MA_splited) < 7:
+                    continue
+                MA_ID, quantity, NFT_name = MA_splited[0], MA_splited[1], MA_splited[2]
+                if NFT_name != '':
+                    entity_indx = find_entity(OUTPUT_ID, outputs_list, clustering_array)
+                    if MA_ID and entity_indx:
+                        count_NFTs_per_entity[entity_indx] += int(quantity)
+
+    et_temp = datetime.datetime.now() - ct_temp
+    print(f"elapsed time (Process CSV File {file_name}): ", et_temp)
+
+print('----------------------')
+
+```
 
 
 
+***
+
+
+### Store/Load "NFTs_owned_per_entity_array" and "balances_per_entity_array"
+
+This code handles storing and loading entity-level data, specifically the NFTs owned and ADA balances of entities.
+
+
+#### **Functionality**
+
+1. **Store Data to File**:
+   - Saves:
+     - `NFTs_owned_per_entity_array`: Detailed list of NFTs owned by each entity.
+     - `count_NFTs_per_entity`: Count of NFTs owned by each entity.
+     - `balances_per_entity_array`: ADA balance for each entity.
+   - Files are stored using the `pickle` library for efficient binary serialization.
+
+2. **Load Data from File**:
+   - Reads back the serialized data for reuse.
+
+
+#### **File Details**
+
+- **File Format**: Pickle (`.txt` but stores binary data)
+- **Stored Data**:
+  - `NFTs_owned_per_entity_array`: 2D array where each row corresponds to an entity and contains tuples of (NFT_ID, quantity).
+  - `count_NFTs_per_entity`: 1D array where each index corresponds to an entity and holds the total NFT count.
+  - `balances_per_entity_array`: 1D array where each index corresponds to an entity and holds the ADA balance.
+
+
+#### **Code**
+
+```python
+print('----------------------')
+import pickle
+
+ct = datetime.datetime.now()
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+
+# Store to file:
+'''
+output_filename = BASE_ADDRESS + '/EntityOwnNFTsWithNameArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+pickle.dump(NFTs_owned_per_entity_array, open(output_filename, 'wb'))
+
+
+output_filename = BASE_ADDRESS + '/EntityOwnNFTsNumberArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+pickle.dump(count_NFTs_per_entity, open(output_filename, 'wb'))
+
+
+output_filename = BASE_ADDRESS + '/EntityBalancesArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+pickle.dump(balances_per_entity_array, open(output_filename, 'wb'))
+'''
+
+# Load from file:
+file_name = BASE_ADDRESS + '/EntityOwnNFTsWithNameArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540.txt'
+NFTs_owned_per_entity_array = pickle.load(open(file_name, 'rb'))
+
+file_name = BASE_ADDRESS + '/EntityOwnNFTsNumberArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540.txt'
+count_NFTs_per_entity = pickle.load(open(file_name, 'rb'))
+
+file_name = BASE_ADDRESS + '/EntityBalancesArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540.txt'
+balances_per_entity_array = pickle.load(open(file_name, 'rb'))
+
+print('----------------------')
+print('done!')
+
+```
+
+
+***
+
+### Find NFTs and FTs Minted by Each Entity
+
+This code processes Cardano transaction data to determine which entities minted specific NFTs and FTs.
+
+
+#### **Functionality**
+
+1. **Inputs**:
+   - CSV files containing transaction data, including minted NFTs and FTs.
+   - Heuristic-based clustering data to map payment addresses to entities.
+
+2. **Outputs**:
+   - `NFTs_minted_per_entity_array`: A 2D list where each row corresponds to an entity and contains a list of NFTs minted by the entity.
+   - `FTs_minted_per_entity_array`: A 2D list where each row corresponds to an entity and contains a list of FTs minted by the entity.
+   - `NFTs_minted_by_smart_contract`: Counter for NFTs minted via smart contracts.
+   - `FTs_minted_by_smart_contract`: Counter for FTs minted via smart contracts.
+
+
+#### **File Details**
+
+- **Input CSV Format**:
+  - Delimited by `|`.
+  - Columns include `MINT_NFTs` and `MINT_FTs`, with details about each minted token.
+
+- **Output Data**:
+  - `NFTs_minted_per_entity_array`: Stores `MA_ID` (Minting Asset IDs) for NFTs.
+  - `FTs_minted_per_entity_array`: Stores `MA_ID` for FTs.
+  - Smart contract counts log cases where no non-smart contract input address is found.
+
+
+#### **Code**
+
+```python
+print('----------------------')
+
+# Current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+print('----------------------')
+
+# Clustering array selection
+clustering_array = clustering_array_heur1and2
+
+# Initialize arrays
+NFTs_minted_per_entity_array = [[] for _ in range(np.amax(clustering_array) + 1)]
+FTs_minted_per_entity_array  = [[] for _ in range(np.amax(clustering_array) + 1)]
+
+NFTs_minted_by_smart_contract = 0
+FTs_minted_by_smart_contract  = 0
+
+# CSV details
+CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_'
+NUMBER_OF_CSV_FILES = 6
+CSV_FILES_SUFFIX = '.csv'
+
+for i in range(1, NUMBER_OF_CSV_FILES + 1):
+    ct_temp = datetime.datetime.now()
+    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+    df = pd.read_csv(file_name, delimiter='|')
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
+
+    ct_temp = datetime.datetime.now()
+
+    for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
+        BLOCK_TIME = str(datetime.datetime.strptime(str(df.loc[index, 'BLOCK_TIME']), '%Y-%m-%d %H:%M:%S').date())
+        EPOCH_NO = str(df.loc[index, 'EPOCH_NO'])
+        inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
+        
+        # Process NFTs
+        NFTs_list = list(df.loc[index, 'MINT_NFTs'].split(';'))
+        for NFT in NFTs_list:
+            MA_ID = NFT.split(',')[0]
+            if MA_ID:
+                flag = 0
+                for tx_input in inputs_list:
+                    address_raw = tx_input.split(',')[4]
+                    address_has_script = tx_input.split(',')[7]
+                    payment_cred = tx_input.split(',')[8]
+                    stake_address = tx_input.split(',')[9]
+                    if address_has_script == 'f':
+                        [address_payment_part, _] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                        if address_payment_part:
+                            addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
+                            entity_indx = clustering_array[addr_indx][0]
+                            NFTs_minted_per_entity_array[entity_indx].append(MA_ID)
+                            flag += 1
+                            break
+                if flag == 0:
+                    NFTs_minted_by_smart_contract += 1
+                    if NFTs_minted_by_smart_contract < 100:
+                        print("NFT: no non-smart contract input address was found for MA_ID = ", MA_ID, '|TX_ID = ', TX_ID)
+
+        # Process FTs
+        FTs_list = list(df.loc[index, 'MINT_FTs'].split(';'))
+        for FT in FTs_list:
+            MA_ID = FT.split(',')[0]
+            if MA_ID:
+                flag = 0
+                for tx_input in inputs_list:
+                    address_raw = tx_input.split(',')[4]
+                    address_has_script = tx_input.split(',')[7]
+                    payment_cred = tx_input.split(',')[8]
+                    stake_address = tx_input.split(',')[9]
+                    if address_has_script == 'f':
+                        [address_payment_part, _] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                        if address_payment_part:
+                            addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
+                            entity_indx = clustering_array[addr_indx][0]
+                            FTs_minted_per_entity_array[entity_indx].append(MA_ID)
+                            flag += 1
+                            break
+                if flag == 0:
+                    FTs_minted_by_smart_contract += 1
+                    if FTs_minted_by_smart_contract < 100:
+                        print("FT: no non-smart contract input address was found for MA_ID = ", MA_ID, '|TX_ID = ', TX_ID)
+
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Extract minting data from CSV File " + file_name + "): ", et_temp)
+
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time: ", et)
+print('----------------------')
+print('done!')
+
+```
 
 
 
+***
+
+### Store/Load "NFTs Minted per Entity" and "FTs Minted per Entity"
+
+This script handles the storage and retrieval of the following data arrays:
+- **`NFTs_minted_per_entity_array`**: 2D Lists of NFTs minted by each entity.
+- **`FTs_minted_per_entity_array`**: 2D Lists of FTs minted by each entity.
 
 
 
+**File Naming**:
+   - The file naming convention includes the heuristic method and a timestamp for traceability.
 
 
 
+#### **Code**
+
+```python
+print('----------------------')
+
+# Current timestamp
+ct = datetime.datetime.now()
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+
+# Store data to files
+output_filename = BASE_ADDRESS + '/EntityNFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+store_array_to_file_2D(NFTs_minted_per_entity_array, output_filename)
+
+output_filename = BASE_ADDRESS + '/EntityFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+store_array_to_file_2D(FTs_minted_per_entity_array, output_filename)
+
+# Load data from files
+file_name = BASE_ADDRESS + '/EntityNFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-04-08_075547.txt'
+NFTs_minted_per_entity_array = load_file_to_array_2D(file_name)
+
+file_name = BASE_ADDRESS + '/EntityFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-04-08_075547.txt'
+FTs_minted_per_entity_array = load_file_to_array_2D(file_name)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+```
+
+### **File Details**
+
+1. **Stored Files**:
+   - **NFT Minting Data**:  
+     File: `EntityNFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>.txt`
+     Format: 2D list of minted NFTs per entity.
+   - **FT Minting Data**:  
+     File: `EntityFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>.txt`
+     Format: 2D list of minted FTs per entity.
+
+2. **Loaded Files**:
+   - Specify the file paths for `NFTs_minted_per_entity_array` and `FTs_minted_per_entity_array` to load the corresponding data.
 
 
+### **Example**
 
+1. **`NFTs_minted_per_entity_array`**:
+   ```python
+   [
+       ['NFT1_ID', 'NFT2_ID'], # Entity 0
+       ['NFT3_ID'],            # Entity 1
+       [],                     # Entity 2
+       ...
+   ]
+   ```
 
+2. **`FTs_minted_per_entity_array`**:
+   ```python
+   [
+       ['FT1_ID'],             # Entity 0
+       ['FT2_ID', 'FT3_ID'],   # Entity 1
+       [],                     # Entity 2
+       ...
+   ]
+   ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+***
 
 
 
