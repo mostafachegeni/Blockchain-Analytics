@@ -4,7 +4,7 @@
 
 # List of `code` Files
 
-Below is an overview of the `code` files included in **codes_handover.zip**. Detailed descriptions of the methods are provided in the relevant papers. The analysis steps are well-documented within the code through comments and self-descriptive variable names to facilitate understanding. Additional documentation for these `code` files is presented in subsequent sections of this document.
+Below is an overview of the `code` files included in the **code** folder. Detailed descriptions of the methods are provided in the relevant papers. The analysis steps are well-documented within the code through comments and self-descriptive variable names to facilitate understanding. Additional documentation for these `code` files is presented in the `doc` folder.
 
 ### File Descriptions
 
