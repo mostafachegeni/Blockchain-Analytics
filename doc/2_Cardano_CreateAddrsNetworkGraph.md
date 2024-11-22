@@ -339,6 +339,578 @@ def gini_index(inp_array):
 
 ```
 
+***
+
+
+***
+
+# Load `graphEdges_merged` from File
+
+This script loads the `graphEdges_merged` array, which contains all edges of the address network graph. Each entry represents the adjacency list for a payment address.
+
+
+
+#### File Details
+
+1. **File Format**:
+   - **Type**: JSON file.
+   - **Content**: Each entry in the file corresponds to a unique payment address and contains a list of integers representing connected addresses (edges).
+   - **Structure**:
+     - Each line contains a JSON array representing the adjacency list.
+     - Example:
+       ```json
+       [
+         [1, 2, 3],   // Address 0 is connected to addresses 1, 2, and 3
+         [0, 4],      // Address 1 is connected to addresses 0 and 4
+         [0, 5, 6]       // Address 2 is connected to addresses 0, 5, and 6
+       ]
+       ```
+
+2. **Number of Columns**:
+   - **Variable Columns**: Each entry contains a list of integers, so the number of columns varies.
+
+3. **Number of Rows**:
+   - Equal to the number of unique payment addresses (`unique_payment_addresses_len`).
+
+4. **Column Data Type**:
+   - **Integers**: Represent indices of connected payment addresses.
+
+
+
+#### Process
+
+1. **File Path**:
+   - File Example: 
+     `BASE_ADDRESS + '/graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_224222.txt'`
+
+2. **Loading the Array**:
+   - The `load_file_to_array_2D` function reads the JSON file and reconstructs the adjacency lists into a Python list of lists.
+
+3. **Completion**:
+   - Logs the length of the loaded array and confirms successful loading.
+
+
+
+#### Code
+
+```python
+# Load graphEdges_merged from file:
+
+print('----------------------')
+# "graphEdges_merged" contains all identified edges in all transactions.
+
+graphEdges_merged = load_file_to_array_2D(BASE_ADDRESS + '/graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_224222.txt')
+
+print('Length of "graphEdges_merged" = ', len(graphEdges_merged))
+
+##########################################################################################
+print('----------------------')
+print('done!')
+```
+
+
+***
+
+
+# Calculate `graph_weights`
+
+This script calculates the weights of edges in the address network graph based on the frequency of clustering between two addresses. Each time two addresses are identified to be clustered together in a transaction, the weight of the edge between them is incremented by 1.
+
+
+
+#### Process
+
+1. **Initialization**:
+   - **`graph_weights`**:
+     - A list of lists initialized to store the weighted edges for each address.
+     - Each entry corresponds to an address and contains tuples in the format `(node, connected_node, weight)`.
+
+2. **Edge Weight Calculation**:
+   - The `find_weights_graphEdges` function iterates through the adjacency lists in `graphEdges_merged`.
+   - For each address:
+     - Identifies unique connected nodes.
+     - Counts the occurrences of each connection to determine the weight.
+   - Appends the weighted edges to the corresponding entry in `graph_weights`.
+
+3. **Performance Tracking**:
+   - Logs the start time, tracks progress using `tqdm`, and calculates the total elapsed time for the weight calculation.
+
+4. **Completion**:
+   - Confirms successful calculation of `graph_weights`.
+
+
+
+#### Example File Details (if stored later):
+- **File Format**: JSON or CSV
+- **Content**: List of weighted edges.
+- **Structure**:
+  - Each entry contains `(node, connected_node, weight)`:
+    ```
+    [
+      [(0, 1, 2), (0, 2, 1)],   # Address 0 connects to 1 with weight 2, and 2 with weight 1
+      [(1, 0, 2)],              # Address 1 connects back to 0 with weight 2
+      [(2, 0, 1)]               # Address 2 connects back to 0 with weight 1
+    ]
+    ```
+
+
+#### Code
+
+```python
+# Calculate graph_weights:
+
+print('----------------------')
+
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+##########################################################################################
+graph_weights = [[] for _ in range(unique_addresses_len)]
+find_weights_graphEdges(graphEdges_merged, graph_weights)
+
+##########################################################################################
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Calculate graph_weights): ", et)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+```
+
+
+
+***
+
+
+# Store/Load `graph_weights` into/from File
+
+This script stores the calculated `graph_weights` into a file and provides functionality to reload it. Each entry represents weighted edges for a payment address in the graph.
+
+
+
+#### File Details
+
+1. **File Format**:
+   - **Type**: Plain text file (`.txt`).
+   - **Content**: Each line corresponds to a unique address and contains a list of weighted edges.
+   - **Structure**:
+     - Each entry contains tuples in the format `(node, connected_node, weight)`:
+       ```
+       [(0, 1, 2), (0, 2, 1)]
+       [(1, 0, 2)]
+       [(2, 0, 1)]
+       ```
+     - Each line represents the weighted edges of the corresponding address.
+
+2. **Number of Columns**:
+   - **Variable Columns**: Each entry contains a list of tuples, so the number of columns per line varies.
+
+3. **Number of Rows**:
+   - Equal to the number of unique payment addresses (`unique_addresses_len`).
+
+4. **Column Data Type**:
+   - **Tuples**: Each tuple contains:
+     - **Node ID (int)**: The current node index.
+     - **Connected Node ID (int)**: The index of the connected node.
+     - **Weight (int)**: The frequency of the connection.
+
+
+
+#### Process
+
+1. **Store `graph_weights`**:
+   - Generates a timestamp for unique file naming.
+   - Iterates through `graph_weights` and writes each list to a new line in the file.
+
+2. **Load `graph_weights`**:
+   - Reads the file line by line and reconstructs `graph_weights` using `ast.literal_eval`.
+   - Each line is parsed to a Python list of tuples representing weighted edges.
+
+3. **Performance Tracking**:
+   - Logs the elapsed time for both storing and loading operations.
+
+4. **Completion**:
+   - Confirms the successful storage and loading of the `graph_weights`.
+
+
+
+
+#### Code
+
+```python
+# Store graph_weights into file:
+
+print('----------------------')
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+ct = datetime.datetime.now()
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+output_filename = BASE_ADDRESS + '/graphWeightsArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+
+with open(output_filename, 'w') as filehandle:
+    for element in graph_weights:
+        filehandle.write(f'{element}\n')
+
+##########################################################################################
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Store graph_weights into file): ", et)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+# Load graph_weights from file:
+
+print('----------------------')
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+input_filename = BASE_ADDRESS + '/graphWeightsArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_234559.txt'
+print('input_filename = ', input_filename)
+
+graph_weights = [[] for _ in range(unique_addresses_len)]
+
+i = 0
+with open(input_filename) as filehandle:
+    for row in filehandle:
+        graph_weights[i] = ast.literal_eval(row[:-1])
+        i += 1
+        if i % 1000000 == 0:
+            print('One million records done!', i)
+
+##########################################################################################
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Load graph_weights from file): ", et)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+```
+
+
+
+***
+
+# Generate "Graph G Addrs Network" Using `graph_weights`
+
+This script constructs a graph `G` using `graph_weights`, where nodes represent unique payment addresses, and weighted edges represent the frequency of clustering between two addresses.
+
+
+
+#### Process
+
+1. **Initialization**:
+   - Creates an empty undirected graph `G` using the `networkx` library.
+
+2. **Node and Edge Addition**:
+   - Iterates through the `graph_weights` list:
+     - Adds each node (`i`) to the graph.
+     - Uses `add_weighted_edges_from` to add weighted edges to the graph.
+
+3. **Graph Properties**:
+   - Checks and prints key properties of the generated graph:
+     - Connectivity (`nx.is_connected`).
+     - Number of nodes (`G.number_of_nodes()`).
+     - Number of edges (`G.number_of_edges()`).
+
+
+
+#### Code
+
+```python
+# Generate "Graph G Addrs network" using graph_weights:
+
+print('----------------------')
+
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+G = nx.Graph()
+
+for i in tqdm(range(len(graph_weights))):
+    G.add_node(i)
+    G.add_weighted_edges_from(graph_weights[i])
+
+print('----------------------')
+print('Is Connected    (G) = ', nx.is_connected(G))
+print('Number of Nodes (G) = ', G.number_of_nodes())
+print('Number of Edges (G) = ', G.number_of_edges())
+
+print('----------------------')
+test_results = [39057080, 454231, 397965]
+for i in test_results:
+    print('----------------------')
+    print('Degree of node ' + str(i) + ' = ', G.degree()[i])
+    print('graph_weights[' + str(i) + '] = ', graph_weights[i])
+
+##########################################################################################
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Generate Graph G Addrs Network): ", et)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+```
+
+
+
+***
+
+# Store/Load Graph Object `Graph G Addrs Network` to/from File
+
+This script provides functionality to save and load the `Graph G Addrs Network` object, which represents the address network graph, using Python's `pickle` module.
+
+
+#### File Details
+
+1. **File Format**:
+   - **Type**: Binary file (`.pickle`).
+   - **Content**: Serialized graph object created using the `networkx` library.
+
+2. **Graph Object Details**:
+   - **Nodes**: Represent unique payment addresses.
+   - **Edges**: Represent connections between addresses with weights indicating clustering frequency.
+
+3. **Number of Nodes and Edges**:
+   - Stored as part of the `networkx` graph object.
+
+
+#### Process
+
+1. **Store Graph Object**:
+   - Generates a timestamp in the format `YYYY-MM-DD_HHMMSS` for unique file naming.
+   - Uses the `pickle.dump` function to serialize and save the graph object to a file.
+   - Example File Name:
+     - `Graph_G_AddrsNetwork_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2024-11-22_123456.pickle`
+
+2. **Load Graph Object**:
+   - Reads the file using `pickle.load` to reconstruct the graph object.
+   - The graph object retains all its properties, including nodes, edges, and weights.
+
+
+
+#### Code
+
+```python
+# Store graph object to file:
+
+print('----------------------')
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+import pickle
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+output_filename = BASE_ADDRESS + '/Graph_G_AddrsNetwork_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__' + curr_timestamp + '.pickle'
+print('output_filename = ', output_filename)
+pickle.dump(G, open(output_filename, 'wb'))
+
+##########################################################################################
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Store G into file): ", et)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+# Load graph object from file:
+
+print('----------------------')
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+import pickle
+input_filename = BASE_ADDRESS + '/Graph_G_AddrsNetwork_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-26_000507.pickle'
+print('input_filename = ', input_filename)
+G = pickle.load(open(input_filename, 'rb'))
+
+##########################################################################################
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Load G from file): ", et)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+```
+
+
+
+***
+
+
+# Extract the Largest Connected Component
+
+This script identifies and analyzes the largest connected component in the address network graph (`G`). It calculates key properties such as connectivity, node count, edge count, and weighted degree statistics.
+
+
+
+#### Process
+
+1. **Identify the Largest Connected Component**:
+   - Extracts all connected components of the graph `G` using `nx.connected_components`.
+   - Sorts the components by size in descending order and selects the largest one.
+   - Creates a subgraph (`largest_cc_subgraph`) from the largest component.
+
+2. **Connectivity and Properties**:
+   - Checks if the largest connected component is fully connected using `nx.is_connected`.
+   - Logs the number of nodes and edges in the subgraph.
+
+3. **Weighted Degree Statistics**:
+   - Calculates the weighted degree of each node in the subgraph using `G.degree(weight='weight')`.
+   - Sorts the degrees and computes:
+     - **Sum of Weighted Degrees**: Total edge weights for the subgraph.
+     - **Maximum Weighted Degree**: Node with the highest degree weight.
+
+4. **Degree Distribution**:
+   - Uses `BinarySearch_Find_start_end` to calculate the count of nodes with specific weighted degrees (1 to 14).
+   - Logs the counts for each weighted degree.
+
+
+
+#### Code
+
+```python
+# Extract the largest connected component:
+
+print('----------------------')
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+# Identify the largest connected component
+largest_cc = list(sorted(nx.connected_components(G), key=len, reverse=True))[0]
+largest_cc_subgraph = G.subgraph(largest_cc).copy()
+
+# Log connectivity and properties
+print('Is Connected    (largest_cc_subgraph) = ', nx.is_connected(largest_cc_subgraph))
+print('Number of Nodes (largest_cc_subgraph) = ', largest_cc_subgraph.number_of_nodes())
+print('Number of Edges (largest_cc_subgraph) = ', largest_cc_subgraph.number_of_edges())
+
+# Weighted degree statistics
+print('----------------------')
+degree_sequence = sorted((d for n, d in largest_cc_subgraph.degree(weight='weight')), reverse=False)
+print('Sum Weighted Degrees (largest_cc_subgraph) = ', sum(degree_sequence))
+print('Max Weighted Degrees (largest_cc_subgraph) = ', max(degree_sequence))
+
+# Degree distribution
+print('----------------------')
+for i in range(1, 15):
+    x = BinarySearch_Find_start_end(degree_sequence, i)
+    print('Number of nodes with Weighted Degree "' + str(i) + '" = ', x[1] - x[0] + 1)
+
+##########################################################################################
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Extract largest connected component): ", et)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+```
+
+
+***
+
+
+# Store/Load Graph Object `largest_cc_subgraph` to/from File
+
+This script provides functionality to save and load the `largest_cc_subgraph`, which represents the largest connected component of the address network graph, using Python's `pickle` module.
+
+
+#### File Details
+
+1. **File Format**:
+   - **Type**: Binary file (`.pickle`).
+   - **Content**: Serialized graph object created using the `networkx` library.
+   - **Graph Properties**:
+     - **Nodes**: Nodes in the largest connected component.
+     - **Edges**: Connections between these nodes with associated weights.
+
+2. **Graph Size**:
+   - Stored as part of the `networkx` graph object, including node and edge counts.
+
+
+#### Process
+
+1. **Store Graph Object**:
+   - Generates a timestamp in the format `YYYY-MM-DD_HHMMSS` for unique file naming.
+   - Uses `pickle.dump` to serialize and save the `largest_cc_subgraph` to a file.
+   - Example File Name:
+     - `Largest1_cc_subgraph_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2024-11-22_123456.pickle`
+
+2. **Load Graph Object**:
+   - Reads the file using `pickle.load` to reconstruct the `largest_cc_subgraph`.
+   - The graph retains all properties, including nodes, edges, and weights.
+
+
+
+
+#### Code
+
+```python
+# Store graph object to file:
+
+print('----------------------')
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+import pickle
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+output_filename = BASE_ADDRESS + '/Largest1_cc_subgraph_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__' + curr_timestamp + '.pickle'
+print('output_filename = ', output_filename)
+pickle.dump(largest_cc_subgraph, open(output_filename, 'wb'))
+
+##########################################################################################
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Store largest_cc_subgraph into file): ", et)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+# Load graph object from file:
+
+print('----------------------')
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+import pickle
+input_filename = BASE_ADDRESS + '/Largest2_cc_subgraph_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-01-10_181953.pickle'
+print('input_filename = ', input_filename)
+largest_cc_subgraph = pickle.load(open(input_filename, 'rb'))
+
+##########################################################################################
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Load largest_cc_subgraph into file): ", et)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+```
+
+
+
 
 
 
