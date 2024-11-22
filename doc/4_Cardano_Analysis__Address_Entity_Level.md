@@ -2772,6 +2772,194 @@ print('done!')
 
 ***
 
+# Generate "balances_array" and "gini_array" for Payment Addresses
+
+This script calculates the balance of payment addresses by processing transaction inputs and outputs from multiple CSV files. It also computes a Gini index periodically to assess the distribution of balances among addresses.
+
+
+#### Process
+
+1. **Initialization**:
+   - A `balances_array` is initialized with zero values for each unique payment address.
+   - A `gini_array` is used to store Gini index values for balance distributions at regular transaction intervals (`gini_sample_id`).
+
+2. **Input Data**:
+   - Transaction data is read from CSV files:
+     - File format: `BASE_ADDRESS + '/cardano_TXs_<file_number>.csv'`
+     - Delimiter: `|`
+     - Number of files: `NUMBER_OF_CSV_FILES = 6`
+
+3. **Processing Transactions**:
+   - For each transaction in the CSV file:
+     - Extract `INPUTs` and `OUTPUTs` columns.
+     - For **inputs**:
+       - Identify non-smart contract (non-SC) addresses.
+       - Deduct the UTXO value from the corresponding address's balance in `balances_array`.
+     - For **outputs**:
+       - Identify non-SC addresses.
+       - Add the UTXO value to the corresponding address's balance in `balances_array`.
+
+4. **Gini Index Calculation**:
+   - At every `gini_sample_id` transactions:
+     - Filter out addresses with zero balances.
+     - Compute the Gini index using the `gini_index` function.
+     - Append the computed Gini index to `gini_array`.
+     - Log Gini index values for specific transaction IDs.
+
+5. **Performance Tracking**:
+   - Log the elapsed time for loading each CSV file and processing its transactions.
+
+6. **Completion**:
+   - Print a completion message when processing is finished.
+
+
+#### Key Variables
+- **`balances_array`**: Tracks the net balance for each unique payment address.
+- **`gini_array`**: Stores Gini index values to monitor balance inequality over time.
+
+
+
+#### Code
+
+```python
+# Generate "balances_array" for payment addresses:
+
+print('----------------------')
+
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_'
+NUMBER_OF_CSV_FILES = 6
+CSV_FILES_SUFFIX = '.csv'
+
+# Initialize balances_array:
+balances_array = np.array([0] * unique_payment_addresses_len)
+for i in range(unique_payment_addresses_len):
+    balances_array[i] = 0 
+
+gini_array = [0]
+gini_sample_id = 200000
+
+for i in range(1, NUMBER_OF_CSV_FILES + 1):
+    ct_temp = datetime.datetime.now()
+
+    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+    df = pd.read_csv(file_name, delimiter='|')
+
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
+
+    ct_temp = datetime.datetime.now()
+
+    for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
+        inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
+        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
+
+        # Calculate "Gini Index"
+        if int(TX_ID) > gini_sample_id:
+            gini_array_indx = int(gini_sample_id / 200000)
+            balances_array_no_zeros = balances_array[balances_array != 0]
+            gini_array.append(gini_index(balances_array_no_zeros))
+            if TX_ID < 2000002:
+                print('TX_ID = ', TX_ID, '  |  gini_array [', gini_array_indx, '] = ', gini_array[gini_array_indx])
+            gini_sample_id += 200000
+
+        # Process inputs
+        for i in range(len(inputs_list)):
+            address_has_script = inputs_list[i].split(',')[7]
+            if address_has_script == 'f':  # non-Smart Contract Address
+                address_raw = inputs_list[i].split(',')[4]
+                payment_cred = inputs_list[i].split(',')[8]
+                stake_address = inputs_list[i].split(',')[9]
+                [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                if address_payment_part != '':
+                    address_position = BinarySearch(unique_payment_addresses, address_payment_part)
+                    UTXO_value = inputs_list[i].split(',')[6]
+                    balances_array[address_position] -= int(UTXO_value)
+
+        # Process outputs
+        for i in range(len(outputs_list)):
+            address_has_script = outputs_list[i].split(',')[4]
+            if address_has_script == 'f':  # non-Smart Contract Address
+                address_raw = outputs_list[i].split(',')[1]
+                payment_cred = outputs_list[i].split(',')[5]
+                stake_address = outputs_list[i].split(',')[6]
+                [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                if address_payment_part != '':
+                    address_position = BinarySearch(unique_payment_addresses, address_payment_part)
+                    UTXO_value = outputs_list[i].split(',')[3]
+                    balances_array[address_position] += int(UTXO_value)
+
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
+
+print('----------------------')
+print('done!')
+
+```
+
+
+
+***
+
+
+# Store "balances_array" and "gini_array" into Files
+
+This script saves both the `balances_array` (containing balances for payment addresses) and the `gini_array` (containing Gini index values) into separate files for later use.
+
+
+#### Process
+
+1. **Timestamp Generation**:
+   - A timestamp in the format `YYYY-MM-DD_HHMMSS` is created to ensure file names are unique.
+
+2. **File Naming**:
+   - **Balances Array File**:
+     - File format: `balancesList_paymentAddresses_noSC__Cardano_TXs_All__<timestamp>.txt`
+     - Example: `balancesList_paymentAddresses_noSC__Cardano_TXs_All__2024-11-22_123456.txt`
+   - **Gini Array File**:
+     - File format: `giniArray_noZeros__paymentAddresses_noSC__Cardano_TXs_All__<timestamp>.txt`
+     - Example: `giniArray_noZeros__paymentAddresses_noSC__Cardano_TXs_All__2024-11-22_123456.txt`
+
+3. **Storing the Arrays**:
+   - The `store_array_to_file` function is used to save each array into its respective file.
+   - Each value in the array is stored on a new line.
+
+4. **Completion**:
+   - Prints the output file names and confirms the arrays are successfully stored.
+
+
+#### Code
+
+```python
+# Store "balances_array" and "gini_array" into files:
+
+print('----------------------')
+
+# Store balances_array
+ct = datetime.datetime.now()
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+output_filename = BASE_ADDRESS + '/balancesList_paymentAddresses_noSC__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+
+store_array_to_file(balances_array, output_filename)
+
+# Store gini_array
+ct = datetime.datetime.now()
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+output_filename = BASE_ADDRESS + '/giniArray_noZeros__paymentAddresses_noSC__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+
+store_array_to_file(gini_array, output_filename)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+
+```
 
 
 
