@@ -172,6 +172,125 @@ This data is aggregated for each epoch and stored in arrays, not individual file
 | **Active Delegators (Entities)**            | Text file (`.txt`) | Lines correspond to delegation amounts for entities in a specific epoch.                              | `0\n100000\n500000\n...`              |
 | **Active Delegators (Stake Addresses)**     | Python arrays      | Two arrays tracking the number of active delegator addresses and entities per epoch.                  | `[1000, 1200, 1100, ...]`             |
 
+***
 
+
+#### **File: `Num_Delegator_addresses_per_epoch__Cardano_TXs_All__<timestamp>.txt`**
+
+- **Purpose**: 
+  Tracks the number of unique delegator addresses active during each epoch.
+
+- **File Format**:
+  - **Type**: Plain text file (`.txt`).
+  - **Structure**: 
+    - Each line contains the count of unique delegator addresses for one epoch.
+  - **Number of Columns**: 1 (Count of delegator addresses per epoch).
+  - **Data Type**: Integer.
+
+- **Example Content**:
+  ```
+  1000
+  1200
+  1100
+  ...
+  ```
+  - Line 1: Epoch 210 had 1,000 delegator addresses.
+  - Line 2: Epoch 211 had 1,200 delegator addresses.
+  - Line 3: Epoch 212 had 1,100 delegator addresses.
 
 ***
+
+#### **File: `Num_Delegator_entities_per_epoch__Cardano_TXs_All__<timestamp>.txt`**
+
+- **Purpose**:
+  Tracks the number of unique delegator entities active during each epoch.
+
+- **File Format**:
+  - **Type**: Plain text file (`.txt`).
+  - **Structure**:
+    - Each line contains the count of unique delegator entities for one epoch.
+  - **Number of Columns**: 1 (Count of delegator entities per epoch).
+  - **Data Type**: Integer.
+
+- **Example Content**:
+  ```
+  950
+  1150
+  1050
+  ...
+  ```
+  - Line 1: Epoch 210 had 950 delegator entities.
+  - Line 2: Epoch 211 had 1,150 delegator entities.
+  - Line 3: Epoch 212 had 1,050 delegator entities.
+
+***
+
+#### **File: `Num_Rewarder_addresses_per_epoch__Cardano_TXs_All__<timestamp>.txt`**
+
+- **Purpose**:
+  Tracks the number of unique rewarder addresses active during each epoch.
+
+- **File Format**:
+  - **Type**: Plain text file (`.txt`).
+  - **Structure**:
+    - Each line contains the count of unique rewarder addresses for one epoch.
+  - **Number of Columns**: 1 (Count of rewarder addresses per epoch).
+  - **Data Type**: Integer.
+
+- **Example Content**:
+  ```
+  800
+  900
+  850
+  ...
+  ```
+  - Line 1: Epoch 210 had 800 rewarder addresses.
+  - Line 2: Epoch 211 had 900 rewarder addresses.
+  - Line 3: Epoch 212 had 850 rewarder addresses.
+
+***
+
+#### **File: `Num_Rewarder_entities_per_epoch__Cardano_TXs_All__<timestamp>.txt`**
+
+- **Purpose**:
+  Tracks the number of unique rewarder entities active during each epoch.
+
+- **File Format**:
+  - **Type**: Plain text file (`.txt`).
+  - **Structure**:
+    - Each line contains the count of unique rewarder entities for one epoch.
+  - **Number of Columns**: 1 (Count of rewarder entities per epoch).
+  - **Data Type**: Integer.
+
+- **Example Content**:
+  ```
+  780
+  870
+  820
+  ...
+  ```
+  - Line 1: Epoch 210 had 780 rewarder entities.
+  - Line 2: Epoch 211 had 870 rewarder entities.
+  - Line 3: Epoch 212 had 820 rewarder entities.
+
+
+### Summary Table
+
+| **File Name**                                        | **Purpose**                          | **Columns**           | **Type**  | **Example**                  |
+|-----------------------------------------------------|--------------------------------------|-----------------------|-----------|------------------------------|
+| `Num_Delegator_addresses_per_epoch__<timestamp>.txt` | Count of delegator addresses per epoch | 1 (Count)            | `int`     | `1000\n1200\n1100\n...`      |
+| `Num_Delegator_entities_per_epoch__<timestamp>.txt`  | Count of delegator entities per epoch | 1 (Count)            | `int`     | `950\n1150\n1050\n...`       |
+| `Num_Rewarder_addresses_per_epoch__<timestamp>.txt`  | Count of rewarder addresses per epoch | 1 (Count)            | `int`     | `800\n900\n850\n...`         |
+| `Num_Rewarder_entities_per_epoch__<timestamp>.txt`   | Count of rewarder entities per epoch  | 1 (Count)            | `int`     | `780\n870\n820\n...`         |
+
+
+### File Access
+
+To load the files:
+```python
+num_delegator_addresses_per_epoch = load_file_to_array(file_name)
+```
+
+***
+
+
