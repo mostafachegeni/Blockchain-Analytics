@@ -910,6 +910,68 @@ print('done!')
 ```
 
 
+***
+
+# Perform "Label Propagation" on `largest_cc_subgraph`
+
+This script applies a Label Propagation algorithm on the largest connected component's copy graph (`largest_cc_subgraph_COPY`). Label Propagation is an iterative algorithm for community detection in graphs.
+
+
+#### Process
+
+1. **Initialization**:
+   - Sets up arguments for the Label Propagation algorithm:
+     - **`rounds`**: Number of iterations (default: `8`).
+     - **`seed`**: Random seed for reproducibility (default: `42`).
+
+2. **Label Propagation**:
+   - Initializes a `LabelPropagator` model using the `largest_cc_subgraph_COPY` graph and the arguments.
+   - Executes a series of label propagation iterations using `do_a_series_of_propagations`.
+   - Produces a dictionary (`NodeLabelsDict`) mapping each node to its detected label.
+
+3. **Sorting Labels**:
+   - Optionally sorts the `NodeLabelsDict`:
+     - By **key**: Node IDs (default).
+     - By **value**: Label assignments.
+
+4. **Performance Tracking**:
+   - Logs the start time, elapsed time, and confirms the completion of label propagation.
+
+
+
+
+#### Code
+
+```python
+# Perform "Label Propagation" on the largest_cc_subgraph_COPY:
+
+print('----------------------')
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+
+if __name__ == "__main__":
+    """
+    --rounds      INT    Number of iterations    Default is 8.
+    --seed        INT    Initial seed            Default is 42.
+    """
+    args = {'rounds': 8, 'seed': 42}
+    model = LabelPropagator(largest_cc_subgraph_COPY, args)
+    NodeLabelsDict = model.do_a_series_of_propagations()
+    # NodeLabelsDict = dict(sorted(NodeLabelsDict.items()))                          # sorted by key
+    NodeLabelsDict = dict(sorted(NodeLabelsDict.items(), key=lambda item: item[1])) # sorted by value
+
+##########################################################################################
+print('----------------------')
+et = datetime.datetime.now() - ct
+print("Total elapsed time (Label Propagation): ", et)
+
+##########################################################################################
+print('----------------------')
+print('done!')
+```
+
+***
 
 
 
