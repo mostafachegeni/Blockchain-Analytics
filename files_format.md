@@ -293,4 +293,50 @@ num_delegator_addresses_per_epoch = load_file_to_array(file_name)
 
 ***
 
+### **Output Files for "Calculate Entities Balances"**
+
+- **Filename Format**:
+  - `YuZhang__BalancesPerEntityDay_{day_offset}__Cardano_TXs_All.txt`
+  - Example: `YuZhang__BalancesPerEntityDay_0001__Cardano_TXs_All.txt`
+
+- **File Format**: CSV (`.txt` files saved as comma-separated values)
+
+- **Number of Columns**: 1
+
+- **Column Details**:
+  - **Column Name**: Balance
+  - **Column Type**: Integer
+  - **Description**: Represents the ADA balance for each entity on the given day. The index of each row corresponds to the entity ID in the `clustering_array`.
+
+- **Rows**: One row per entity in the clustering array.
+
+### **Output Files for "Calculate Entities TX_vol"**
+
+- **Filename Format**:
+  - `TX_Vol_PerEntityDay_{day_offset}__Cardano_TXs_All.pickle`
+  - Example: `TX_Vol_PerEntityDay_0001__Cardano_TXs_All.pickle`
+
+- **File Format**: Pickle (`.pickle` binary files)
+
+- **Number of Columns**: 1 (represented as a Python list)
+
+- **Column Details**:
+  - **Column Name**: Transaction Volume
+  - **Column Type**: Integer
+  - **Description**: Represents the absolute transaction volume (sum of input and output amounts) for each entity on the given day. The index of each element corresponds to the entity ID in the `clustering_array`.
+
+- **Rows**: One row per entity in the clustering array.
+
+### General Notes on File Structure
+1. **Daily Output**: Each file represents data for a single day, identified by the `day_offset` starting from the initial date (`2017-09-23`).
+2. **Consistency**: The index or order of rows in both file formats aligns with the entity IDs defined in the clustering array (`clustering_array`).
+3. **Storage Location**:
+   - Balances: Stored in `YuZhang_Cardano_Balances_Entities` directory.
+   - Transaction Volumes: Stored in `YuZhang_Cardano_TX_Vols_Entities__PICKLE` directory.
+4. **File Size**: As both formats iterate over entities daily, the file sizes scale with the number of entities and daily transactions processed.
+
+***
+
+
+
 
