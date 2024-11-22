@@ -5,7 +5,7 @@ In the following sections, each cell in the corresponding 'code' (with a similar
 
 ***
 
-### Import Libraries and Set Constant Variables
+# Import Libraries and Set Constant Variables
 
 This cell imports a comprehensive set of libraries and modules required for data analysis, visualization, multiprocessing, and Spark-based operations. It also initializes certain environment variables, constants, and performs some basic computations.
 
@@ -93,7 +93,7 @@ print('done!')
 
 ***
 
-### Define Base and Temporary Directory Paths
+# Define Base and Temporary Directory Paths
 
 This cell sets up the base and temporary directory paths to organize and manage file storage for the Cardano project.
 
@@ -116,7 +116,7 @@ TEMP_ADDRESS = BASE_ADDRESS + '/temp_files/'
 
 
 
-### Define Required Methods
+# Define Required Methods
 
 This cell contains a set of essential utility functions and algorithms to support various computational tasks, such as data manipulation, searching, clustering, graph processing, and file I/O operations. Each function is explained below.
 
@@ -338,4 +338,12 @@ def gini_index(inp_array):
     return ((np.sum((2 * index - n - 1
 
 ```
+
+
+
+
+
+
+
+
 
