@@ -9,7 +9,6 @@ In the following sections, each cell in the corresponding 'code' (with a similar
 
 This cell imports a comprehensive set of libraries and modules required for data analysis, visualization, multiprocessing, and Spark-based operations. It also initializes certain environment variables, constants, and performs some basic computations.
 
-#### Explanation of the Code:
 1. **Library Imports**:
    - **Core libraries**: `numpy`, `array`, `csv`, `datetime`, and `os`.
    - **Search and sorting**: `bisect`.
