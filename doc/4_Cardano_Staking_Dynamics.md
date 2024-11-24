@@ -1,7 +1,24 @@
-# Cardano_Staking_Dynamics
+# 4. Cardano Staking Dynamics
 
+This '.md' file explains the implementation of the corresponding code "**4_Cardano_Staking_Dynamics.ipynb**". The code performs the following analyses:
+- Calculate "Gini Index" of entities' balances per epoch
+- Calculate "Gini Index" of entities' stake delegations per epoch
+- Calculate "Gini Index" of entities rewards per epoch
+- Calculate number of active delegators (Stake Addresses) per epoch
+- PLOT: Entities(Heur1 and Heur2) "Wealth" distributions
+- PLOT: Entities(Heur1 and Heur2) "Stake Delegation" distributions
+- PLOT: Entities(Heur1 and Heur2) "Reward" distributions
+- PLOT: Gini Index of entities' wealth, stake delegations, rewards in each epoch
+- PLOT: Number of "Delegator/Rewardee" "Addresses/Entities" in each epoch
+- PLOT: Scatter Plot "Pool Rewards" vs "Pool Delegations" for all delegation events in all epochs
+- PLOT: Scatter Plot "Pool Delegation" vs "Entity Wealth" for all delegation events in all epochs
+- PLOT: Scatter Plot "Number of Pools received Delegation from an Entity per epoch" vs "Entity Wealth" for all delegation events in all epochs
+- PLOT: Scatter Plot "Reward per epoch" vs "Entity Wealth" for all delegation events in all epochs
+- PLOT: "Entity Wealth (ADA)" vs. "Entity Size"
+- PLOT: "Entity Stake Delegation (ADA)" vs. "Entity Size"
+- PLOT: "Entity Stake Delegation (ADA)" vs. "Entity Wealth (ADA)"
 
-In the following sections, each cell in the corresponding 'code' (with a similar filename in the code directory of this repository) is documented with a brief description of its purpose and functionality, followed by the summarized cell code.
+In the following sections, each cell in the corresponding 'code' is documented with a brief description of its purpose and functionality, followed by the summarized cell code.
 
 ***
 
