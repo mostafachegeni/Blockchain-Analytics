@@ -1,5 +1,34 @@
-# Cardano Address/Entity Analysis
+# 2_Cardano Address/Entity Analysis
 
+This '.md' file explains the implementation of the corresponding code "**2_Cardano_Address_Entity_Analysis.ipynb**". The code performs the following analyses:
+- Calculate the number of members in each cluster (based on heuristic 1 and/or 2)
+- Fitting power-law distributions to the distribution of cluster sizes
+- Finding the corresponding "Entity ID" for Each "Stake Address" (Delegation Address) based on Heuristic 2
+- Calculate balances of entities
+- Calculate number of active delegators/rewarders (entities) per epoch
+- Calculate number of active delegators (Stake Addresses/Entities) per epoch
+- Calculate number of new entities over time
+- Calculate number of new "Byron", "Shelley", and "Stake" addresses over time
+- Calculate number of new addresses per day
+- Calculate numbe rof active Users/Entities per day
+- Calculate list of NFT/FT/ADA transactions" over time at an entity-level
+- Calculate distribution of NFTs/ADAs owned by entities
+- Calculate distribution of NFTs/FTs minted by entities
+- Calculate entities' daily balances
+- Calculate entities' daily transaction volume
+- Calculate distribution of Ada holding time
+- PLOT: Entity Stake Delegation (ADA) vs. Entity Wealth (ADA)
+- PLOT: Entity Wealth (ADA) vs. Entity Size
+- PLOT: Entity Stake Delegation (ADA) vs. Entity Size
+- PLOT: Entity Stake Delegation (ADA) vs. Entity Wealth (ADA)
+- PLOT: Number of new entities per day
+- PLOT: Number of new addresses per day
+- PLOT: Result of active addresses/entities
+- PLOT: ADA hodling time distribution
+- PLOT: compare ADA velocity time calculated with random sampling rates 100% and 30%
+- PLOT: Number of owned NFTs/ADAs per entity
+- PLOT: Distribution of minted NFTs/FTs per Entity
+- PLOT: fitting a power-law distributions to the distribution of minted NFTs/FTs
 
 In the following sections, each cell in the corresponding 'code' (with a similar filename in the code directory of this repository) is documented with a brief description of its purpose and functionality, followed by the summarized cell code.
 
