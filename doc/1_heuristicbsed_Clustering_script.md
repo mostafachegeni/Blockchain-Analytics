@@ -1,5 +1,6 @@
-# 1_heuristicbsed_Clustering_script
+# heuristicbsed_Clustering_script
 
+This 'code' analyzes Cardano transactions, applies two heuristics to cluster the addresses into entities, and creates/stores the clustering results as an array.
 In the following sections, each cell in the corresponding 'code' (with a similar filename in the code directory of this repository) is documented with a brief description of its purpose and functionality, followed by the summarized cell code.
 
 
@@ -10,7 +11,7 @@ In the following sections, each cell in the corresponding 'code' (with a similar
 This cell imports a comprehensive set of libraries and modules required for data analysis, visualization, multiprocessing, and Spark-based operations. It also initializes certain environment variables, constants, and performs some basic computations.
 
 #### Explanation of the Code:
-1. **Library Imports**:
+**Library Imports**:
    - **Core libraries**: `numpy`, `array`, `csv`, `datetime`, and `os`.
    - **Search and sorting**: `bisect`.
    - **Visualization**: `matplotlib.pyplot`.
@@ -21,70 +22,34 @@ This cell imports a comprehensive set of libraries and modules required for data
    - **Progress tracking**: `tqdm`.
    - **Serialization**: `pickle`.
 
-2. **Environment Variable Setup**:
-   - Disables timezone warnings for PyArrow with `os.environ`.
-
-3. **Cardano Blockchain Date and Address Analysis**:
-   - Sets constants for unique address counts and calculates the total time length of the Cardano blockchain in days.
-
-4. **Outputs**:
-   - Prints address count statistics and a success message.
 
 #### Cell Code:
 ```python
-# Import libraries and set constant variables:
-
 import numpy as np
 from array import *
 import csv
-
-# using datetime module
 import datetime;
-
-# Binary Search
 from bisect import bisect_left
 from bisect import bisect_right
-
 import matplotlib.pyplot as plt
 import json
-
 import multiprocessing as mp
 from multiprocessing import Process, Queue
 from multiprocessing import current_process
 import queue
 import threading
-
 import os
 os.environ["PYARROW_IGNORE_TIMEZONE"] = "1"
 from pyspark.sql import SparkSession
 import pyspark.pandas as ps
 from pyspark.sql.functions import col
 import pandas as pd
-
 import random
 import networkx as nx
 from tqdm import tqdm
-
-# https://python-louvain.readthedocs.io/en/latest/api.html
-# community.modularity(partition, graph, weight='weight')
 from community import modularity
-
 import pickle
-
 import powerlaw
-
-print('----------------------')
-# unique_payment_addresses_len = len(unique_payment_addresses)
-unique_raw_addresses_len        = 40330345
-unique_payment_addresses_len    = 40324960
-unique_delegation_addresses_len = 3868049
-print('unique_raw_addresses_len        = ', unique_raw_addresses_len)
-print('unique_payment_addresses_len    = ', unique_payment_addresses_len)
-print('unique_delegation_addresses_len = ', unique_delegation_addresses_len)
-
-INITIAL_DATE_CARDANO      = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
-FINAL_DATE_CARDANO        = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
-total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds()/86400) + 1
 
 print('----------------------')
 print('done!')
@@ -97,14 +62,12 @@ print('done!')
 
 This cell sets up the base and temporary directory paths to organize and manage file storage for the Cardano project.
 
-#### Explanation of the Code:
-1. **`BASE_ADDRESS`**:
+**`BASE_ADDRESS`**:
    - Defines the base directory for storing exported data related to the project.
 
-2. **`TEMP_ADDRESS`**:
+**`TEMP_ADDRESS`**:
    - Defines a subdirectory within the base directory to store temporary files.
 
-These paths centralize file storage management and ensure consistent directory usage throughout the project.
 
 #### Cell Code:
 ```python
@@ -121,62 +84,45 @@ TEMP_ADDRESS = BASE_ADDRESS + '/temp_files/'
 This cell contains a set of essential utility functions and algorithms to support various computational tasks, such as data manipulation, searching, clustering, graph processing, and file I/O operations. Each function is explained below.
 
 #### Explanation of the Code:
-1. **Time Logging**:
-   - Prints the current timestamp to record the start of execution.
-
-2. **Parent Array Operations**:
+**UnionFind Operations**:
    - `parent`: Retrieves the parent of a node in a Union-Find structure.
    - `find_parent`: Finds the root parent of a node using path compression.
    - `link_address`: Implements the Union-Find algorithm to link two nodes.
    - `resolveAll`: Resolves all parent-child relationships to find ultimate roots.
-
-3. **Clustering Operations**:
    - `remapClusterIds`: Reassigns cluster IDs to ensure a contiguous sequence starting from zero.
-
-4. **Merge Parent Arrays**:
    - `merge_parents`: Combines two parent arrays into a unified structure.
 
-5. **Binary Search**:
+**Binary Search**:
    - `BinarySearch`: Performs a binary search for a specific element.
    - `BinarySearch_Find_start_end`: Finds the start and end indices of a target element in a sorted array.
 
-6. **File Operations**:
+**File Operations**:
    - `store_array_to_file`, `store_array_to_file_2D`: Save arrays (1D or 2D) to files using CSV or JSON.
    - `load_file_to_array`, `load_file_to_array_2D`: Load arrays from CSV or JSON files.
    - `store_dict_to_file_INT`: Saves a dictionary to a file with integer keys and values.
    - `load_file_to_dict_INT`: Loads a dictionary from a file with integer keys and values.
 
-7. **Graph Processing**:
+**Graph Processing**:
    - `add_edge_info`: Adds weighted edges between nodes in a graph structure.
 
-8. **Address Extraction**:
+**Cardano Address Extraction**:
    - `extract_payment_delegation_parts`: Splits raw addresses into payment and delegation parts based on Cardano's address types (Byron or Shelley).
 
-9. **Statistical Calculations**:
+**Statistical Calculations**:
    - `gini_index`: Computes the Gini index for measuring inequality in wealth distribution.
 
 #### Cell Code:
 ```python
-# Define required methods:
-
-print('----------------------')
-
-# ct stores current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
-
 ##########################################################################################
 def parent (id1, parents_array):
     return parents_array[id1]
 
-##########################################################################################
 def find_parent (id1, parents_array):
     while (id1 != parent(id1, parents_array)):
         new_parent = parent(parent(id1, parents_array), parents_array)
         id1 = new_parent
     return id1
 
-##########################################################################################
 # Link two addresses based on "Union-Find" Algorithm:
 def link_address (addr_position_1, addr_position_2, parents_array):
     id1 = find_parent(addr_position_1, parents_array)
@@ -188,13 +134,11 @@ def link_address (addr_position_1, addr_position_2, parents_array):
     parents_array[id1] = id2
     return
 
-##########################################################################################
 def resolveAll (parents_array):
     for id1 in tqdm(range(len(parents_array))):
         parents_array[id1] = find_parent(id1, parents_array)
     return
 
-##########################################################################################
 def remapClusterIds (parents_array, clustering_array):
     cluster_count = 0
     place_holder = 9999999999999
@@ -209,7 +153,6 @@ def remapClusterIds (parents_array, clustering_array):
         clustering_array[i] = new_cluster_ids [parent_index]
     return cluster_count
 
-##########################################################################################
 def merge_parents(parents_array, parents_merged):
     if (len(parents_array) != len(parents_merged)):
         print('parents_merged Error: -1 (Length)')
@@ -227,7 +170,6 @@ def BinarySearch(a, x, debug=True):
             print('BinarySearch Error: -1')
         return -1
 
-##########################################################################################
 def BinarySearch_Find_start_end(a, x):
     i = bisect_left(a, x)
     j = bisect_right(a, x) - 1
@@ -249,7 +191,6 @@ def store_array_to_file (input_array_name, file_name, index_=False, header_=None
     print('elapsed time (Store Array to ' + file_name + '): ', et)
     return
 
-##########################################################################################
 def load_file_to_array (file_name, header_=None):
     ct = datetime.datetime.now()
     print('start time (Load ' + file_name  + ' to Array): ', ct)
@@ -259,7 +200,6 @@ def load_file_to_array (file_name, header_=None):
     print('elapsed time (Load ' + file_name  + ' to Array): ', et)
     return output_array_name
 
-##########################################################################################
 def store_array_to_file_2D (input_array_name, file_name):
     ct = datetime.datetime.now()
     print('start time (Store Array 2D to ' + file_name + '): ', ct)
@@ -269,7 +209,6 @@ def store_array_to_file_2D (input_array_name, file_name):
     print('elapsed time (Store Array 2D to ' + file_name + '): ', et)
     return
 
-##########################################################################################
 def load_file_to_array_2D (file_name):
     ct = datetime.datetime.now()
     print('start time (Load ' + file_name  + ' to Array 2D): ', ct)
@@ -279,7 +218,6 @@ def load_file_to_array_2D (file_name):
     print('elapsed time (Load ' + file_name  + ' to Array 2D): ', et)
     return output_array_name
 
-##########################################################################################
 def store_dict_to_file_INT (input_dict_name, file_name):
     ct = datetime.datetime.now()
     print('start time (Store Dictionary to ' + file_name + '): ', ct)
@@ -290,7 +228,6 @@ def store_dict_to_file_INT (input_dict_name, file_name):
     print('elapsed time (Store Dictionary to ' + file_name + '): ', et)
     return
 
-##########################################################################################
 def load_file_to_dict_INT (file_name):
     ct = datetime.datetime.now()
     print('start time (Load ' + file_name  + ' to Dictionary): ', ct)
@@ -343,17 +280,14 @@ def gini_index(inp_array):
 
 # Extracts all cardano addresses (raw, payment, and delegation):
 
-This code extracts all addresses (raw, payment, and delegation) from Cardano transaction data stored in CSV files. The extracted addresses are categorized into three separate lists: `raw_address_list`, `payment_address_list`, and `delegation_address_list`. Additionally, it measures the time taken for loading and processing the data. Below is a detailed explanation of the code:
+This cell extracts all addresses (raw, payment, and delegation) from Cardano transaction data stored in CSV files. The extracted addresses are categorized into three separate lists: `raw_address_list`, `payment_address_list`, and `delegation_address_list`. Additionally, it measures the time taken for loading and processing the data. Below is a detailed explanation of the code:
 
-1. **Initialization and Timestamp**:
-    - The script starts by initializing three empty lists to store addresses.
-    - It prints the current timestamp to mark the beginning of the process.
 
-2. **File Details**:
-    - The input files follow a naming convention: `BASE_ADDRESS + '/cardano_TXs_' + <number> + '.csv'`, where `<number>` ranges from 1 to `NUMBER_OF_CSV_FILES`.
+**File Details**:
+    - The input files follow a naming convention: `BASE_ADDRESS + '/cardano_TXs_<number>.csv'`, where `<number>` ranges from 1 to `NUMBER_OF_CSV_FILES`.
     - Each file is a CSV file with a pipe (`|`) delimiter, and it contains columns relevant to transaction inputs and outputs.
 
-3. **File Loading and Address Extraction**:
+**File Loading and Address Extraction**:
     - The script iterates through all specified CSV files.
     - For each file:
         - It measures the time taken to load the file into a DataFrame.
@@ -362,21 +296,10 @@ This code extracts all addresses (raw, payment, and delegation) from Cardano tra
             - Uses the `extract_payment_delegation_parts` function to further split addresses into their payment and delegation components.
             - Appends these components to the corresponding lists if they are not empty.
 
-4. **Performance Tracking**:
-    - The script logs the time taken for both loading the file and extracting addresses from its data.
-
-
 ### Code
 ```python
 # Create extracts all addresses (raw, payment, and delegation) appeared on the cardano transactions and creates a List for each 
 # [raw_address_list, payment_address_list, and delegation_address_list]:
-
-print('----------------------')
-
-# ct stores current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
-print('----------------------')
 
 # List of all addresses (from INPUTs and OUTPUTs)
 raw_address_list = []
@@ -416,13 +339,6 @@ for i in range(1, NUMBER_OF_CSV_FILES + 1):
     et_temp = datetime.datetime.now() - ct_temp
     print("elapsed time (Extract Addresses from INs/OUTs of CSV File " + file_name + "): ", et_temp)
 
-print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (Create list of Addresses Array List in Python): ", et)
-
-print('----------------------')
-print('done!')
-
 ```
 
 
@@ -431,119 +347,95 @@ print('done!')
 
 # Store "raw_address_list / payment_address_list / delegation_address_list" into a File:
 
-This code saves the extracted address lists (`raw_address_list`, `payment_address_list`, and `delegation_address_list`) into separate text files. Each file's name includes a timestamp to ensure unique identification. Below is a detailed explanation of the process:
+This cell saves the extracted address lists (`raw_address_list`, `payment_address_list`, and `delegation_address_list`) into separate text files. Each file's name includes a timestamp to ensure unique identification. Below is a detailed explanation of the process:
 
-1. **Timestamp Generation**:
-    - The current timestamp is captured and formatted into `YYYY-MM-DD_HHMMSS` format. This ensures that each output file has a unique name based on the time of creation.
-
-2. **File Details**:
+**File Details**:
     - Each list is saved into a separate text file in the specified directory (`BASE_ADDRESS`).
-    - File naming convention: `AddressList<Type>__Cardano_TXs_All__<timestamp>.txt`, where `<Type>` corresponds to the list type (`Raw`, `Payment`, or `Delegation`).
+    - File naming convention: `AddressList<Type>__Cardano_TXs_All__<timestamp>`, where `<Type>` corresponds to the list type (`Raw`, `Payment`, or `Delegation`).
 
-3. **Storing Lists**:
+**Storing Lists**:
     - The function `store_array_to_file` is used to write each list into its respective file. This function is assumed to handle the file writing process (e.g., storing each list item on a new line).
 
-4. **Completion Message**:
-    - The script prints a completion message after saving all files.
+
 
 ### Code
 ```python
 # Store "raw_address_list / payment_address_list / delegation_address_list" into a File:
 
-print('----------------------')
-
-ct = datetime.datetime.now()
-print("current time: ", ct)
-
 # write a list into a file:
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
-output_filename = BASE_ADDRESS + '/AddressListRaw__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/AddressListRaw__Cardano_TXs_All__' + curr_timestamp 
 store_array_to_file(raw_address_list, output_filename)
 
 # write a list into a file:
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
-output_filename = BASE_ADDRESS + '/AddressListPayment__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/AddressListPayment__Cardano_TXs_All__' + curr_timestamp 
 store_array_to_file(payment_address_list, output_filename)
 
 # write a list into a file:
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
-output_filename = BASE_ADDRESS + '/AddressListDelegation__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/AddressListDelegation__Cardano_TXs_All__' + curr_timestamp 
 store_array_to_file(delegation_address_list, output_filename)
 
-print('----------------------')
-print('done!')
 ```
 
 ### Output File Format
-- **File Type**: Plain text (`.txt`).
+- **File Type**: Plain text 
 - **Content**: Each address is written on a new line.
-    - `AddressListRaw__Cardano_TXs_All__<timestamp>.txt`: Contains all raw addresses.
-    - `AddressListPayment__Cardano_TXs_All__<timestamp>.txt`: Contains all payment addresses.
-    - `AddressListDelegation__Cardano_TXs_All__<timestamp>.txt`: Contains all delegation addresses.
+    - `AddressListRaw__Cardano_TXs_All__<timestamp>`: Contains all raw addresses.
+    - `AddressListPayment__Cardano_TXs_All__<timestamp>`: Contains all payment addresses.
+    - `AddressListDelegation__Cardano_TXs_All__<timestamp>`: Contains all delegation addresses.
 - **Timestamp**: The file name includes a timestamp in the format `YYYY-MM-DD_HHMMSS`.
 
 ### Example File Content
-For `AddressListRaw__Cardano_TXs_All__<timestamp>.txt`:
+For `AddressListRaw__Cardano_TXs_All__<timestamp>`:
 ```
 addr1qxyz...
 addr1qabc...
 addr1qlmn...
 ```
 
-
-
-
 ***
+
+
 
 # Remove Duplicate Addresses and Sort raw_address_list / payment_address_list / delegation_address_list:
 
-This code removes duplicate addresses and sorts the `raw_address_list`, `payment_address_list`, and `delegation_address_list`. The operation is performed using the `sort` shell command, which is executed via Python's `os.system` method.
+This cell removes duplicate addresses and sorts the `raw_address_list`, `payment_address_list`, and `delegation_address_list`. The operation is performed using the `sort` shell command, which is executed via Python's `os.system` method.
 
-1. **Timestamp Logging**:
-    - The current timestamp is printed at the start of the operation to log the process initiation.
-
-2. **Sorting and Deduplication**:
+**Sorting and Deduplication**:
     - The `sort` command is used with the `-u` option to remove duplicates and sort the addresses lexicographically.
     - The `-k 1` option specifies sorting based on the first key (default behavior for text files).
 
-3. **Input and Output Files**:
+**Input and Output Files**:
     - Input files: Address lists generated previously (`AddressListRaw`, `AddressListPayment`, and `AddressListDelegation`).
     - Output files: Deduplicated and sorted address lists, with filenames prefixed by `Unique_`.
-
-4. **Completion Message**:
-    - A completion message is printed after deduplication and sorting are finished.
 
 ### Code
 ```python
 # Remove Duplicate Addresses and Sort raw_address_list / payment_address_list / delegation_address_list:
 
-print('----------------------')
-ct = datetime.datetime.now()
-print("current time: ", ct)
+os.system('sort -k 1 -u /local/scratch/exported/blockchain_parsed/cardano_mostafa/AddressListRaw__Cardano_TXs_All__2023-02-28_143357        > /local/scratch/exported/blockchain_parsed/cardano_mostafa/Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357')
+os.system('sort -k 1 -u /local/scratch/exported/blockchain_parsed/cardano_mostafa/AddressListPayment__Cardano_TXs_All__2023-02-28_143953    > /local/scratch/exported/blockchain_parsed/cardano_mostafa/Unique_AddressesListPayment__Cardano_TXs_All__2023-02-28_143953')
+os.system('sort -k 1 -u /local/scratch/exported/blockchain_parsed/cardano_mostafa/AddressListDelegation__Cardano_TXs_All__2023-02-28_144415 > /local/scratch/exported/blockchain_parsed/cardano_mostafa/Unique_AddressesListDelegation__Cardano_TXs_All__2023-02-28_144415')
 
-os.system('sort -k 1 -u /local/scratch/exported/blockchain_parsed/cardano_mostafa/AddressListRaw__Cardano_TXs_All__2023-02-28_143357.txt        > /local/scratch/exported/blockchain_parsed/cardano_mostafa/Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357.txt')
-os.system('sort -k 1 -u /local/scratch/exported/blockchain_parsed/cardano_mostafa/AddressListPayment__Cardano_TXs_All__2023-02-28_143953.txt    > /local/scratch/exported/blockchain_parsed/cardano_mostafa/Unique_AddressesListPayment__Cardano_TXs_All__2023-02-28_143953.txt')
-os.system('sort -k 1 -u /local/scratch/exported/blockchain_parsed/cardano_mostafa/AddressListDelegation__Cardano_TXs_All__2023-02-28_144415.txt > /local/scratch/exported/blockchain_parsed/cardano_mostafa/Unique_AddressesListDelegation__Cardano_TXs_All__2023-02-28_144415.txt')
-
-print('----------------------')
-print('done!')
 ```
 
 ### Input and Output File Details
 
 - **Input Files**:
-    - `AddressListRaw__Cardano_TXs_All__2023-02-28_143357.txt`
-    - `AddressListPayment__Cardano_TXs_All__2023-02-28_143953.txt`
-    - `AddressListDelegation__Cardano_TXs_All__2023-02-28_144415.txt`
+    - `AddressListRaw__Cardano_TXs_All__2023-02-28_143357`
+    - `AddressListPayment__Cardano_TXs_All__2023-02-28_143953`
+    - `AddressListDelegation__Cardano_TXs_All__2023-02-28_144415`
     - These files contain unsorted address lists, possibly with duplicates.
 
 - **Output Files**:
-    - `Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357.txt`
-    - `Unique_AddressesListPayment__Cardano_TXs_All__2023-02-28_143953.txt`
-    - `Unique_AddressesListDelegation__Cardano_TXs_All__2023-02-28_144415.txt`
+    - `Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357`
+    - `Unique_AddressesListPayment__Cardano_TXs_All__2023-02-28_143953`
+    - `Unique_AddressesListDelegation__Cardano_TXs_All__2023-02-28_144415`
     - These files contain sorted and deduplicated address lists.
 
 
@@ -553,39 +445,31 @@ print('done!')
 # Read unique raw/payment/delegation array lists from file:
 
 
-This code reads unique address lists (`unique_raw_addresses`, `unique_payment_addresses`, and `unique_delegation_addresses`) from previously saved text files. Each file contains sorted and deduplicated addresses, one address per line. The script calculates and prints the length of each list for verification.
+This cell reads unique address lists (`unique_raw_addresses`, `unique_payment_addresses`, and `unique_delegation_addresses`) from previously saved text files. Each file contains sorted and deduplicated addresses, one address per line. The script calculates and prints the length of each list for verification.
 
 #### Process
-1. **Input Files**:
+**Input Files**:
    - The files contain sorted and unique addresses corresponding to raw, payment, and delegation categories.
    - File names:
-     - `Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357.txt`
-     - `Unique_AddressesListPayment__Cardano_TXs_All__2023-02-28_143953.txt`
-     - `Unique_AddressesListDelegation__Cardano_TXs_All__2023-02-28_144415.txt`
+     - `Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357`
+     - `Unique_AddressesListPayment__Cardano_TXs_All__2023-02-28_143953`
+     - `Unique_AddressesListDelegation__Cardano_TXs_All__2023-02-28_144415`
    - These files are located in the directory defined by the `BASE_ADDRESS` variable.
 
-2. **Loading Process**:
+**Loading Process**:
    - The `load_file_to_array` function reads each line of the file into an array.
    - Each address becomes an individual element of the array.
 
-3. **Output**:
+**Output**:
    - Arrays:
      - `unique_raw_addresses`: Contains unique raw addresses.
      - `unique_payment_addresses`: Contains unique payment addresses.
      - `unique_delegation_addresses`: Contains unique delegation addresses.
    - Lengths of each array are printed to summarize the number of unique addresses.
 
-4. **Completion**:
-   - A message is printed once all files are successfully loaded.
-
-#### Notes
-- Ensure that the `load_file_to_array` function supports reading plain text files with newline-separated content.
-- Verify that the input files exist and are accessible to avoid file-not-found errors.
 
 ```python
 # Read unique raw/payment/delegation array lists from file:
-
-print('----------------------')
 
 file_name = BASE_ADDRESS + '/Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357.txt'
 unique_raw_addresses = load_file_to_array(file_name)
@@ -599,140 +483,8 @@ file_name = BASE_ADDRESS + '/Unique_AddressesListDelegation__Cardano_TXs_All__20
 unique_delegation_addresses = load_file_to_array(file_name)
 print('Length of \"unique_delegation_addresses\" = ' + str(len(unique_delegation_addresses)))
 
-##########################################################################################
-print('----------------------')
-print('done!')
 ```
 
-
-***
-
-
-# Find the epoch of each address Byron, Shelley, and Stake Addresses (the first epoch it appeared on the blockchain)
-
-This code determines the first epoch in which each address (raw, Byron, Shelley, and delegation) appears on the Cardano blockchain. It processes transaction data and maps addresses to their first epoch.
-
-
-
-#### Process
-
-1. **Initialization**:
-   - A placeholder value (`999999999999`) is used to initialize epoch arrays for each address category (`raw_addresses_epoch_array`, `Byron_payment_addresses_epoch_array`, etc.).
-   - Epoch details are read from a CSV file (`cardano_epochs_MinTXID_CardanoAllTXs.csv`) to determine the first transaction ID for each epoch.
-
-2. **Input Data**:
-   - **Epoch Information**:
-     - File: `cardano_epochs_MinTXID_CardanoAllTXs.csv`
-     - Delimiter: `|`
-     - Columns:
-       - `MIN_TX_ID`: Minimum transaction ID for each epoch.
-   - **Transaction Data**:
-     - Files: `cardano_TXs_1.csv` to `cardano_TXs_6.csv`.
-     - Delimiter: `|`.
-     - Contains transaction IDs and outputs.
-
-3. **Address Categorization**:
-   - **Byron Address**: Identified by the `address_raw[2] == '8'` condition.
-   - **Shelley Address**: Payment addresses not identified as Byron.
-   - **Delegation Address**: Delegation parts of the address extracted using the `extract_payment_delegation_parts` function.
-
-4. **Search and Update**:
-   - For each transaction output:
-     - Binary search (`BinarySearch`) is used to locate the position of the address in the corresponding unique address array.
-     - The epoch array for the address type is updated if it hasn't been set previously.
-
-5. **Performance Tracking**:
-   - Logs elapsed time for file loading and processing.
-
-
-#### Notes
-- Ensure that the `extract_payment_delegation_parts` and `BinarySearch` functions are implemented and efficient.
-- Verify that input files exist and match the expected format.
-- Placeholder values (`999999999999`) in epoch arrays indicate addresses that do not appear in any epoch.
-
-
-
-```python
-# Find the epoch of each address Byron, Shelley, and Stake Addresses (the first epoch it appeared on the blockchain):
-
-print('----------------------')
-# ct stores current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
-
-print('----------------------')
-file_name = BASE_ADDRESS + '/cardano_epochs_MinTXID_CardanoAllTXs.csv'
-df = pd.read_csv(file_name, delimiter='|')
-
-first_TX_IDs_in_epoch_array = df['MIN_TX_ID'].to_numpy()
-current_epoch = -1
-
-place_holder = 999999999999
-raw_addresses_epoch_array             = np.array([place_holder] * len(unique_raw_addresses))
-Byron_payment_addresses_epoch_array   = np.array([place_holder] * len(unique_payment_addresses))
-Shelley_payment_addresses_epoch_array = np.array([place_holder] * len(unique_payment_addresses))
-delegation_addresses_epoch_array      = np.array([place_holder] * len(unique_delegation_addresses))
-
-CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_'
-NUMBER_OF_CSV_FILES = 6
-CSV_FILES_SUFFIX = '.csv'
-
-for i in range(1, NUMBER_OF_CSV_FILES + 1):
-
-    ct_temp = datetime.datetime.now()
-
-    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
-    df = pd.read_csv(file_name, delimiter='|')
-
-    et_temp = datetime.datetime.now() - ct_temp
-    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
-
-    ct_temp = datetime.datetime.now()
-
-    for index, row in tqdm(df.iterrows()):
-        TX_ID = df.loc[index, 'TX_ID']
-        if TX_ID == first_TX_IDs_in_epoch_array[current_epoch + 2]:
-            current_epoch += 1
-        
-        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
-        for tx_output in outputs_list:
-            address_raw = tx_output.split(',')[1]
-            address_has_script = tx_output.split(',')[4]
-            payment_cred = tx_output.split(',')[5]
-            stake_address = tx_output.split(',')[6]
-            [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
-
-            if address_raw != '':
-                addr_position = BinarySearch(unique_raw_addresses, address_raw)
-                if raw_addresses_epoch_array[addr_position] == place_holder:
-                    raw_addresses_epoch_array[addr_position] = current_epoch
-
-            if address_payment_part != '':
-                if address_raw[2] == '8':  # Byron Address
-                    addr_position = BinarySearch(unique_payment_addresses, address_payment_part)
-                    if Byron_payment_addresses_epoch_array[addr_position] == place_holder:
-                        Byron_payment_addresses_epoch_array[addr_position] = current_epoch
-                else:  # Shelley Address
-                    addr_position = BinarySearch(unique_payment_addresses, address_payment_part)
-                    if Shelley_payment_addresses_epoch_array[addr_position] == place_holder:
-                        Shelley_payment_addresses_epoch_array[addr_position] = current_epoch
-
-            if address_delegation_part != '':
-                addr_position = BinarySearch(unique_delegation_addresses, address_delegation_part)
-                if delegation_addresses_epoch_array[addr_position] == place_holder:
-                    delegation_addresses_epoch_array[addr_position] = current_epoch
-
-    et_temp = datetime.datetime.now() - ct_temp
-    print("elapsed time (Detect Byron and Shelley Addresses from INs/OUTs of CSV File " + file_name + "): ", et_temp)
-
-print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (Detect Byron and Shelley Addresses): ", et)
-
-print('----------------------')
-print('done!')
-
-```
 
 
 ***
@@ -772,16 +524,13 @@ This function generates a `parents_array` and `graph_edges_array` using **Heuris
    - Resolved `parents_array` and `graph_edges_array` are saved to temporary files.
    - File paths are returned via the multiprocessing queue.
 
-6. **Completion**:
-   - The Spark session is stopped after processing.
-   - Elapsed time for processing is logged.
 
 #### Output Files
 - **Parents Array File**:
-  - File Name: `parentsList_temp__<csv_file_basename>__<timestamp>.txt`
+  - File Name: `parentsList_temp__<csv_file_basename>__<timestamp>`
   - Contains the resolved `parents_array`.
 - **Graph Edges File**:
-  - File Name: `graphEdgesList_temp__<csv_file_basename>__<timestamp>.txt`
+  - File Name: `graphEdgesList_temp__<csv_file_basename>__<timestamp>`
   - Contains adjacency lists for graph edges.
 
 
@@ -802,12 +551,10 @@ def generate_parents_array(queue_):
     str_current_proc = 'current_process()._identity[0] ' + '(' + csv_file_basename + ')' + ' = ' + str(current_process()._identity[0])
     print(str_current_proc)
 
-    ct_temp = datetime.datetime.now()
-
     # Create SparkSession 
     spark = SparkSession.builder \
                      .master("local[1]") \
-                     .appName("Mostafa_SparkTest_1") \
+                     .appName("Cardano_Spark") \
                      .config('spark.driver.maxResultSize', '70g') \
                      .config('spark.executor.cores', 4) \
                      .config('spark.executor.memory', '30g') \
@@ -817,11 +564,6 @@ def generate_parents_array(queue_):
                      .getOrCreate() 
 
     df = spark.read.option("delimiter", "|").csv(csv_file_name, inferSchema=True, header=True)
-
-    et_temp = datetime.datetime.now() - ct_temp
-    print("elapsed time (Load CSV File " + csv_file_name + "): ", et_temp)
-
-    ct_temp = datetime.datetime.now()
 
     # Initialize parents_array:
     parents_array = np.array([0] * unique_payment_addresses_len)
@@ -863,22 +605,15 @@ def generate_parents_array(queue_):
     ct_file = datetime.datetime.now()
     curr_timestamp = str(ct_file)[0:10] + '_' + str(ct_file)[11:13] + str(ct_file)[14:16] + str(ct_file)[17:26]
 
-    output_parents_filename = TEMP_ADDRESS + '/parentsList_temp__' + csv_file_basename + '__' + curr_timestamp + '.txt'
+    output_parents_filename = TEMP_ADDRESS + '/parentsList_temp__' + csv_file_basename + '__' + curr_timestamp 
     store_array_to_file(parents_array, output_parents_filename)
 
-    output_graghEdges_filename = TEMP_ADDRESS + '/graphEdgesList_temp__' + csv_file_basename + '__' + curr_timestamp + '.txt'
+    output_graghEdges_filename = TEMP_ADDRESS + '/graphEdgesList_temp__' + csv_file_basename + '__' + curr_timestamp 
     store_array_to_file_2D(graph_edges_array, output_graghEdges_filename)
 
     queue_.put([output_parents_filename, output_graghEdges_filename])
 
-    et_temp = datetime.datetime.now() - ct_temp
-    print("elapsed time (Link Addresses with Heuristics in CSV File " + csv_file_basename + "): ", et_temp)
-
     return
-
-##########################################################################################
-print('----------------------')
-print('done!')
 
 ```
 
@@ -889,7 +624,7 @@ print('done!')
 
 # Create and Fill "Parents_" Arrays (Related to "Heuristic1"):
 
-This script processes transaction data from multiple CSV files in parallel using Heuristic1 to create and populate `parents_` arrays and corresponding graph edges for each file. It leverages multiprocessing for efficiency and stores the results for further analysis.
+This cell processes transaction data from multiple CSV files in parallel using Heuristic1 to create and populate `parents_` arrays (accrding to a `UnionFind` algorithm) and corresponding graph edges for each file. It leverages multiprocessing for efficiency and stores the results for further analysis.
 
 
 
@@ -909,11 +644,6 @@ This script processes transaction data from multiple CSV files in parallel using
    - The output filenames (for `parents_` arrays and graph edges) are retrieved from the queues.
    - The arrays are loaded into memory using `load_file_to_array` and `load_file_to_array_2D`.
 
-4. **Performance Tracking**:
-   - Logs the elapsed time for the entire process, including generating and loading the arrays.
-
-5. **Completion**:
-   - Prints a success message once all arrays are loaded and processes are complete.
 
 
 
@@ -932,13 +662,6 @@ This script processes transaction data from multiple CSV files in parallel using
 ```python
 # Create and Fill "Parents_" arrays (related to "Heuristic1"):
 
-print('----------------------')
-
-# ct stores current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
-
-##########################################################################################
 if __name__ == "__main__":  # confirms that the code is under main function
     q1 = Queue()
     q2 = Queue()
@@ -1009,15 +732,6 @@ if __name__ == "__main__":  # confirms that the code is under main function
     graghEdges_6 = load_file_to_array_2D(output_filename_6[1])
     print('parents_6 and graghEdges_6 loaded!')
 
-##########################################################################################
-print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (Fill Parents_Arrays with Heuristics for all CSV Files): ", et)
-
-##########################################################################################
-print('----------------------')
-print('done!')
-
 ```
 
 
@@ -1026,7 +740,7 @@ print('done!')
 
 # Heuristic 2: Link "Shelley Addresses" with the Same "address_delegation_part"
 
-This script implements Heuristic 2 to link Shelley addresses that share the same `address_delegation_part`. It achieves this by creating a `stake_delegation_array` and resolving a `parents_heur2_array` to group addresses with shared delegation parts.
+This cell implements Heuristic 2 to link Shelley addresses that share the same `address_delegation_part`. It achieves this by creating a `stake_delegation_array` and resolving a `parents_heur2_array` to group addresses with shared delegation parts.
 
 
 #### Process
@@ -1057,13 +771,6 @@ This script implements Heuristic 2 to link Shelley addresses that share the same
    - Using `stake_delegation_array`, link all payment addresses sharing the same delegation part in `parents_heur2_array`.
    - Apply Union-Find's `link_address` and resolve the parents array with `resolveAll`.
 
-5. **Performance Tracking**:
-   - Logs the elapsed time for each major step, including reading CSV files, building `stake_delegation_array`, and resolving `parents_heur2_array`.
-
-6. **Completion**:
-   - A success message is printed when the script finishes.
-
-
 
 #### Output
 - **`stake_delegation_array`**:
@@ -1079,13 +786,6 @@ This script implements Heuristic 2 to link Shelley addresses that share the same
 ```python
 # Heuristic 2 (link "Shelley Addresses" with the same "address_delegation_part"):
 
-print('----------------------')
-
-# ct stores current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
-print('----------------------')
-
 # Initialize stake_delegation_array:
 stake_delegation_array = [[] for _ in range(unique_delegation_addresses_len)]
 
@@ -1094,15 +794,8 @@ NUMBER_OF_CSV_FILES = 6
 CSV_FILES_SUFFIX = '.csv'
 
 for i in range(1, NUMBER_OF_CSV_FILES + 1):
-    ct_temp = datetime.datetime.now()
-
     file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
     df = pd.read_csv(file_name, delimiter='|')
-
-    et_temp = datetime.datetime.now() - ct_temp
-    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
-
-    ct_temp = datetime.datetime.now()
 
     for index, row in tqdm(df.iterrows()):
         outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
@@ -1117,20 +810,9 @@ for i in range(1, NUMBER_OF_CSV_FILES + 1):
                 indx2 = BinarySearch(unique_payment_addresses, address_payment_part)
                 stake_delegation_array[indx1].append(indx2)
 
-    et_temp = datetime.datetime.now() - ct_temp
-    print("elapsed time (Extract stake delegations from CSV File " + file_name + "): ", et_temp)
-
 # Unique sort the "stake_delegation_array":
 for i in tqdm(range(len(stake_delegation_array))):
     stake_delegation_array[i] = sorted(set(stake_delegation_array[i]))
-
-print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (Heuristic2: find \"Shelley Addresses\" with the same \"address_delegation_part\"): ", et)
-
-# Create and Fill "parents_heur2_array":
-print('----------------------')
-ct = datetime.datetime.now()
 
 # Initialize parents_heur2_array:
 parents_heur2_array = np.array([0] * unique_payment_addresses_len)
@@ -1145,14 +827,6 @@ for i in tqdm(range(len(stake_delegation_array))):
 # Resolve parents array:
 resolveAll(parents_heur2_array)
 
-print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (Create and Fill \"heur2_parents_array\"): ", et)
-
-##########################################################################################
-print('----------------------')
-print('done!')
-
 ```
 
 
@@ -1162,7 +836,7 @@ print('done!')
 
 # Load/Store "stake_delegation_array" and "parents_heur2_array" from/into File
 
-This script handles saving and loading the `stake_delegation_array` and `parents_heur2_array` to and from files for Heuristic 2. These files preserve the relationships between Shelley addresses and their respective delegation parts, allowing for reuse in further analysis.
+This cell handles saving and loading the `stake_delegation_array` and `parents_heur2_array` to and from files for Heuristic 2. These files preserve the relationships between Shelley addresses and their respective delegation parts, allowing for reuse in further analysis.
 
 
 #### Process
@@ -1180,15 +854,11 @@ This script handles saving and loading the `stake_delegation_array` and `parents
 
 4. **File Naming**:
    - **`stake_delegation_array` File**:
-     - Format: `stakeDelegationArray__Heuristic2__Cardano_TXs_All__<timestamp>.txt`
-     - Example: `stakeDelegationArray__Heuristic2__Cardano_TXs_All__2024-11-22_123456.txt`
+     - Format: `stakeDelegationArray__Heuristic2__Cardano_TXs_All__<timestamp>`
+     - Example: `stakeDelegationArray__Heuristic2__Cardano_TXs_All__2024-11-22_123456`
    - **`parents_heur2_array` File**:
-     - Format: `parentsList_Heuristic2__Cardano_TXs_All__<timestamp>.txt`
-     - Example: `parentsList_Heuristic2__Cardano_TXs_All__2024-11-22_123456.txt`
-
-5. **Completion**:
-   - Logs the filenames and confirms successful storage or loading of arrays.
-
+     - Format: `parentsList_Heuristic2__Cardano_TXs_All__<timestamp>`
+     - Example: `parentsList_Heuristic2__Cardano_TXs_All__2024-11-22_123456`
 
 
 #### Code
@@ -1196,30 +866,31 @@ This script handles saving and loading the `stake_delegation_array` and `parents
 ```python
 # Load/Store "stake_delegation_array" and "parents_heur2_array" from/into file:
 
-print('----------------------')
-
 # Store "stake_delegation_array" into file:
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
-output_filename = BASE_ADDRESS + '/stakeDelegationArray__Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/stakeDelegationArray__Heuristic2__Cardano_TXs_All__' + curr_timestamp 
 print('output_filename = ', output_filename)
 store_array_to_file_2D(stake_delegation_array, output_filename)
 
 # Load stake_delegation_array from file:
-file_name = BASE_ADDRESS + '/stakeDelegationArray__Heuristic2__Cardano_TXs_All__2023-03-26_043620.txt'
+file_name = BASE_ADDRESS + '/stakeDelegationArray__Heuristic2__Cardano_TXs_All__2023-03-26_043620'
 stake_delegation_array = load_file_to_array_2D(file_name)
 
+
+
 # Store "parents_heur2_array" into file:
-print('----------------------')
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
-output_filename = BASE_ADDRESS + '/parentsList_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/parentsList_Heuristic2__Cardano_TXs_All__' + curr_timestamp 
 print('output_filename = ', output_filename)
 store_array_to_file(parents_heur2_array, output_filename)
 
-##########################################################################################
-print('----------------------')
-print('done!')
+
+# Load parents_heur2_array from file:
+file_name = BASE_ADDRESS + '/parentsList_Heuristic2__Cardano_TXs_All__2023-03-26_105842.txt'
+parents_heur2_array = load_file_to_array (file_name)
+
 
 ```
 
@@ -1229,7 +900,7 @@ print('done!')
 
 # Create and Fill "Parents_Merged Arrays"
 
-This script combines multiple `parents` arrays generated from various heuristics into a unified `parents_merged` array. Depending on the requirements, the user can merge arrays from **Heuristic 1**, **Heuristic 2**, or both.
+This cell combines multiple `parents` arrays generated from various heuristics into a unified `parents_merged` array. Depending on the requirements, the user can merge arrays from **Heuristic 1**, **Heuristic 2**, or both.
 
 
 #### Process
@@ -1254,19 +925,10 @@ This script combines multiple `parents` arrays generated from various heuristics
 3. **Resolving Parents**:
    - After merging, resolve the `parents_merged` array using `resolveAll` to finalize the parent relationships.
 
-4. **Performance Tracking**:
-   - Logs the total elapsed time for the merging process.
-
-5. **Completion**:
-   - Prints success messages after each merge and upon final resolution of the `parents_merged` array.
-
-
 
 #### Output
 - **`parents_merged` Array**:
   - Contains the final resolved parent relationships combining the selected heuristics.
-
-
 
 
 #### Code
@@ -1274,53 +936,58 @@ This script combines multiple `parents` arrays generated from various heuristics
 ```python
 # Create and Fill "Parents_Merged Arrays":
 
-print('----------------------')
-
-
-# ct stores current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
-
 ##########################################################################################
-# Initialize parents array:
+# Initialize parents_merged array:
 parents_merged = np.array([[0]] * unique_payment_addresses_len)
 for i in range(unique_payment_addresses_len):
     parents_merged[i] = i
 
 ##########################################################################################
-# parents_merged = "parents_heur2_array" + "parents_1 + parents_2 + parents_3 + parents_4 + parents_5 + parents_6":
+# parents_merged = "parents_1 + parents_2 + parents_3 + parents_4 + parents_5 + parents_6":
 
-print('----------------------')
+resolveAll (parents_1)
+resolveAll (parents_2)
+resolveAll (parents_3)
+resolveAll (parents_4)
+resolveAll (parents_5)
+resolveAll (parents_6)
 
-# Load Heuristic 1 and Heuristic 2 arrays from files:
-file_name = BASE_ADDRESS + '/parentsList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223712.txt'
-parents_heur1_array = load_file_to_array(file_name)
+merge_parents(parents_1, parents_merged)
+merge_parents(parents_2, parents_merged)
+merge_parents(parents_3, parents_merged)
+merge_parents(parents_4, parents_merged)
+merge_parents(parents_5, parents_merged)
+merge_parents(parents_6, parents_merged)
 
+resolveAll (parents_merged)
+
+##########################################################################################
+# parents_merged = "parents_heur2_array":
+'''
+# Load parents_merged from file:
 file_name = BASE_ADDRESS + '/parentsList_Heuristic2__Cardano_TXs_All__2023-03-26_105842.txt'
-parents_heur2_array = load_file_to_array(file_name)
-
-# Merge Heuristic 1 and 2 arrays into parents_merged:
-merge_parents(parents_heur1_array, parents_merged)
-print('parents_heur1_array merged!')
+parents_heur2_array = load_file_to_array (file_name)
 
 merge_parents(parents_heur2_array, parents_merged)
-print('parents_heur2_array merged!')
+resolveAll (parents_merged)
+'''
 
 ##########################################################################################
-# Resolve parents_merged array:
-print('----------------------')
+# parents_merged =   "parents_heur2_array":
+#                  + "parents_1 + parents_2 + parents_3 + parents_4 + parents_5 + parents_6":
+'''
+# Load parents_merged from file:
+file_name = BASE_ADDRESS + '/parentsList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223712.txt'
+parents_heur1_array = load_file_to_array (file_name)
 
-resolveAll(parents_merged)
-print('parents_merged[] resolved!')
+file_name = BASE_ADDRESS + '/parentsList_Heuristic2__Cardano_TXs_All__2023-03-26_105842.txt'
+parents_heur2_array = load_file_to_array (file_name)
 
-##########################################################################################
-print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (Fill Parents_Merged Array): ", et)
+merge_parents(parents_heur1_array, parents_merged)
+merge_parents(parents_heur2_array, parents_merged)
 
-##########################################################################################
-print('----------------------')
-print('done!')
+resolveAll (parents_merged)
+'''
 
 ```
 
@@ -1331,25 +998,18 @@ print('done!')
 
 ### Store `parents_merged` into File
 
-This script saves the `parents_merged` array, which combines parent relationships derived from Heuristic 1 and Heuristic 2, into a file for future use.
+This cell saves the `parents_merged` array, which combines parent relationships derived from Heuristic 1 and Heuristic 2, into a file for future use.
 
----
 
 #### Process
 
-1. **Timestamp Generation**:
-   - A timestamp is generated in the format `YYYY-MM-DD_HHMMSS` to ensure the output file has a unique name.
-
-2. **File Naming**:
+**File Naming**:
    - The file is named based on the combined heuristics:
-     - Format: `parentsList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>.txt`
-     - Example: `parentsList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2024-11-22_123456.txt`
+     - Format: `parentsList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
+     - Example: `parentsList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2024-11-22_123456`
 
-3. **Saving the Array**:
+**Saving the Array**:
    - The `store_array_to_file` function writes each entry of the `parents_merged` array to a new line in the output file.
-
-4. **Completion**:
-   - Logs the output file name and confirms successful storage of the array.
 
 
 
@@ -1358,19 +1018,10 @@ This script saves the `parents_merged` array, which combines parent relationship
 ```python
 # Store parents_merged into file:
 
-print('----------------------')
-
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
-
 output_filename = BASE_ADDRESS + '/parentsList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
-
-print('output_filename = ', output_filename)
 store_array_to_file(parents_merged, output_filename)
-
-##########################################################################################
-print('----------------------')
-print('done!')
 
 ```
 
@@ -1380,30 +1031,16 @@ print('done!')
 
 # Create and Fill "Clustering Array"
 
-This script generates a `clustering_array` to assign each payment address to a unique cluster based on the resolved `parents_merged` array. It also calculates the number of clusters formed.
+This cell generates a `clustering_array` to assign each payment address to a unique cluster based on the resolved `parents_merged` array. It also calculates the number of clusters formed.
 
 
 #### Process
 
-1. **Initialization**:
-   - `clustering_array`: An array of size equal to the number of unique payment addresses (`unique_payment_addresses_len`). Initially set to zeros.
-
-2. **Remap Cluster IDs**:
+**Remap Cluster IDs**:
    - The `remapClusterIds` function:
      - Maps each address in `parents_merged` to a unique cluster ID.
      - Fills the `clustering_array` with these cluster IDs.
      - Returns the total number of clusters.
-
-3. **Performance Metrics**:
-   - Logs:
-     - Length of the `clustering_array`.
-     - Total number of unique clusters:
-       - Using `np.unique(clustering_array)`.
-       - Using `max(clustering_array) + 1`.
-       - From the return value of `remapClusterIds`.
-
-4. **Completion**:
-   - Prints the `clustering_array` and logs the elapsed time for the process.
 
 
 #### Output
@@ -1419,34 +1056,14 @@ This script generates a `clustering_array` to assign each payment address to a u
 ```python
 # Create and Fill "Clustering Array":
 
-print('----------------------')
-
-# ct stores current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
-
 clustering_array = np.array([0] * unique_payment_addresses_len)
-
 num_of_clusters = remapClusterIds(parents_merged, clustering_array)
 
 ##########################################################################################
-print('----------------------')
 print('Length of "clustering_array" = ', len(clustering_array))
 print('Number of Clusters           = '  , len(np.unique(clustering_array)))
 print('Number of Clusters           = '  , max(clustering_array) + 1)
 print('Number of Clusters           = '  , num_of_clusters)
-
-print('----------------------')
-print('clustering_array = ', clustering_array)
-
-##########################################################################################
-print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (Fill Clustering Array with Heuristics): ", et)
-
-##########################################################################################
-print('----------------------')
-print('done!')
 
 ```
 
@@ -1457,13 +1074,13 @@ print('done!')
 
 # Store/Load `clustering_array` into/from File
 
-This script saves the `clustering_array` to a file and provides functionality to reload it. The file contains the cluster ID for each unique payment address, representing its associated cluster.
+This cell saves the `clustering_array` to a file and provides functionality to reload it. The file contains the cluster ID for each unique payment address, representing its associated cluster.
 
 
 #### File Details
 
 1. **File Format**:
-   - **Type**: Plain text file (`.txt`).
+   - **Type**: Plain text file 
    - **Content**: Each line corresponds to a unique payment address, and the value on the line is the cluster ID assigned to that address.
    - **Structure**: 
      - **Single Column**: Contains integer cluster IDs.
@@ -1487,22 +1104,19 @@ This script saves the `clustering_array` to a file and provides functionality to
 
 #### Process
 
-1. **Store `clustering_array`**:
+**Store `clustering_array`**:
    - A timestamp in the format `YYYY-MM-DD_HHMMSS` is generated to ensure file names are unique.
    - The array is saved using the `store_array_to_file` function, with each cluster ID written to a new line.
    - **File Naming Options**:
      - **Heuristic 1 Only**:
-       - Format: `clusteringArrayList_Heuristic1noSC__Cardano_TXs_All__<timestamp>.txt`
+       - Format: `clusteringArrayList_Heuristic1noSC__Cardano_TXs_All__<timestamp>`
      - **Heuristic 2 Only**:
-       - Format: `clusteringArrayList_Heuristic2__Cardano_TXs_All__<timestamp>.txt`
+       - Format: `clusteringArrayList_Heuristic2__Cardano_TXs_All__<timestamp>`
      - **Heuristic 1 and 2**:
-       - Format: `clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>.txt`
+       - Format: `clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
 
-2. **Load `clustering_array`**:
+**Load `clustering_array`**:
    - The `load_file_to_array` function reads the file and reconstructs the `clustering_array` by converting each line into an integer value.
-
-3. **Completion**:
-   - Logs the file name used for storing and confirms successful loading of the array.
 
 
 
@@ -1511,24 +1125,20 @@ This script saves the `clustering_array` to a file and provides functionality to
 ```python
 # Store/Load clustering_array into file:
 
-print('----------------------')
-
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
 
 # Store clustering_array into file:
-output_filename = BASE_ADDRESS + '/clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp
 print('output_filename = ', output_filename)
 store_array_to_file(clustering_array, output_filename)
 
 # Load clustering_array from file:
-file_name = BASE_ADDRESS + '/clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-03-26_141212.txt'
+file_name = BASE_ADDRESS + '/clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-03-26_141212'
 clustering_array = load_file_to_array(file_name)
 
-##########################################################################################
-print('----------------------')
-print('done!')
 ```
+
 
 
 ***
@@ -1536,35 +1146,29 @@ print('done!')
 
 # Merge `graghEdges_` Arrays
 
-This script merges multiple graph edge arrays, each representing edges extracted from a subset of analyzed transactions, into a single unified `graphEdges_merged` array. The resulting merged array contains all identified edges in the address network graph.
+This cell merges multiple graph edge arrays, each representing edges extracted from a subset of analyzed transactions, into a single unified `graphEdges_merged` array. The resulting merged array contains all identified edges in the address network graph.
 
 
 #### Process
 
 1. **Input Arrays**:
    - **`graghEdges_1` to `graghEdges_6`**:
-     - Lists of adjacency lists, where each index corresponds to a unique payment address.
-     - Each entry contains a list of edges (e.g., connections to other addresses) related to the corresponding payment address.
+     - Lists of adjacency lists, where each index corresponds to a subset of transactions.
+     - Each entry contains a list of edges (e.g., connections to other addresses) related to the corresponding address network graph (generated accoring to a subset of trnsactions).
 
 2. **Output Array**:
    - **`graphEdges_merged`**:
      - A unified adjacency list for all edges across all transactions.
-     - Each index corresponds to a unique payment address, containing all edges identified for that address from all input arrays.
+     - Each index corresponds to a subset of transactions, containing all edges identified for that address from all input arrays.
 
 3. **Merging Function**:
    - **`merge_graphEdges`**:
      - Extends the adjacency lists in `graphEdges_merged` with the data from each `graghEdges_array`.
      - Ensures that all edge data is retained without duplication.
 
-4. **Performance Tracking**:
-   - Logs elapsed time for merging all input arrays.
-
-5. **Completion**:
-   - Confirms successful merging of each `graghEdges_` array into `graphEdges_merged`.
 
 
-
-#### Example File Details (if stored later):
+#### File Format:
 - **File Format**: 
   - **Type**: JSON-like or plain text structure.
   - **Structure**: Each index corresponds to a unique payment address, containing a list of edges (connections to other addresses).
@@ -1583,9 +1187,6 @@ This script merges multiple graph edge arrays, each representing edges extracted
 ```python
 # Merge graghEdges_ Arrays:
 
-# This cell merges multiple graph edge arrays, each containing the edge data for a subset of analyzed transactions.
-# The final "graphEdges_merged" will contain all identified edges in all transactions.
-
 def merge_graphEdges(graghEdges_array, graghEdges_merged):
     if len(graghEdges_array) != len(graghEdges_merged):
         print('merge_graphEdges Error: -1 (Length)')
@@ -1596,41 +1197,16 @@ def merge_graphEdges(graghEdges_array, graghEdges_merged):
     
     return
 
-print('----------------------')
-# ct stores current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
-
 ##########################################################################################
 
 graphEdges_merged = [[] for _ in range(unique_payment_addresses_len)]
 
 merge_graphEdges(graghEdges_1, graphEdges_merged)
-print('graghEdges_1[] merged!')
-
 merge_graphEdges(graghEdges_2, graphEdges_merged)
-print('graghEdges_2[] merged!')
-
 merge_graphEdges(graghEdges_3, graphEdges_merged)
-print('graghEdges_3[] merged!')
-
 merge_graphEdges(graghEdges_4, graphEdges_merged)
-print('graghEdges_4[] merged!')
-
 merge_graphEdges(graghEdges_5, graphEdges_merged)
-print('graghEdges_5[] merged!')
-
 merge_graphEdges(graghEdges_6, graphEdges_merged)
-print('graghEdges_6[] merged!')
-
-##########################################################################################
-print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (Merge Graph Edges): ", et)
-
-##########################################################################################
-print('----------------------')
-print('done!')
 
 ```
 
@@ -1644,29 +1220,18 @@ print('done!')
 This script saves the merged graph edges array (`graphEdges_merged`) into a file for future analysis. The file contains adjacency lists representing the network of payment addresses.
 
 
-#### File Details
-
-1. **File Format**:
-   - **Type**: Plain text file (`.txt`).
-   - **Content**: Each line corresponds to a unique payment address.
-   - **Structure**: 
-     - Each line contains a list of integers separated by commas.
-     - Each integer represents an address connected to the current address by an edge.
-   - Example:
-     ```
-     1,2,3
-     0,4
-     5,6
-     ```
-
-2. **Number of Columns**:
-   - **Variable Columns**: The number of columns per line depends on the number of edges connected to each address.
-
-3. **Number of Rows**:
-   - Equal to the number of unique payment addresses (`unique_payment_addresses_len`).
-
-4. **Column Data Type**:
-   - **Integers**: Represent indices of connected payment addresses.
+#### File Format:
+- **File Format**: 
+  - **Type**: JSON-like or plain text structure.
+  - **Structure**: Each index corresponds to a unique payment address, containing a list of edges (connections to other addresses).
+  - Example:
+    ```
+    [
+      [1, 2],       # Address 0 connected to Address 1 and Address 2
+      [0, 3],       # Address 1 connected to Address 0 and Address 3
+      []
+    ]
+    ```
 
 
 #### Process
@@ -1674,15 +1239,11 @@ This script saves the merged graph edges array (`graphEdges_merged`) into a file
 1. **File Naming**:
    - Generates a unique file name with a timestamp in the format `YYYY-MM-DD_HHMMSS`.
    - **File Example**:
-     - `graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2024-11-22_123456.txt`
+     - `graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2024-11-22_123456`
 
 2. **Saving the Array**:
    - The `store_array_to_file_2D` function writes the adjacency list to the file.
    - Each adjacency list is converted to a comma-separated string for storage.
-
-3. **Completion**:
-   - Logs the output file name and confirms successful storage of the array.
-
 
 
 #### Code
@@ -1690,12 +1251,10 @@ This script saves the merged graph edges array (`graphEdges_merged`) into a file
 ```python
 # Store graphEdges_merged into file:
 
-print('----------------------')
-
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
 
-output_filename = BASE_ADDRESS + '/graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__' + curr_timestamp 
 print('output_filename = ', output_filename)
 
 store_array_to_file_2D(graphEdges_merged, output_filename)
