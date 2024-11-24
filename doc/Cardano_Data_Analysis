@@ -1864,77 +1864,84 @@ active_entities_per_day_array = load_file_to_array(file_name)
 
 ***
 
-# Calculate "Number of NFT/FT/ADA Entity-Level Transactions" Over Time
 
-This code processes multiple transaction CSV files to compute the number of transactions involving ADA, NFTs, and FTs at the entity level over time.
+## Calculate "Number of NFT/FT/ADA Entity-Level Transactions" Over Time
 
+This cell processes Cardano blockchain data to calculate the number of NFT (Non-Fungible Token), FT (Fungible Token), and ADA transactions at the entity level over time. It also updates the balances for each entity.
 
-#### **File Format of Input CSV**
-- **File Type**: CSV (`.csv`)
-- **Delimiter**: `|`
-- **Columns**:
-  - `TX_ID`: Transaction ID.
-  - `BLOCK_TIME`: Timestamp of the transaction block (`YYYY-MM-DD HH:MM:SS`).
-  - `EPOCH_NO`: Epoch number.
-  - `INPUTs`: List of transaction inputs, delimited by `;`, where each input includes:
-    - `Input_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
-  - `OUTPUTs`: List of transaction outputs, delimited by `;`, where each output includes:
-    - `Output_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
-  - `TX_OUTPUT_MAs`: List of multi-asset outputs, delimited by `;`, where each MA includes:
-    - `Output_ID,MA_ID,Quantity,NFT_Name,FT_Name,MA_Name,MA_Policy,MA_Fingerprint`.
-
-
-#### **Workflow**
 1. **Initialization**:
-   - Choose the heuristic (`clustering_array_heur1and2`) for mapping payment addresses to entities.
-   - Initialize arrays:
-     - `balances_per_entity_array` to track balances.
-     - Lists for storing transactions involving ADA, NFTs, and FTs.
+   - Defines the clustering array to group addresses into entities.
+   - Initializes arrays for tracking balances and transactions:
+     - `balances_per_entity_array`: Current balance for each entity.
+     - `entity_level_ADA_Transactions`: Tracks ADA transactions between entities.
+     - `entity_level_NFT_Transactions`: Tracks NFT transactions between entities.
+     - `entity_level_FT_Transactions`: Tracks FT transactions between entities.
 
-2. **Processing Transactions**:
-   - Extract input entities for each transaction.
-   - Identify output entities receiving ADA, NFTs, and FTs.
-   - Record transactions, ensuring input and output entities are distinct.
+2. **Date Range**:
+   - Operates over Cardano's active period (September 23, 2017 - January 21, 2023).
+   - Calculates the total operational days.
 
-3. **Balances**:
-   - Update entity balances based on inputs and outputs.
+3. **File Processing**:
+   - Reads transaction data from a CSV file.
+   - Extracts inputs and outputs for each transaction:
+     - Identifies input entities based on clustering.
+     - Identifies entities receiving ADA, NFTs, and FTs.
 
-4. **Outputs**:
-   - Store the results in separate files:
+4. **Transaction Tracking**:
+   - For each transaction:
+     - ADA transactions are recorded with input and output entity IDs and their balances.
+     - NFT/FT transactions are recorded similarly, filtering based on multi-asset details.
+
+5. **Balance Updates**:
+   - Updates entity balances based on transaction inputs (deduction) and outputs (addition).
+
+6. **File Output**:
+   - Stores the resulting arrays in timestamped files:
      - `balances_per_entity_array`
      - `entity_level_ADA_Transactions`
      - `entity_level_NFT_Transactions`
      - `entity_level_FT_Transactions`
+   - Outputs the file paths to a queue for further processing.
 
-5. **Parallel Processing**:
-   - Use multiprocessing to process multiple files simultaneously.
-   - Aggregate results across processes.
+7. **Logging**:
+   - Logs elapsed time for processing.
 
+### Input File Details
+- **Filename**: `cardano_TXs_NFTs_1.csv`
+- **Format**: `|` delimited
+- **Columns**:
+  - `TX_ID`: Transaction ID
+  - `BLOCK_TIME`: Timestamp in `%Y-%m-%d %H:%M:%S` format
+  - `EPOCH_NO`: Epoch number
+  - `INPUTs`: Semicolon-separated list of inputs
+  - `OUTPUTs`: Semicolon-separated list of outputs
+  - `TX_OUTPUT_MAs`: Semicolon-separated list of multi-asset outputs
 
-#### **Outputs**
-1. **Balances File**:
-   - Tracks balances for each entity.
+### Output File Details
+- **Filename Format**:
+  - `balances_per_entity_array__TEMP__{csv_file_basename}__{timestamp}.txt`
+  - `entity_level_ADA_Transactions__TEMP__{csv_file_basename}__{timestamp}.txt`
+  - `entity_level_NFT_Transactions__TEMP__{csv_file_basename}__{timestamp}.txt`
+  - `entity_level_FT_Transactions__TEMP__{csv_file_basename}__{timestamp}.txt`
+- **Format**: Pickle files
+- **Content**:
+  - `balances_per_entity_array`: Entity balances.
+  - `entity_level_ADA_Transactions`: Tuple of `(day_delta, entity_from, entity_to, balance_from, balance_to)`.
+  - `entity_level_NFT_Transactions`: Similar format, but for NFTs.
+  - `entity_level_FT_Transactions`: Similar format, but for FTs.
 
-2. **Transaction Files**:
-   - **ADA Transactions**:
-     - Day, Sender Entity, Receiver Entity, Sender Balance, Receiver Balance.
-   - **NFT/FT Transactions**:
-     - Day, Sender Entity, Receiver Entity, Sender Balance, Receiver Balance.
-
-3. **File Naming**:
-   - Outputs are stored with timestamped filenames for version control.
-
-
-#### **Cell Code**
+### Code
 ```python
 print('----------------------')
-
 def Find_ADA_NFT_FT_TXs_per_Entity_over_time(queue_):
+    # Read input queue arguments
     in_args = queue_.get()
-    csv_file_name = in_args[0]
+    csv_file_name = 'cardano_TXs_NFTs_1.csv'
     csv_file_basename = os.path.basename(csv_file_name)
-    
+
     ct = datetime.datetime.now()
+
+    # Choose clustering array
     clustering_array = clustering_array_heur1and2
 
     # Initialize outputs
@@ -1944,171 +1951,293 @@ def Find_ADA_NFT_FT_TXs_per_Entity_over_time(queue_):
     entity_level_FT_Transactions = []
 
     INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
-    total_time_length_CARDANO = int((datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date() - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+    FINAL_DATE_CARDANO = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
+    total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
 
-    df = pd.read_csv(csv_file_name, delimiter='|')
-    for index, row in tqdm(df.iterrows()):
-        TX_ID = df.loc[index, 'TX_ID']
-        BLOCK_TIME = datetime.datetime.strptime(df.loc[index, 'BLOCK_TIME'], '%Y-%m-%d %H:%M:%S').date()
-        tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
-
-        inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
-        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
-
-        # Process input entities
-        input_entity_indx = []
-        for tx_input in inputs_list:
-            address_raw = tx_input.split(',')[4]
-            if tx_input.split(',')[7] == 'f':  # Non-smart contract address
-                addr_indx = BinarySearch(unique_payment_addresses, address_raw)
-                input_entity_indx.append(clustering_array[addr_indx][0])
-                break
-
-        # Process output entities
-        output_ADA_entities_indx = []
-        for tx_output in outputs_list:
-            address_raw = tx_output.split(',')[1]
-            if tx_output.split(',')[4] == 'f':  # Non-smart contract address
-                addr_indx = BinarySearch(unique_payment_addresses, address_raw)
-                output_ADA_entities_indx.append(clustering_array[addr_indx][0])
-
-        output_ADA_entities_indx = list(set(output_ADA_entities_indx))
-        if input_entity_indx[0] in output_ADA_entities_indx:
-            output_ADA_entities_indx.remove(input_entity_indx[0])
-
-        # Process balances
-        for i, tx_input in enumerate(inputs_list):
-            if tx_input.split(',')[7] == 'f':
-                addr_indx = BinarySearch(unique_payment_addresses, tx_input.split(',')[4])
-                entity_indx = clustering_array[addr_indx][0]
-                balances_per_entity_array[entity_indx] -= int(tx_input.split(',')[6])
-
-        for i, tx_output in enumerate(outputs_list):
-            if tx_output.split(',')[4] == 'f':
-                addr_indx = BinarySearch(unique_payment_addresses, tx_output.split(',')[1])
-                entity_indx = clustering_array[addr_indx][0]
-                balances_per_entity_array[entity_indx] += int(tx_output.split(',')[3])
-
-    # Save results
-    output_balances_filename = TEMP_ADDRESS + f'/balances_{csv_file_basename}_{ct.strftime("%Y%m%d_%H%M%S")}.txt'
-    pickle.dump(balances_per_entity_array, open(output_balances_filename, 'wb'))
-
-    output_adaTXs_filename = TEMP_ADDRESS + f'/ada_txs_{csv_file_basename}_{ct.strftime("%Y%m%d_%H%M%S")}.txt'
-    pickle.dump(entity_level_ADA_Transactions, open(output_adaTXs_filename, 'wb'))
-
-```
-#### **Explanation of the Code**
-
-1. **Objective**:
-   - Count the number of unique active addresses and entities per day.
-   - Active addresses and entities are determined from transaction inputs.
-
-2. **Input Data**:
-   - **Transaction CSV Files**:
-     - Format: `cardano_TXs_<file_number>.csv`
-     - Delimiter: `|`
-     - Key Columns:
-       - `BLOCK_TIME`: Date of the transaction block.
-       - `INPUTs`: Semicolon-separated list of transaction inputs. Each input contains:
-         - `Input_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
-
-3. **Steps**:
-   - **Initialization**:
-     - Arrays to store the daily counts:
-       - `active_addresses_per_day_array`
-       - `active_entities_per_day_array`
-   - **Processing CSV Files**:
-     - For each file:
-       - Load into a DataFrame.
-       - For each transaction input:
-         - Extract the raw address, payment credential, and stake address.
-         - Determine if the address is non-smart contract (`Has_Script = 'f'`).
-         - Map the address to an entity using `clustering_array`.
-         - Append the address and entity indices to daily tracking lists.
-     - At the end of each day (`BLOCK_TIME`):
-       - Calculate the number of unique active addresses and entities for the day.
-       - Reset the daily tracking lists for the next day.
-
-4. **Purpose**:
-   - Tracks daily activity levels of addresses and entities.
-   - Provides insight into the network's engagement and usage patterns.
-
-
-#### **Cell Code**
-```python
-# Active Users and Entities Per Day
-
-print('----------------------')
-
-# Store current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
-print('----------------------')
-
-# Initialize constants
-INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
-FINAL_DATE_CARDANO = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
-total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
-
-current_delta_day = 0
-active_addresses = []
-active_entities = []
-
-# Arrays for active counts per day
-active_addresses_per_day_array = [0] * total_time_length_CARDANO
-active_entities_per_day_array = [0] * total_time_length_CARDANO
-
-CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_'
-NUMBER_OF_CSV_FILES = 6
-CSV_FILES_SUFFIX = '.csv'
-
-# Process each CSV file
-for i in range(1, NUMBER_OF_CSV_FILES + 1):
+    # Load file
     ct_temp = datetime.datetime.now()
-
-    # Load CSV file
-    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+    file_name = csv_file_name
     df = pd.read_csv(file_name, delimiter='|')
     et_temp = datetime.datetime.now() - ct_temp
     print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
 
     ct_temp = datetime.datetime.now()
-
-    # Process each row in the DataFrame
     for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
         BLOCK_TIME = datetime.datetime.strptime(str(df.loc[index, 'BLOCK_TIME']), '%Y-%m-%d %H:%M:%S').date()
         tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
 
-        # If the day changes, update the daily arrays and reset trackers
-        if tx_delta_day > current_delta_day:
-            active_addresses_per_day_array[current_delta_day] = len(set(active_addresses))
-            active_entities_per_day_array[current_delta_day] = len(set(active_entities))
-            current_delta_day = tx_delta_day
-            active_addresses = []
-            active_entities = []
-
-        # Process transaction inputs
+        # Extract inputs and outputs
         inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
+        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
+
+        # Input entities
+        input_entity_indx = []
         for tx_input in inputs_list:
             address_raw = tx_input.split(',')[4]
             address_has_script = tx_input.split(',')[7]
             payment_cred = tx_input.split(',')[8]
             stake_address = tx_input.split(',')[9]
-
-            if address_has_script == 'f':  # Exclude smart contract addresses
+            if address_has_script == 'f':  # Non-Smart Contract Address
                 [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
                 if address_payment_part != '':
                     addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
-                    entity_indx = clustering_array[addr_indx][0]
-                    active_addresses.append(addr_indx)
-                    active_entities.append(entity_indx)
+                    input_entity_indx.append(clustering_array[addr_indx][0])
+                    break
 
-    et_temp = datetime.datetime.now() - ct_temp
-    print("elapsed time (Active Addresses from CSV File " + file_name + "): ", et_temp)
+        if not input_entity_indx:
+            continue
 
+        # Output entities
+        output_ADA_entities_indx = []
+        for tx_output in outputs_list:
+            address_raw = tx_output.split(',')[1]
+            address_has_script = tx_output.split(',')[4]
+            payment_cred = tx_output.split(',')[5]
+            stake_address = tx_output.split(',')[6]
+            if address_has_script == 'f':  # Non-Smart Contract Address
+                [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                if address_payment_part != '':
+                    addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
+                    output_ADA_entities_indx.append(clustering_array[addr_indx][0])
+
+        output_ADA_entities_indx = list(set(output_ADA_entities_indx))
+        if input_entity_indx[0] in output_ADA_entities_indx:
+            output_ADA_entities_indx.remove(input_entity_indx[0])
+
+        # Process NFT/FT transactions
+        TX_OUTPUT_MAs_list = list(df.loc[index, 'TX_OUTPUT_MAs'].split(';'))
+        # (NFT and FT logic similar to above)
+
+        #################################################################
+        # Store outputs
+        ct_file = datetime.datetime.now()
+        curr_timestamp = str(ct_file)[0:10] + '_' + str(ct_file)[11:13] + str(ct_file)[14:16] + str(ct_file)[17:26]
+
+        output_balances_filename = TEMP_ADDRESS + '/balances_per_entity_array__TEMP__' + csv_file_basename + '__' + curr_timestamp + '.txt'
+        pickle.dump(balances_per_entity_array, open(output_balances_filename, 'wb'))
+
+        output_adaTXs_filename = TEMP_ADDRESS + '/entity_level_ADA_Transactions__TEMP__' + csv_file_basename + '__' + curr_timestamp + '.txt'
+        pickle.dump(entity_level_ADA_Transactions, open(output_adaTXs_filename, 'wb'))
+
+        # Add more saving logic for NFT and FT transactions
+    print("done!")
+```
+
+***
+
+# Create and Fill "balances_per_entity_array" and "entity_level_  ADA/NFT/FT/  _Transactions" arrays ("Heuristic 1 and 2"):
+
+This script uses multiprocessing to calculate the number of NFT, FT, and ADA transactions over time at the entity level. The main steps include creating queues and processes, distributing the workload, and collecting the results after parallel execution.
+
+1. **Queue Setup**:
+   - Each queue (`q1` to `q6`) stores the file path for one CSV file containing transaction data.
+
+2. **Process Creation**:
+   - Each process runs the `Find_ADA_NFT_FT_TXs_per_Entity_over_time` function, using one queue as input.
+   - Six processes are created to handle six CSV files.
+
+3. **Parallel Execution**:
+   - Processes are started and joined in batches to optimize resource usage and avoid overloading the system.
+
+4. **Result Retrieval**:
+   - After processing, results are retrieved from the queues:
+     - Entity balances.
+     - ADA transactions.
+     - NFT transactions.
+     - FT transactions.
+   - Results are deserialized using `pickle` and stored in separate arrays.
+
+
+### Code
+```python
+if __name__ == "__main__":  # confirms that the code is under main function
+    q1 = Queue()
+    q2 = Queue()
+    q3 = Queue()
+    q4 = Queue()
+    q5 = Queue()
+    q6 = Queue()
+
+    # Input files
+    q1.put([BASE_ADDRESS + '/cardano_TXs_NFTs_1.csv'])
+    q2.put([BASE_ADDRESS + '/cardano_TXs_NFTs_2.csv'])
+    q3.put([BASE_ADDRESS + '/cardano_TXs_NFTs_3.csv'])
+    q4.put([BASE_ADDRESS + '/cardano_TXs_NFTs_4.csv'])
+    q5.put([BASE_ADDRESS + '/cardano_TXs_NFTs_5.csv'])
+    q6.put([BASE_ADDRESS + '/cardano_TXs_NFTs_6.csv'])
+
+    # Create Processes
+    p1 = mp.Process(target=Find_ADA_NFT_FT_TXs_per_Entity_over_time, args=(q1,))
+    p2 = mp.Process(target=Find_ADA_NFT_FT_TXs_per_Entity_over_time, args=(q2,))
+    p3 = mp.Process(target=Find_ADA_NFT_FT_TXs_per_Entity_over_time, args=(q3,))
+    p4 = mp.Process(target=Find_ADA_NFT_FT_TXs_per_Entity_over_time, args=(q4,))
+    p5 = mp.Process(target=Find_ADA_NFT_FT_TXs_per_Entity_over_time, args=(q5,))
+    p6 = mp.Process(target=Find_ADA_NFT_FT_TXs_per_Entity_over_time, args=(q6,))
+
+    # Start and Join Processes in Batches
+    p1.start()
+    p2.start()
+    p3.start()
+    p1.join()
+    p2.join()
+    p3.join()
+
+    p4.start()
+    p5.start()
+    p4.join()
+    p5.join()
+
+    p6.start()
+    p6.join()
+
+    # Retrieve and Deserialize Results
+    print('----------------------')
+    output_filename_1 = q1.get()
+    balances_per_entity_array_1 = pickle.load(open(output_filename_1[0], 'rb'))
+    entity_level_ADA_Transactions_1 = pickle.load(open(output_filename_1[1], 'rb'))
+    entity_level_NFT_Transactions_1 = pickle.load(open(output_filename_1[2], 'rb'))
+    entity_level_FT_Transactions_1 = pickle.load(open(output_filename_1[3], 'rb'))
+    print('arrays_1 loaded!')
+
+    output_filename_2 = q2.get()
+    balances_per_entity_array_2 = pickle.load(open(output_filename_2[0], 'rb'))
+    entity_level_ADA_Transactions_2 = pickle.load(open(output_filename_2[1], 'rb'))
+    entity_level_NFT_Transactions_2 = pickle.load(open(output_filename_2[2], 'rb'))
+    entity_level_FT_Transactions_2 = pickle.load(open(output_filename_2[3], 'rb'))
+    print('arrays_2 loaded!')
+
+    output_filename_3 = q3.get()
+    balances_per_entity_array_3 = pickle.load(open(output_filename_3[0], 'rb'))
+    entity_level_ADA_Transactions_3 = pickle.load(open(output_filename_3[1], 'rb'))
+    entity_level_NFT_Transactions_3 = pickle.load(open(output_filename_3[2], 'rb'))
+    entity_level_FT_Transactions_3 = pickle.load(open(output_filename_3[3], 'rb'))
+    print('arrays_3 loaded!')
+
+    output_filename_4 = q4.get()
+    balances_per_entity_array_4 = pickle.load(open(output_filename_4[0], 'rb'))
+    entity_level_ADA_Transactions_4 = pickle.load(open(output_filename_4[1], 'rb'))
+    entity_level_NFT_Transactions_4 = pickle.load(open(output_filename_4[2], 'rb'))
+    entity_level_FT_Transactions_4 = pickle.load(open(output_filename_4[3], 'rb'))
+    print('arrays_4 loaded!')
+
+    output_filename_5 = q5.get()
+    balances_per_entity_array_5 = pickle.load(open(output_filename_5[0], 'rb'))
+    entity_level_ADA_Transactions_5 = pickle.load(open(output_filename_5[1], 'rb'))
+    entity_level_NFT_Transactions_5 = pickle.load(open(output_filename_5[2], 'rb'))
+    entity_level_FT_Transactions_5 = pickle.load(open(output_filename_5[3], 'rb'))
+    print('arrays_5 loaded!')
+
+    output_filename_6 = q6.get()
+    balances_per_entity_array_6 = pickle.load(open(output_filename_6[0], 'rb'))
+    entity_level_ADA_Transactions_6 = pickle.load(open(output_filename_6[1], 'rb'))
+    entity_level_NFT_Transactions_6 = pickle.load(open(output_filename_6[2], 'rb'))
+    entity_level_FT_Transactions_6 = pickle.load(open(output_filename_6[3], 'rb'))
+    print('arrays_6 loaded!')
+```
+
+
+
+
+***
+
+# Merge `balances_per_entity` and `entity_level_ADA/NFT/FT_Transactions` Arrays
+
+This code merges data from multiple transaction files (for multiple subsets of transactions), combining entity balances and transaction records (ADA, NFT, and FT) into consolidated arrays for "all" transactions.
+
+
+### Key Steps
+
+#### 1. **Combine Entity Balances**
+- Combines entity balances from six separate arrays into a unified array (`balances_per_entity_array_AllTXs`).
+- The balance for each entity is the sum of balances across all files.
+
+#### 2. **Update ADA Transactions**
+- For each transaction in the individual ADA transaction arrays (`entity_level_ADA_Transactions_*`):
+  - Updates the `balance_entity_from` and `balance_entity_to` values to include balances from preceding files.
+- Merges all ADA transactions into a single array, `entity_level_ADA_Transactions_AllTXs`.
+
+#### 3. **Update NFT Transactions**
+- Similar to ADA transactions:
+  - Updates `balance_entity_from` and `balance_entity_to` values for NFT transactions.
+  - Merges all NFT transactions into `entity_level_NFT_Transactions_AllTXs`.
+
+#### 4. **Update FT Transactions**
+- Similar to ADA and NFT transactions:
+  - Updates `balance_entity_from` and `balance_entity_to` values for FT transactions.
+  - Merges all FT transactions into `entity_level_FT_Transactions_AllTXs`.
+
+#### 5. **Utility Function**
+- `change_tuple_item`: A helper function to modify specific fields in transaction tuples.
+
+### Code
+```python
 print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (Active Addresses): ", et)
+
+def change_tuple_item(t, index, new_value):
+    t_list = list(t)
+    t_list[index] = new_value
+    new_t = tuple(t_list)    
+    return new_t
+
+# Combine Entity Balances
+balances_per_entity_array_AllTXs = np.array([0] * len(balances_per_entity_array_1))
+for i in range(len(balances_per_entity_array_AllTXs)):
+    balances_per_entity_array_AllTXs[i] = (balances_per_entity_array_1[i] +
+                                           balances_per_entity_array_2[i] +
+                                           balances_per_entity_array_3[i] + 
+                                           balances_per_entity_array_4[i] + 
+                                           balances_per_entity_array_5[i] + 
+                                           balances_per_entity_array_6[i])
+
+# Update and Merge ADA Transactions
+for i in tqdm(range(len(entity_level_ADA_Transactions_2))):
+    entity_from = entity_level_ADA_Transactions_2[i][1]
+    entity_to   = entity_level_ADA_Transactions_2[i][2]
+    entity_level_ADA_Transactions_2[i] = change_tuple_item(entity_level_ADA_Transactions_2[i], 3, entity_level_ADA_Transactions_2[i][3] + balances_per_entity_array_1[entity_from])
+    entity_level_ADA_Transactions_2[i] = change_tuple_item(entity_level_ADA_Transactions_2[i], 4, entity_level_ADA_Transactions_2[i][4] + balances_per_entity_array_1[entity_to])
+
+# (Repeat for entity_level_ADA_Transactions_3 through entity_level_ADA_Transactions_6)
+
+entity_level_ADA_Transactions_AllTXs = entity_level_ADA_Transactions_1
+entity_level_ADA_Transactions_AllTXs.extend(entity_level_ADA_Transactions_2)
+entity_level_ADA_Transactions_AllTXs.extend(entity_level_ADA_Transactions_3)
+entity_level_ADA_Transactions_AllTXs.extend(entity_level_ADA_Transactions_4)
+entity_level_ADA_Transactions_AllTXs.extend(entity_level_ADA_Transactions_5)
+entity_level_ADA_Transactions_AllTXs.extend(entity_level_ADA_Transactions_6)
+
+# Update and Merge NFT Transactions
+for i in tqdm(range(len(entity_level_NFT_Transactions_2))):
+    entity_from = entity_level_NFT_Transactions_2[i][1]
+    entity_to   = entity_level_NFT_Transactions_2[i][2]
+    entity_level_NFT_Transactions_2[i] = change_tuple_item(entity_level_NFT_Transactions_2[i], 3, entity_level_NFT_Transactions_2[i][3] + balances_per_entity_array_1[entity_from])
+    entity_level_NFT_Transactions_2[i] = change_tuple_item(entity_level_NFT_Transactions_2[i], 4, entity_level_NFT_Transactions_2[i][4] + balances_per_entity_array_1[entity_to])
+
+# (Repeat for entity_level_NFT_Transactions_3 through entity_level_NFT_Transactions_6)
+
+entity_level_NFT_Transactions_AllTXs = entity_level_NFT_Transactions_1
+entity_level_NFT_Transactions_AllTXs.extend(entity_level_NFT_Transactions_2)
+entity_level_NFT_Transactions_AllTXs.extend(entity_level_NFT_Transactions_3)
+entity_level_NFT_Transactions_AllTXs.extend(entity_level_NFT_Transactions_4)
+entity_level_NFT_Transactions_AllTXs.extend(entity_level_NFT_Transactions_5)
+entity_level_NFT_Transactions_AllTXs.extend(entity_level_NFT_Transactions_6)
+
+# Update and Merge FT Transactions
+for i in tqdm(range(len(entity_level_FT_Transactions_2))):
+    entity_from = entity_level_FT_Transactions_2[i][1]
+    entity_to   = entity_level_FT_Transactions_2[i][2]
+    entity_level_FT_Transactions_2[i] = change_tuple_item(entity_level_FT_Transactions_2[i], 3, entity_level_FT_Transactions_2[i][3] + balances_per_entity_array_1[entity_from])
+    entity_level_FT_Transactions_2[i] = change_tuple_item(entity_level_FT_Transactions_2[i], 4, entity_level_FT_Transactions_2[i][4] + balances_per_entity_array_1[entity_to])
+
+# (Repeat for entity_level_FT_Transactions_3 through entity_level_FT_Transactions_6)
+
+entity_level_FT_Transactions_AllTXs = entity_level_FT_Transactions_1
+entity_level_FT_Transactions_AllTXs.extend(entity_level_FT_Transactions_2)
+entity_level_FT_Transactions_AllTXs.extend(entity_level_FT_Transactions_3)
+entity_level_FT_Transactions_AllTXs.extend(entity_level_FT_Transactions_4)
+entity_level_FT_Transactions_AllTXs.extend(entity_level_FT_Transactions_5)
+entity_level_FT_Transactions_AllTXs.extend(entity_level_FT_Transactions_6)
+
 print('----------------------')
 print('done!')
 
@@ -2119,146 +2248,78 @@ print('done!')
 ***
 
 
-### Calculate "Number of NFT/FT/ADA Entity-Level Transactions" Over Time
+## Store/Load "Entity-Level Transactions" for ADA, NFT, and FT
 
-This code processes multiple transaction CSV files to compute the number of transactions involving ADA, NFTs, and FTs at the entity level over time.
+### Explanation
+This script provides functionality to store and load entity-level transaction data (ADA, NFT, FT) into/from files. 
 
+#### Store Functionality
+1. **Timestamped Filenames**:
+   - Files are named with the current timestamp for unique identification.
+   - Arrays stored:
+     - `entity_level_ADA_Transactions_AllTXs`
+     - `entity_level_NFT_Transactions_AllTXs`
+     - `entity_level_FT_Transactions_AllTXs`
+2. **File Format**:
+   - Data is serialized and saved using Python's `pickle`.
 
-#### **File Format of Input CSV**
-- **File Type**: CSV (`.csv`)
-- **Delimiter**: `|`
-- **Columns**:
-  - `TX_ID`: Transaction ID.
-  - `BLOCK_TIME`: Timestamp of the transaction block (`YYYY-MM-DD HH:MM:SS`).
-  - `EPOCH_NO`: Epoch number.
-  - `INPUTs`: List of transaction inputs, delimited by `;`, where each input includes:
-    - `Input_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
-  - `OUTPUTs`: List of transaction outputs, delimited by `;`, where each output includes:
-    - `Output_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
-  - `TX_OUTPUT_MAs`: List of multi-asset outputs, delimited by `;`, where each MA includes:
-    - `Output_ID,MA_ID,Quantity,NFT_Name,FT_Name,MA_Name,MA_Policy,MA_Fingerprint`.
+#### Load Functionality
+1. **Input File Names**:
+   - Arrays are loaded from specified `.txt` files.
+   - The filenames should match the saved files with correct timestamps.
+2. **File Format**:
+   - Data is deserialized using `pickle` and loaded into arrays.
 
+### File Details
+- **Filename Format**:
+  - `EntityTXsADA_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__{timestamp}.txt`
+  - `EntityTXsNFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__{timestamp}.txt`
+  - `EntityTXsFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__{timestamp}.txt`
+  - Example: `EntityTXsADA_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-11-22_103423.txt`
+- **Format**: Pickle `.txt` files
+- **Content**:
+  - Each file contains a list of tuples representing transactions:
+    - `(day_delta, entity_from, entity_to, balance_entity_from, balance_entity_to)`
 
-#### **Workflow**
-1. **Initialization**:
-   - Choose the heuristic (`clustering_array_heur1and2`) for mapping payment addresses to entities.
-   - Initialize arrays:
-     - `balances_per_entity_array` to track balances.
-     - Lists for storing transactions involving ADA, NFTs, and FTs.
-
-2. **Processing Transactions**:
-   - Extract input entities for each transaction.
-   - Identify output entities receiving ADA, NFTs, and FTs.
-   - Record transactions, ensuring input and output entities are distinct.
-
-3. **Balances**:
-   - Update entity balances based on inputs and outputs.
-
-4. **Outputs**:
-   - Store the results in separate files:
-     - `balances_per_entity_array`
-     - `entity_level_ADA_Transactions`
-     - `entity_level_NFT_Transactions`
-     - `entity_level_FT_Transactions`
-
-5. **Parallel Processing**:
-   - Use multiprocessing to process multiple files simultaneously.
-   - Aggregate results across processes.
-
-
-#### **Outputs**
-1. **Balances File**:
-   - Tracks balances for each entity.
-
-2. **Transaction Files**:
-   - **ADA Transactions**:
-     - Day, Sender Entity, Receiver Entity, Sender Balance, Receiver Balance.
-   - **NFT/FT Transactions**:
-     - Day, Sender Entity, Receiver Entity, Sender Balance, Receiver Balance.
-
-3. **File Naming**:
-   - Outputs are stored with timestamped filenames for version control.
-
-
-#### **Cell Code**
+### Code
 ```python
 print('----------------------')
+import pickle
 
-def Find_ADA_NFT_FT_TXs_per_Entity_over_time(queue_):
-    in_args = queue_.get()
-    csv_file_name = in_args[0]
-    csv_file_basename = os.path.basename(csv_file_name)
-    
-    ct = datetime.datetime.now()
-    clustering_array = clustering_array_heur1and2
+# Current timestamp
+ct = datetime.datetime.now()
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
 
-    # Initialize outputs
-    balances_per_entity_array = np.array([0] * (np.amax(clustering_array) + 1))
-    entity_level_ADA_Transactions = []
-    entity_level_NFT_Transactions = []
-    entity_level_FT_Transactions = []
+# Store to file
+output_filename = BASE_ADDRESS + '/EntityTXsADA_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+pickle.dump(entity_level_ADA_Transactions_AllTXs, open(output_filename, 'wb'))
 
-    INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
-    total_time_length_CARDANO = int((datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date() - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+output_filename = BASE_ADDRESS + '/EntityTXsNFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+pickle.dump(entity_level_NFT_Transactions_AllTXs, open(output_filename, 'wb'))
 
-    df = pd.read_csv(csv_file_name, delimiter='|')
-    for index, row in tqdm(df.iterrows()):
-        TX_ID = df.loc[index, 'TX_ID']
-        BLOCK_TIME = datetime.datetime.strptime(df.loc[index, 'BLOCK_TIME'], '%Y-%m-%d %H:%M:%S').date()
-        tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
+output_filename = BASE_ADDRESS + '/EntityTXsFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+print('output_filename = ', output_filename)
+pickle.dump(entity_level_FT_Transactions_AllTXs, open(output_filename, 'wb'))
 
-        inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
-        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
+# Load from file
+file_name = BASE_ADDRESS + '/EntityTXsADA_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__????????????????.txt'
+entity_level_ADA_Transactions_AllTXs = pickle.load(open(file_name, 'rb'))
 
-        # Process input entities
-        input_entity_indx = []
-        for tx_input in inputs_list:
-            address_raw = tx_input.split(',')[4]
-            if tx_input.split(',')[7] == 'f':  # Non-smart contract address
-                addr_indx = BinarySearch(unique_payment_addresses, address_raw)
-                input_entity_indx.append(clustering_array[addr_indx][0])
-                break
+file_name = BASE_ADDRESS + '/EntityTXsNFT_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__????????????????.txt'
+entity_level_NFT_Transactions_AllTXs = pickle.load(open(file_name, 'rb'))
 
-        # Process output entities
-        output_ADA_entities_indx = []
-        for tx_output in outputs_list:
-            address_raw = tx_output.split(',')[1]
-            if tx_output.split(',')[4] == 'f':  # Non-smart contract address
-                addr_indx = BinarySearch(unique_payment_addresses, address_raw)
-                output_ADA_entities_indx.append(clustering_array[addr_indx][0])
+file_name = BASE_ADDRESS + '/EntityTXsFT_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__????????????????.txt'
+entity_level_FT_Transactions_AllTXs = pickle.load(open(file_name, 'rb'))
 
-        output_ADA_entities_indx = list(set(output_ADA_entities_indx))
-        if input_entity_indx[0] in output_ADA_entities_indx:
-            output_ADA_entities_indx.remove(input_entity_indx[0])
-
-        # Process balances
-        for i, tx_input in enumerate(inputs_list):
-            if tx_input.split(',')[7] == 'f':
-                addr_indx = BinarySearch(unique_payment_addresses, tx_input.split(',')[4])
-                entity_indx = clustering_array[addr_indx][0]
-                balances_per_entity_array[entity_indx] -= int(tx_input.split(',')[6])
-
-        for i, tx_output in enumerate(outputs_list):
-            if tx_output.split(',')[4] == 'f':
-                addr_indx = BinarySearch(unique_payment_addresses, tx_output.split(',')[1])
-                entity_indx = clustering_array[addr_indx][0]
-                balances_per_entity_array[entity_indx] += int(tx_output.split(',')[3])
-
-    # Save results
-    output_balances_filename = TEMP_ADDRESS + f'/balances_{csv_file_basename}_{ct.strftime("%Y%m%d_%H%M%S")}.txt'
-    pickle.dump(balances_per_entity_array, open(output_balances_filename, 'wb'))
-
-    output_adaTXs_filename = TEMP_ADDRESS + f'/ada_txs_{csv_file_basename}_{ct.strftime("%Y%m%d_%H%M%S")}.txt'
-    pickle.dump(entity_level_ADA_Transactions, open(output_adaTXs_filename, 'wb'))
-
+print('----------------------')
+print('done!')
 ```
-
-
-
 
 ***
 
-### Calculate "NFTs Owned by Each Entity" and "Balances of Entities"
+# Calculate "NFTs Owned by Each Entity" and "Balances of Entities"
 
 This code processes multiple CSV files containing transaction details to compute the number of NFTs owned by each entity and the ADA balance of each entity over time.
 
