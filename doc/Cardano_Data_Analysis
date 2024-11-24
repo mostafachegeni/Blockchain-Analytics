@@ -2265,18 +2265,18 @@ This script provides functionality to store and load entity-level transaction da
 
 #### Load Functionality
 1. **Input File Names**:
-   - Arrays are loaded from specified `.txt` files.
+   - Arrays are loaded from specified binary files.
    - The filenames should match the saved files with correct timestamps.
 2. **File Format**:
    - Data is deserialized using `pickle` and loaded into arrays.
 
 ### File Details
 - **Filename Format**:
-  - `EntityTXsADA_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__{timestamp}.txt`
-  - `EntityTXsNFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__{timestamp}.txt`
-  - `EntityTXsFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__{timestamp}.txt`
-  - Example: `EntityTXsADA_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-11-22_103423.txt`
-- **Format**: Pickle `.txt` files
+  - `EntityTXsADA_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__{timestamp}`
+  - `EntityTXsNFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__{timestamp}`
+  - `EntityTXsFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__{timestamp}`
+  - Example: `EntityTXsADA_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-11-22_103423`
+- **Format**: Pickle
 - **Content**:
   - Each file contains a list of tuples representing transactions:
     - `(day_delta, entity_from, entity_to, balance_entity_from, balance_entity_to)`
@@ -2291,26 +2291,26 @@ ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
 
 # Store to file
-output_filename = BASE_ADDRESS + '/EntityTXsADA_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/EntityTXsADA_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp 
 print('output_filename = ', output_filename)
 pickle.dump(entity_level_ADA_Transactions_AllTXs, open(output_filename, 'wb'))
 
-output_filename = BASE_ADDRESS + '/EntityTXsNFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/EntityTXsNFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp 
 print('output_filename = ', output_filename)
 pickle.dump(entity_level_NFT_Transactions_AllTXs, open(output_filename, 'wb'))
 
-output_filename = BASE_ADDRESS + '/EntityTXsFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/EntityTXsFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp 
 print('output_filename = ', output_filename)
 pickle.dump(entity_level_FT_Transactions_AllTXs, open(output_filename, 'wb'))
 
 # Load from file
-file_name = BASE_ADDRESS + '/EntityTXsADA_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__????????????????.txt'
+file_name = BASE_ADDRESS + '/EntityTXsADA_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>
 entity_level_ADA_Transactions_AllTXs = pickle.load(open(file_name, 'rb'))
 
-file_name = BASE_ADDRESS + '/EntityTXsNFT_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__????????????????.txt'
+file_name = BASE_ADDRESS + '/EntityTXsNFT_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>'
 entity_level_NFT_Transactions_AllTXs = pickle.load(open(file_name, 'rb'))
 
-file_name = BASE_ADDRESS + '/EntityTXsFT_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__????????????????.txt'
+file_name = BASE_ADDRESS + '/EntityTXsFT_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>'
 entity_level_FT_Transactions_AllTXs = pickle.load(open(file_name, 'rb'))
 
 print('----------------------')
@@ -2361,9 +2361,6 @@ This code processes multiple CSV files containing transaction details to compute
    - For each transaction:
      - Adjust `balances_per_entity_array` for ADA inputs and outputs.
      - Update `NFTs_owned_per_entity_array` and `count_NFTs_per_entity`.
-
-4. **Time Tracking**:
-   - Measure and log the elapsed time for each CSV file.
 
 
 #### **Outputs**
@@ -2466,7 +2463,7 @@ This code handles storing and loading entity-level data, specifically the NFTs o
 
 #### **File Details**
 
-- **File Format**: Pickle (`.txt` but stores binary data)
+- **File Format**: Pickle 
 - **Stored Data**:
   - `NFTs_owned_per_entity_array`: 2D array where each row corresponds to an entity and contains tuples of (NFT_ID, quantity).
   - `count_NFTs_per_entity`: 1D array where each index corresponds to an entity and holds the total NFT count.
@@ -2484,17 +2481,17 @@ curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)
 
 # Store to file:
 '''
-output_filename = BASE_ADDRESS + '/EntityOwnNFTsWithNameArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/EntityOwnNFTsWithNameArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp 
 print('output_filename = ', output_filename)
 pickle.dump(NFTs_owned_per_entity_array, open(output_filename, 'wb'))
 
 
-output_filename = BASE_ADDRESS + '/EntityOwnNFTsNumberArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/EntityOwnNFTsNumberArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp 
 print('output_filename = ', output_filename)
 pickle.dump(count_NFTs_per_entity, open(output_filename, 'wb'))
 
 
-output_filename = BASE_ADDRESS + '/EntityBalancesArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/EntityBalancesArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__' + curr_timestamp 
 print('output_filename = ', output_filename)
 pickle.dump(balances_per_entity_array, open(output_filename, 'wb'))
 '''
