@@ -304,13 +304,13 @@ This cell reads three sorted and unique address lists (`raw_address_list`, `paym
 ```python
 # Read ("sorted" "unique" array_list) [raw_address_list/payment_address_list/delegation_address_list] from file:
 
-file_name = BASE_ADDRESS + '/Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357.txt'
+file_name = BASE_ADDRESS + '/Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357'
 unique_raw_addresses = load_file_to_array(file_name)  # Text file, single column of strings (addresses)
 
-file_name = BASE_ADDRESS + '/Unique_AddressesListPayment__Cardano_TXs_All__2023-02-28_143953.txt'
+file_name = BASE_ADDRESS + '/Unique_AddressesListPayment__Cardano_TXs_All__2023-02-28_143953'
 unique_payment_addresses = load_file_to_array(file_name)  # Text file, single column of strings (addresses)
 
-file_name = BASE_ADDRESS + '/Unique_AddressesListDelegation__Cardano_TXs_All__2023-02-28_144415.txt'
+file_name = BASE_ADDRESS + '/Unique_AddressesListDelegation__Cardano_TXs_All__2023-02-28_144415'
 unique_delegation_addresses = load_file_to_array(file_name)  # Text file, single column of strings (addresses)
 
 ##########################################################################################
@@ -600,7 +600,7 @@ This cell handles storing and loading the `entity_of_stake_addresses` array, whi
 2. **Storing Data**:
    - The `entity_of_stake_addresses` array is saved into a file.
    - The filename includes a timestamp for versioning:
-     - Format: `Entities_related_to_Stake_Addresses__Heuristic2__Cardano_TXs_All__YYYY-MM-DD_HHMMSS.txt`
+     - Format: `Entities_related_to_Stake_Addresses__Heuristic2__Cardano_TXs_All__YYYY-MM-DD_HHMMSS`
    - Uses the `store_array_to_file` function to write the array to disk.
 
 3. **Loading Data**:
@@ -615,12 +615,12 @@ ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
 
 # Store "entity_of_stake_addresses" into file:
-output_filename = BASE_ADDRESS + '/Entities_related_to_Stake_Addresses__Heuristic2__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/Entities_related_to_Stake_Addresses__Heuristic2__Cardano_TXs_All__' + curr_timestamp 
 print('output_filename = ', output_filename)
 store_array_to_file(entity_of_stake_addresses, output_filename)
 
 # Load "entity_of_stake_addresses" from file:
-file_name = BASE_ADDRESS + '/Entities_related_to_Stake_Addresses__Heuristic2__Cardano_TXs_All__2024-01-23_212107.txt'
+file_name = BASE_ADDRESS + '/Entities_related_to_Stake_Addresses__Heuristic2__Cardano_TXs_All__2024-01-23_212107'
 entity_of_stake_addresses = load_file_to_array(file_name)
 
 ```
@@ -1152,11 +1152,11 @@ for index, row in tqdm(df.iterrows()):
         reward_addresses_per_epoch_SET.clear()
         reward_entities_per_epoch_SET.clear()
         
-        output_filename = BASE_ADDRESS + '/YuZhang_Cardano_StakeDelegation_Entities/StakeDelegPerEntityEpoch_' + str(current_epoch).zfill(4) + '__Cardano_TXs_All.txt'
+        output_filename = BASE_ADDRESS + '/Cardano_StakeDelegation_Entities/StakeDelegPerEntityEpoch_' + str(current_epoch).zfill(4) + '__Cardano_TXs_All'
         store_array_to_file(stake_deleg_by_entities, output_filename)
         stake_deleg_by_entities = [0] * ( np.amax(clustering_array)+1 )
         
-        output_filename = BASE_ADDRESS + '/YuZhang_Cardano_Reward_Entities/RewardPerEntityEpoch_' + str(current_epoch).zfill(4) + '__Cardano_TXs_All.txt'
+        output_filename = BASE_ADDRESS + '/Cardano_Reward_Entities/RewardPerEntityEpoch_' + str(current_epoch).zfill(4) + '__Cardano_TXs_All'
         store_array_to_file(reward_by_entities, output_filename)
         reward_by_entities      = [0] * ( np.amax(clustering_array)+1 )
 
@@ -1582,16 +1582,16 @@ This cell provides functionality to save and load arrays tracking the first appe
 
 #### Load Functionality
 1. **File Names**:
-   - Arrays are loaded back into memory from specific `.txt` files.
+   - Arrays are loaded back into memory from specific plain text files.
    - The filenames must match the saved timestamped names.
 2. **File Format**:
    - Data is loaded using the custom function, which retrieves the array values.
 
 ### File Details
 - **Filename Format for Saving**:
-  - `newPerDay_{AddressType}__Cardano_TXs_All__{Timestamp}.txt`
-  - Example: `newPerDay_rawAddresses__Cardano_TXs_All__2023-04-20_025121.txt`
-- **Data Format**: CSV-like `.txt` files
+  - `newPerDay_{AddressType}__Cardano_TXs_All__{Timestamp}`
+  - Example: `newPerDay_rawAddresses__Cardano_TXs_All__2023-04-20_025121`
+- **Data Format**: CSV-like plain text files
 - **Columns**: 
   - Single column containing integers representing the first appearance day offset for each address.
   - Placeholder values (`999999999999`) indicate that the address did not appear.
@@ -1824,21 +1824,21 @@ This cell provides functionality to save and load daily counts of active users (
      - `active_addresses_per_day_array`
      - `active_entities_per_day_array`
 2. **File Format**:
-   - Data is stored as `.txt` files in CSV format.
+   - Data is stored as plain text files in CSV format.
 
 #### Load Functionality
 1. **Input File Names**:
-   - Arrays are loaded from specified `.txt` files.
+   - Arrays are loaded from specified plain text files.
    - The filenames must match the timestamped naming convention used during saving.
 2. **File Format**:
    - Data is loaded as arrays using a custom file loading function.
 
 ### File Details
 - **Filename Format for Saving**:
-  - `activeAddressesPerDayList__Cardano_TXs_All__{Timestamp}.txt`
-  - `activeEntitiesPerDayList__Cardano_TXs_All__{Timestamp}.txt`
-  - Example: `activeAddressesPerDayList__Cardano_TXs_All__2023-04-09_224357.txt`
-- **Data Format**: CSV-like `.txt` files
+  - `activeAddressesPerDayList__Cardano_TXs_All__{Timestamp}`
+  - `activeEntitiesPerDayList__Cardano_TXs_All__{Timestamp}`
+  - Example: `activeAddressesPerDayList__Cardano_TXs_All__2023-04-09_224357`
+- **Data Format**: CSV-like plain text files
 - **Columns**: 
   - Single column containing integers representing daily counts of active addresses or entities.
 
@@ -1850,17 +1850,17 @@ ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
 
 # Store "active_addresses_per_day_array" and "active_entities_per_day_array" to file:
-output_filename = BASE_ADDRESS + '/activeAddressesPerDayList__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/activeAddressesPerDayList__Cardano_TXs_All__' + curr_timestamp 
 store_array_to_file(active_addresses_per_day_array, output_filename)
 
-output_filename = BASE_ADDRESS + '/activeEntitiesPerDayList__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/activeEntitiesPerDayList__Cardano_TXs_All__' + curr_timestamp 
 store_array_to_file(active_entities_per_day_array, output_filename)
 
 # Load "active_addresses_per_day_array" and "active_entities_per_day_array" from File:
-file_name = BASE_ADDRESS + '/activeAddressesPerDayList__Cardano_TXs_All__2023-04-09_224357.txt'
+file_name = BASE_ADDRESS + '/activeAddressesPerDayList__Cardano_TXs_All__2023-04-09_224357'
 active_addresses_per_day_array = load_file_to_array(file_name)
 
-file_name = BASE_ADDRESS + '/activeEntitiesPerDayList__Cardano_TXs_All__2023-04-09_224357.txt'
+file_name = BASE_ADDRESS + '/activeEntitiesPerDayList__Cardano_TXs_All__2023-04-09_224357'
 active_entities_per_day_array = load_file_to_array(file_name)
 
 ```
@@ -1922,10 +1922,10 @@ This cell processes Cardano blockchain data to calculate the number of NFT (Non-
 
 ### Output File Details
 - **Filename Format**:
-  - `balances_per_entity_array__TEMP__{csv_file_basename}__{timestamp}.txt`
-  - `entity_level_ADA_Transactions__TEMP__{csv_file_basename}__{timestamp}.txt`
-  - `entity_level_NFT_Transactions__TEMP__{csv_file_basename}__{timestamp}.txt`
-  - `entity_level_FT_Transactions__TEMP__{csv_file_basename}__{timestamp}.txt`
+  - `balances_per_entity_array__TEMP__{csv_file_basename}__{timestamp}`
+  - `entity_level_ADA_Transactions__TEMP__{csv_file_basename}__{timestamp}`
+  - `entity_level_NFT_Transactions__TEMP__{csv_file_basename}__{timestamp}`
+  - `entity_level_FT_Transactions__TEMP__{csv_file_basename}__{timestamp}`
 - **Format**: Pickle files
 - **Content**:
   - `balances_per_entity_array`: Entity balances.
@@ -2017,10 +2017,10 @@ def Find_ADA_NFT_FT_TXs_per_Entity_over_time(queue_):
         ct_file = datetime.datetime.now()
         curr_timestamp = str(ct_file)[0:10] + '_' + str(ct_file)[11:13] + str(ct_file)[14:16] + str(ct_file)[17:26]
 
-        output_balances_filename = TEMP_ADDRESS + '/balances_per_entity_array__TEMP__' + csv_file_basename + '__' + curr_timestamp + '.txt'
+        output_balances_filename = TEMP_ADDRESS + '/balances_per_entity_array__TEMP__' + csv_file_basename + '__' + curr_timestamp 
         pickle.dump(balances_per_entity_array, open(output_balances_filename, 'wb'))
 
-        output_adaTXs_filename = TEMP_ADDRESS + '/entity_level_ADA_Transactions__TEMP__' + csv_file_basename + '__' + curr_timestamp + '.txt'
+        output_adaTXs_filename = TEMP_ADDRESS + '/entity_level_ADA_Transactions__TEMP__' + csv_file_basename + '__' + curr_timestamp 
         pickle.dump(entity_level_ADA_Transactions, open(output_adaTXs_filename, 'wb'))
 
         # Add more saving logic for NFT and FT transactions
@@ -2500,13 +2500,13 @@ pickle.dump(balances_per_entity_array, open(output_filename, 'wb'))
 '''
 
 # Load from file:
-file_name = BASE_ADDRESS + '/EntityOwnNFTsWithNameArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540.txt'
+file_name = BASE_ADDRESS + '/EntityOwnNFTsWithNameArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540'
 NFTs_owned_per_entity_array = pickle.load(open(file_name, 'rb'))
 
-file_name = BASE_ADDRESS + '/EntityOwnNFTsNumberArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540.txt'
+file_name = BASE_ADDRESS + '/EntityOwnNFTsNumberArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540'
 count_NFTs_per_entity = pickle.load(open(file_name, 'rb'))
 
-file_name = BASE_ADDRESS + '/EntityBalancesArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540.txt'
+file_name = BASE_ADDRESS + '/EntityBalancesArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540'
 balances_per_entity_array = pickle.load(open(file_name, 'rb'))
 
 print('----------------------')
@@ -2667,10 +2667,10 @@ FTs_minted_per_entity_array = load_file_to_array_2D(file_name)
 
 1. **Stored Files**:
    - **NFT Minting Data**:  
-     File: `EntityNFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>.txt`
+     File: `EntityNFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
      Format: 2D list of minted NFTs per entity.
    - **FT Minting Data**:  
-     File: `EntityFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>.txt`
+     File: `EntityFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
      Format: 2D list of minted FTs per entity.
 
 2. **Loaded Files**:
@@ -2848,14 +2848,14 @@ This script saves both the `balances_array` (containing balances for payment add
 # Store balances_array
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
-output_filename = BASE_ADDRESS + '/balancesList_paymentAddresses_noSC__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/balancesList_paymentAddresses_noSC__Cardano_TXs_All__' + curr_timestamp
 store_array_to_file(balances_array, output_filename)
 
 
 # Store gini_array
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
-output_filename = BASE_ADDRESS + '/giniArray_noZeros__paymentAddresses_noSC__Cardano_TXs_All__' + curr_timestamp + '.txt'
+output_filename = BASE_ADDRESS + '/giniArray_noZeros__paymentAddresses_noSC__Cardano_TXs_All__' + curr_timestamp
 store_array_to_file(gini_array, output_filename)
 
 ```
@@ -3224,4 +3224,70 @@ def Find_ADA_Velocity(queue_):
 
 ***
 
+
+## Find Ground Truth for ADA Velocity
+
+### Explanation
+This script calculates the ground truth for ADA velocity for each month in 2022 using precomputed holding day data. The velocity is computed by dividing the total ADA held during the month by the number of days in that month. This ground truth is compared with velocities estimated using random sampling.
+
+#### Key Steps
+
+1. **Load Precomputed Data**:
+   - Holding day data for each month is loaded from files.
+   - Files correspond to a `SampleRate` of 1.0 (all transactions considered).
+
+2. **Compute ADA Velocity**:
+   - Converts the holding day data into ADA (from Lovelace) by dividing by 1,000,000.
+   - Restricts the analysis to the first 400 holding days.
+   - Calculates the average holding ADA per day for the month.
+
+3. **Output**:
+   - Prints the ground truth velocity for each month.
+
+4. **Plot**:
+   - Prepares data for plotting the velocity distribution.
+
+### Input File Details
+- **Filename Format**:
+  - `HoldingDayArray__SampleRate_0001_From_{start_day}_To_{end_day}__Cardano_TXs_All.pickle`
+- **Content**:
+  - Serialized array representing ADA held for each day in the specified range.
+- **Format**: `.pickle` files with serialized arrays.
+
+### Output
+- Prints the ground truth ADA velocity for each month in 2022.
+
+### Code
+```python
+# Define the first day of each month in 2022
+FIRST_DAY_of_each_month_2022 = [1561, 1592, 1620, 1651, 1681, 1712, 1742, 1773, 1804, 1834, 1865, 1895, 1926]
+
+# Calculate ground truth velocity for each month
+for i, ax in tqdm(enumerate(axes.flatten())):
+    file_name = BASE_ADDRESS + '/YuZhang_Holding_Days/' + 'YuZhang__HoldingDayArray__SampleRate_0001_From_' + str(FIRST_DAY_of_each_month_2022[i]).zfill(4) + '_To_' + str(FIRST_DAY_of_each_month_2022[i+1]).zfill(4) + '__Cardano_TXs_All.pickle'
+
+    # Load the holding day data
+    hodling_day_array = pickle.load(open(file_name, 'rb'))
+    hodling_day_array_ADA = [float(h) / 1000000 for h in hodling_day_array]
+
+    # Limit to the first 400 values
+    hodling_day_array_ADA = hodling_day_array_ADA[:400]
+
+    # Calculate the number of days in the month
+    month_length = FIRST_DAY_of_each_month_2022[i + 1] - FIRST_DAY_of_each_month_2022[i] + 1
+
+    # Calculate the ground truth velocity
+    ground_truth_velocity = sum(hodling_day_array_ADA) / month_length
+
+    # Print the velocity
+    print(str(ground_truth_velocity) + ',')
+
+    # Prepare for plotting
+    x = np.arange(1, len(hodling_day_array_ADA) + 1)
+    y = np.array(hodling_day_array_ADA)
+```
+
+
+
+***
 
