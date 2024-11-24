@@ -3118,11 +3118,110 @@ print('----------------------')
 print('done!')
 ```
 
-
 ***
 
+## Calculate Distribution of ADA Holding (SAMPLE_RATE = 1.0 and 0.3)
+
+### Explanation
+This script calculates the distribution of ADA holding over specific time ranges, sampled at rates of 1.0 and 0.3. The ADA holding is defined as the time between the input and output of ADA transactions. 
+
+#### Key Steps
+
+1. **Initialization**:
+   - **Sample Rate**:
+     - `SAMPLE_RATE = 1.0`: Includes all transactions.
+     - `SAMPLE_RATE = 0.3`: Samples 30% of transactions randomly.
+   - `hodling_day_array`: An array to store the ADA value held for each day.
+   - `FIRST_DAY` and `LAST_DAY`: Specify the time range for the calculation.
+
+2. **Processing CSV Files**:
+   - Reads transaction data from multiple CSV files.
+   - For each transaction:
+     - **Inputs**: Calculates the holding period (in days) for ADA by subtracting the input time from the block time.
+     - Adds the ADA value to `hodling_day_array` if the transaction is sampled based on `SAMPLE_RATE`.
+
+3. **Output**:
+   - The holding day distribution is saved to a file using `pickle.dump`.
 
 
+### Input File Details
+- **Filename**: `cardano_TXs_Velocity_{index}.csv`
+- **Format**: `|` delimited
+- **Columns**:
+  - `TX_ID`: Transaction ID
+  - `BLOCK_TIME`: Timestamp in `%Y-%m-%d %H:%M:%S` format
+  - `INPUTs`: Semicolon-separated list of inputs with fields such as value and time.
 
+### Output File Details
+- **Filename Format**:
+  - `HoldingDayArray__SampleRate_{rate}_From_{start_day}_To_{end_day}__Cardano_TXs_All.pickle`
+- **Content**:
+  - A list containing ADA values held for each day in the specified time range.
+- **Format**: `.pickle` file with serialized arrays.
+
+### Code
+```python
+print('----------------------')
+import random
+
+def Find_ADA_Velocity(queue_):
+    # Read input queue arguments
+    in_args = queue_.get()
+    SAMPLE_RATE = in_args[0]
+    FIRST_DAY = in_args[1]
+    LAST_DAY = in_args[2]
+
+    # ct stores current time
+    ct = datetime.datetime.now()
+
+    INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+    FINAL_DATE_CARDANO = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
+    total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+
+    hodling_day_array = [0] * total_time_length_CARDANO
+
+    CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_Velocity_'
+    NUMBER_OF_CSV_FILES = 6
+    CSV_FILES_SUFFIX = '.csv'
+
+    # Process files
+    for i in range(1, NUMBER_OF_CSV_FILES + 1):
+        ct_temp = datetime.datetime.now()
+
+        file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+        df = pd.read_csv(file_name, delimiter='|')
+
+        et_temp = datetime.datetime.now() - ct_temp
+        print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
+
+        ct_temp = datetime.datetime.now()
+
+        for index, row in tqdm(df.iterrows()):
+            TX_ID = df.loc[index, 'TX_ID']
+            BLOCK_TIME = datetime.datetime.strptime(str(df.loc[index, 'BLOCK_TIME']), '%Y-%m-%d %H:%M:%S').date()
+            tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
+            if tx_delta_day < FIRST_DAY or tx_delta_day > LAST_DAY:
+                continue
+
+            inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
+            for tx_input in inputs_list:
+                input_value = int(tx_input.split(',')[6])
+                input_time_str = tx_input.split(',')[10]
+                INPUT_TIME = datetime.datetime.strptime(input_time_str, '%Y-%m-%d %H:%M:%S').date()
+                INPUT_HOLDING_DAY = int((BLOCK_TIME - INPUT_TIME).total_seconds() / 86400)
+
+                # Random sampling based on SAMPLE_RATE
+                random_float = random.random()
+                if random_float <= SAMPLE_RATE:
+                    hodling_day_array[INPUT_HOLDING_DAY] += input_value
+
+    output_filename = BASE_ADDRESS + '/Holding_Days/HoldingDayArray__' + 'SampleRate_' + str(SAMPLE_RATE).zfill(4) + '_From_' + str(FIRST_DAY).zfill(4) + '_To_' + str(LAST_DAY).zfill(4) + '__Cardano_TXs_All.pickle'
+    pickle.dump(hodling_day_array, open(output_filename, 'wb'))
+
+
+```
+
+
+***
 
 
