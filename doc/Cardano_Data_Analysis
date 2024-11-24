@@ -2732,12 +2732,6 @@ This script calculates the balance of payment addresses by processing transactio
      - Append the computed Gini index to `gini_array`.
      - Log Gini index values for specific transaction IDs.
 
-5. **Performance Tracking**:
-   - Log the elapsed time for loading each CSV file and processing its transactions.
-
-6. **Completion**:
-   - Print a completion message when processing is finished.
-
 
 #### Key Variables
 - **`balances_array`**: Tracks the net balance for each unique payment address.
@@ -2750,11 +2744,6 @@ This script calculates the balance of payment addresses by processing transactio
 ```python
 # Generate "balances_array" for payment addresses:
 
-print('----------------------')
-
-# ct stores current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
 
 CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_'
 NUMBER_OF_CSV_FILES = 6
@@ -2819,12 +2808,6 @@ for i in range(1, NUMBER_OF_CSV_FILES + 1):
                     UTXO_value = outputs_list[i].split(',')[3]
                     balances_array[address_position] += int(UTXO_value)
 
-    et_temp = datetime.datetime.now() - ct_temp
-    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
-
-print('----------------------')
-print('done!')
-
 ```
 
 
@@ -2844,45 +2827,299 @@ This script saves both the `balances_array` (containing balances for payment add
 
 2. **File Naming**:
    - **Balances Array File**:
-     - File format: `balancesList_paymentAddresses_noSC__Cardano_TXs_All__<timestamp>.txt`
-     - Example: `balancesList_paymentAddresses_noSC__Cardano_TXs_All__2024-11-22_123456.txt`
+     - File format: `balancesList_paymentAddresses_noSC__Cardano_TXs_All__<timestamp>`
+     - Example: `balancesList_paymentAddresses_noSC__Cardano_TXs_All__2024-11-22_123456`
    - **Gini Array File**:
-     - File format: `giniArray_noZeros__paymentAddresses_noSC__Cardano_TXs_All__<timestamp>.txt`
-     - Example: `giniArray_noZeros__paymentAddresses_noSC__Cardano_TXs_All__2024-11-22_123456.txt`
+     - File format: `giniArray_noZeros__paymentAddresses_noSC__Cardano_TXs_All__<timestamp>`
+     - Example: `giniArray_noZeros__paymentAddresses_noSC__Cardano_TXs_All__2024-11-22_123456`
 
 3. **Storing the Arrays**:
    - The `store_array_to_file` function is used to save each array into its respective file.
    - Each value in the array is stored on a new line.
-
-4. **Completion**:
-   - Prints the output file names and confirms the arrays are successfully stored.
-
 
 #### Code
 
 ```python
 # Store "balances_array" and "gini_array" into files:
 
-print('----------------------')
-
 # Store balances_array
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
 output_filename = BASE_ADDRESS + '/balancesList_paymentAddresses_noSC__Cardano_TXs_All__' + curr_timestamp + '.txt'
-print('output_filename = ', output_filename)
-
 store_array_to_file(balances_array, output_filename)
+
 
 # Store gini_array
 ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
 output_filename = BASE_ADDRESS + '/giniArray_noZeros__paymentAddresses_noSC__Cardano_TXs_All__' + curr_timestamp + '.txt'
-print('output_filename = ', output_filename)
-
 store_array_to_file(gini_array, output_filename)
 
-##########################################################################################
+```
+
+
+***
+
+# Calculate Entities' Daily Balances:
+
+This script calculates the daily balances for Cardano entities by aggregating transactions from multiple CSV files. It processes inputs and outputs to update the balances of entities for each day.
+
+#### Key Steps
+
+1. **Initialization**:
+   - `balances_per_entity_array`: Stores balances for each entity, initialized to zero.
+   - `current_delta_day`: Tracks the current day being processed, starting from the initial blockchain date.
+
+2. **Process CSV Files**:
+   - Reads multiple transaction CSV files.
+   - For each transaction:
+     - **Inputs**: Subtracts UTXO values from the corresponding entity's balance.
+     - **Outputs**: Adds UTXO values to the corresponding entity's balance.
+
+3. **Daily Balances**:
+   - At the end of each day (`current_delta_day`), the balances are saved to a file using `store_array_to_file`.
+   - The process continues to the next day, resetting the daily balance calculations.
+
+4. **Logging**:
+   - Logs the elapsed time for processing each file.
+
+### Input File Details
+- **Filename**: `cardano_TXs_Velocity_{index}.csv`
+- **Format**: `|` delimited
+- **Columns**:
+  - `TX_ID`: Transaction ID
+  - `BLOCK_TIME`: Timestamp in `%Y-%m-%d %H:%M:%S` format
+  - `INPUTs`: Semicolon-separated list of inputs
+  - `OUTPUTs`: Semicolon-separated list of outputs
+
+### Output File Details
+- **Filename Format**:
+  - `BalancesPerEntityDay_{day}`
+- **Content**:
+  - A list of balances for all entities at the end of each day.
+- **Format**: Pickle file with serialized arrays.
+
+### Code
+```python
+print('----------------------')
+import random
+import pickle
+
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+print('----------------------')
+
+# Define date range
+INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+FINAL_DATE_CARDANO = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
+total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+
+# Choose clustering array
+clustering_array = clustering_array_heur1and2
+
+# Initialize balances array
+balances_per_entity_array = [0] * (np.amax(clustering_array) + 1)
+current_delta_day = 0
+
+CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_Velocity_'
+NUMBER_OF_CSV_FILES = 6
+CSV_FILES_SUFFIX = '.csv'
+
+# Process files
+for i in range(1, NUMBER_OF_CSV_FILES + 1):
+    ct_temp = datetime.datetime.now()
+    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+    df = pd.read_csv(file_name, delimiter='|')
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
+
+    ct_temp = datetime.datetime.now()
+
+    for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
+        BLOCK_TIME = datetime.datetime.strptime(str(df.loc[index, 'BLOCK_TIME']), '%Y-%m-%d %H:%M:%S').date()
+        tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
+
+        # Save daily balances and move to the next day
+        if current_delta_day < tx_delta_day:
+            output_filename = BASE_ADDRESS + '/Cardano_Balances_Entities/BalancesPerEntityDay_' + str(current_delta_day).zfill(4) + '__Cardano_TXs_All'
+            store_array_to_file(balances_per_entity_array, output_filename)
+            current_delta_day = tx_delta_day
+
+        # Process inputs
+        inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
+        for i in range(len(inputs_list)):
+            address_has_script = inputs_list[i].split(',')[7]
+            if address_has_script == 'f':  # Non-Smart Contract Address
+                address_raw = inputs_list[i].split(',')[4]
+                payment_cred = inputs_list[i].split(',')[8]
+                stake_address = inputs_list[i].split(',')[9]
+                [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                if address_payment_part != '':
+                    addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
+                    entity_indx = clustering_array[addr_indx][0]
+                    UTXO_value = int(inputs_list[i].split(',')[6])
+                    balances_per_entity_array[entity_indx] -= int(UTXO_value)
+
+        # Process outputs
+        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
+        for i in range(len(outputs_list)):
+            address_has_script = outputs_list[i].split(',')[4]
+            if address_has_script == 'f':  # Non-Smart Contract Address
+                address_raw = outputs_list[i].split(',')[1]
+                payment_cred = outputs_list[i].split(',')[5]
+                stake_address = outputs_list[i].split(',')[6]
+                [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                if address_payment_part != '':
+                    addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
+                    entity_indx = clustering_array[addr_indx][0]
+                    UTXO_value = int(outputs_list[i].split(',')[3])
+                    balances_per_entity_array[entity_indx] += int(UTXO_value)
+```
+
+
+
+***
+
+
+# Calculate Entities' Daily Transaction Volume:
+
+### Explanation
+This script calculates the daily transaction volume for blockchain entities by processing transaction inputs and outputs. The volumes are aggregated for each entity on a daily basis.
+
+#### Key Steps
+
+1. **Initialization**:
+   - `TX_vol_per_entity_array`: An array to store transaction volumes for each entity, initialized to zero.
+   - `current_delta_day`: Tracks the current day being processed, starting from the initial blockchain date.
+
+2. **Process CSV Files**:
+   - Reads multiple transaction CSV files.
+   - For each transaction:
+     - **Inputs**: Subtracts UTXO values from the transaction volume of the corresponding entity.
+     - **Outputs**: Adds UTXO values to the transaction volume of the corresponding entity.
+
+3. **Daily Transaction Volumes**:
+   - At the end of each day (`current_delta_day`), transaction volumes are saved to a file using `pickle.dump`.
+   - Resets the daily transaction volume array for the next day.
+
+4. **Logging**:
+   - Logs the elapsed time for processing each file.
+
+### Input File Details
+- **Filename**: `cardano_TXs_Velocity_{index}.csv`
+- **Format**: `|` delimited
+- **Columns**:
+  - `TX_ID`: Transaction ID
+  - `BLOCK_TIME`: Timestamp in `%Y-%m-%d %H:%M:%S` format
+  - `INPUTs`: Semicolon-separated list of inputs
+  - `OUTPUTs`: Semicolon-separated list of outputs
+
+### Output File Details
+- **Filename Format**:
+  - `TX_Vol_PerEntityDay_{day}.pickle`
+- **Content**:
+  - A list containing the transaction volumes for each entity at the end of the day.
+- **Format**: `.pickle` serialized files.
+
+### Code
+```python
+print('----------------------')
+import random
+import pickle
+
+# ct stores current time
+ct = datetime.datetime.now()
+print("current time: ", ct)
+print('----------------------')
+
+# Define date range
+INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+FINAL_DATE_CARDANO = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
+total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+
+# Choose clustering array
+clustering_array = clustering_array_heur1and2
+
+# Initialize transaction volume array
+TX_vol_per_entity_array = [0] * (np.amax(clustering_array) + 1)
+current_delta_day = 0
+
+CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_Velocity_'
+NUMBER_OF_CSV_FILES = 6
+CSV_FILES_SUFFIX = '.csv'
+
+# Process files
+for i in range(1, NUMBER_OF_CSV_FILES + 1):
+    ct_temp = datetime.datetime.now()
+    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+    df = pd.read_csv(file_name, delimiter='|')
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
+
+    ct_temp = datetime.datetime.now()
+
+    for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
+        BLOCK_TIME = datetime.datetime.strptime(str(df.loc[index, 'BLOCK_TIME']), '%Y-%m-%d %H:%M:%S').date()
+        tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
+
+        # Save daily transaction volume and move to the next day
+        if current_delta_day < tx_delta_day:
+            output_filename = BASE_ADDRESS + '/Cardano_TX_Vols_Entities__PICKLE/TX_Vol_PerEntityDay_' + str(current_delta_day).zfill(4) + '__Cardano_TXs_All.pickle'
+            pickle.dump(TX_vol_per_entity_array, open(output_filename, 'wb'))
+            TX_vol_per_entity_array = [0] * (np.amax(clustering_array) + 1)
+            current_delta_day = tx_delta_day
+
+        # Process inputs
+        inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
+        TX_vol_dict = {}
+        for tx_input in inputs_list:
+            tx_input_split = tx_input.split(',')
+            address_has_script = tx_input_split[7]
+            if address_has_script == 'f':  # Non-Smart Contract Address
+                address_raw = tx_input_split[4]
+                payment_cred = tx_input_split[8]
+                stake_address = tx_input_split[9]
+                [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                if address_payment_part != '':
+                    addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
+                    entity_indx = clustering_array[addr_indx][0]
+                    UTXO_value = int(tx_input_split[6])
+                    TX_vol_dict[entity_indx] = TX_vol_dict.get(entity_indx, 0) - UTXO_value
+
+        # Process outputs
+        outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
+        for tx_output in outputs_list:
+            tx_output_split = tx_output.split(',')
+            address_has_script = tx_output_split[4]
+            if address_has_script == 'f':  # Non-Smart Contract Address
+                address_raw = tx_output_split[1]
+                payment_cred = tx_output_split[5]
+                stake_address = tx_output_split[6]
+                [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                if address_payment_part != '':
+                    addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
+                    entity_indx = clustering_array[addr_indx][0]
+                    UTXO_value = int(tx_output_split[3])
+                    TX_vol_dict[entity_indx] = TX_vol_dict.get(entity_indx, 0) + UTXO_value
+
+        for key in TX_vol_dict:
+            TX_vol_per_entity_array[key] += abs(TX_vol_dict[key])
+
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Process CSV File " + file_name + "): ", et_temp)
+
 print('----------------------')
 print('done!')
-
 ```
+
+
+***
+
+
+
+
+
+
