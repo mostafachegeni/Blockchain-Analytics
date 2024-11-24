@@ -1330,21 +1330,11 @@ This cell determines the number of new entities created each day, based on trans
    - **Epoch Filtering**:
      - Exclude addresses associated with smart contracts (`address_has_script != 'f'`).
 
-4. **Purpose**:
-   - Tracks the time evolution of new entities in the network.
-   - Useful for analyzing adoption and growth over time.
-
 
 #### **Cell Code**
 ```python
 # Find Number of New "Entities" Over Time
 
-print('----------------------')
-
-# Store current time
-ct = datetime.datetime.now()
-print("current time: ", ct)
-print('----------------------')
 
 # Initialize constants
 INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
@@ -1394,16 +1384,6 @@ for i in range(1, NUMBER_OF_CSV_FILES + 1):
                     entity_indx = clustering_array_heur1and2[addr_indx][0]
                     if entities_new_per_day_array[entity_indx] == place_holder:
                         entities_new_per_day_array[entity_indx] = current_delta_day
-
-    et_temp = datetime.datetime.now() - ct_temp
-    print("elapsed time (New Entities over Time from CSV File " + file_name + "): ", et_temp)
-
-print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (New Entities over Time): ", et)
-print('----------------------')
-print('done!')
-
 ```
 
 
@@ -1418,7 +1398,7 @@ This cell handles the persistence of the `entities_new_per_day_array` data, whic
 
 #### **File Format**
 
-- **File Type**: Text file (`.txt`)
+- **File Type**: Plain Text
 - **Delimiter**: One value per line
 - **Content**:
   - Array values representing the day each entity was first observed. The index corresponds to the entity index, and the value represents the day since the start of the Cardano network (`INITIAL_DATE_CARDANO`).
@@ -1429,11 +1409,11 @@ This cell handles the persistence of the `entities_new_per_day_array` data, whic
 1. **Storing Data**:
    - Write the `entities_new_per_day_array` to a text file.
    - File is named with a timestamp for version control:
-     - Example: `newPerDay_Entities__Cardano_TXs_All__YYYY-MM-DD_HHMMSS.txt`.
+     - Example: `newPerDay_Entities__Cardano_TXs_All__YYYY-MM-DD_HHMMSS`.
 
 2. **Loading Data**:
-   - Load the array from a specified file.
    - Use the `load_file_to_array` function to restore the array into memory.
+
 
 
 #### **Cell Code**
@@ -1445,19 +1425,12 @@ ct = datetime.datetime.now()
 curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
 
 # Store "entities_new_per_day_array" into file:
-'''
-output_filename = BASE_ADDRESS + '/newPerDay_Entities__Cardano_TXs_All__' + curr_timestamp + '.txt'
-print('output_filename = ', output_filename)
+output_filename = BASE_ADDRESS + '/newPerDay_Entities__Cardano_TXs_All__' + curr_timestamp 
 store_array_to_file(entities_new_per_day_array, output_filename)
-'''
 
 # Load "entities_new_per_day_array" from file:
-file_name = BASE_ADDRESS + '/newPerDay_Entities__Cardano_TXs_All__2023-04-22_012525.txt'
+file_name = BASE_ADDRESS + '/newPerDay_Entities__Cardano_TXs_All__2023-04-22_012525'
 entities_new_per_day_array = load_file_to_array(file_name)
-
-##########################################################################################
-print('----------------------')
-print('done!')
 
 ```
 
@@ -1466,70 +1439,73 @@ print('done!')
 ***
 
 
-### Find Number of New "Byron", "Shelley", and "Stake" Addresses Over Time
+## Find Number of New "Byron", "Shelley", and "Stake" Addresses vs Time
 
-This cell calculates the number of new addresses (Byron, Shelley, and Stake) observed each day using data from multiple transaction CSV files.
+This cell calculates the number of new Cardano addresses (Byron, Shelley, and Stake delegation addresses) created per day over the entire operational period of Cardano. It processes transaction data from CSV files and determines the day each unique address first appears in the blockchain data.
 
+1. **Datetime Initialization**:
+   - Calculates the total operational days of Cardano between its initial launch date (September 23, 2017) and the final date considered (January 21, 2023).
+2. **Address Initialization**:
+   - Uses placeholder values (`999999999999`) to initialize arrays for tracking the first appearance day of:
+     - **Raw Addresses**: All unique raw addresses.
+     - **Byron Payment Addresses**: Addresses starting with the prefix `'8'`.
+     - **Shelley Payment Addresses**: Shelley-specific addresses.
+     - **Delegation Addresses**: Stake delegation addresses.
+3. **File Processing**:
+   - Reads transaction data from CSV files containing outputs.
+   - Extracts output details to determine if each unique address appears for the first time.
+   - Updates the respective arrays with the day offset of the first occurrence.
+4. **Address Type Classification**:
+   - **Byron Addresses**: Identified by the prefix `'8'`.
+   - **Shelley Addresses**: Non-Byron payment addresses.
+   - **Delegation Addresses**: Derived from the delegation parts of the Shelley addresses.
+5. **Output Data**:
+   - Each array (`raw_addresses_new_per_day_array`, `Byron_payment_addresses_new_per_day_array`, etc.) contains the first appearance day of addresses relative to the Cardano start date.
 
-#### **Explanation of the Code**
+### CSV File Details
+- **Format**: `|` delimited
+- **Columns**:
+  - `TX_ID` (Transaction ID)
+  - `BLOCK_TIME` (Timestamp in `%Y-%m-%d %H:%M:%S` format)
+  - `EPOCH_NO` (Epoch number)
+  - `OUTPUTs` (Semicolon-separated list containing address details)
 
-1. **Objective**:
-   - Track the first observation day for each unique address type:
-     - **Raw Addresses**: All raw addresses in outputs.
-     - **Byron Payment Addresses**: Payment addresses specific to Byron-era transactions.
-     - **Shelley Payment Addresses**: Payment addresses specific to Shelley-era transactions.
-     - **Delegation (Stake) Addresses**: Stake addresses used in delegation.
+### Output Data Details
+- **Format**: Arrays
+- **Number of Columns**: 1 per array
+- **Array Descriptions**:
+  - `raw_addresses_new_per_day_array`: Tracks the first appearance of raw addresses.
+  - `Byron_payment_addresses_new_per_day_array`: Tracks Byron payment addresses.
+  - `Shelley_payment_addresses_new_per_day_array`: Tracks Shelley payment addresses.
+  - `delegation_addresses_new_per_day_array`: Tracks delegation addresses.
+- **Values**:
+  - Day offsets (integer) representing the day the address first appeared.
+  - Placeholder values for addresses that do not appear in the data.
 
-2. **Input Data**:
-   - **Transaction CSV Files**:
-     - Format: `cardano_TXs_<file_number>.csv`
-     - Delimiter: `|`
-     - Key Columns:
-       - `OUTPUTs`: Semicolon-separated list of transaction outputs. Each output contains:
-         - `Output_ID,Raw_Address,Stake_Addr_ID,Value,Has_Script,Payment_Cred,Stake_Addr`.
-
-3. **Steps**:
-   - **Initialization**:
-     - Arrays to store the first observation day for each address:
-       - `raw_addresses_new_per_day_array`
-       - `Byron_payment_addresses_new_per_day_array`
-       - `Shelley_payment_addresses_new_per_day_array`
-       - `delegation_addresses_new_per_day_array`
-     - Placeholders (`999999999999`) indicate unobserved addresses.
-   - **Processing CSV Files**:
-     - For each file:
-       - Load into a DataFrame.
-       - For each transaction output:
-         - Extract relevant address parts.
-         - Determine the type of the address (Byron, Shelley, or Stake).
-         - Update the corresponding array with the current day if the address is new.
-
-
-#### **Cell Code**
+### Code
 ```python
-# Find Number of New "Byron", "Shelley", and "Stake" Addresses Over Time
+# Find Number of new "Byron", "Shelley", and "Stake" addresses VS "Time":
 
-print('----------------------')
-
-# Store current time
+# Current time
 ct = datetime.datetime.now()
 print("current time: ", ct)
 print('----------------------')
 
-# Initialize constants
+# Initialize date range
 INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
 FINAL_DATE_CARDANO = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
 total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
 
 current_delta_day = 0
-place_holder = 999999999999
 
-# Arrays for first observation day
+# Initialize arrays for new addresses
+place_holder = 999999999999
 raw_addresses_new_per_day_array = np.array([place_holder] * len(unique_raw_addresses))
 Byron_payment_addresses_new_per_day_array = np.array([place_holder] * len(unique_payment_addresses))
 Shelley_payment_addresses_new_per_day_array = np.array([place_holder] * len(unique_payment_addresses))
 delegation_addresses_new_per_day_array = np.array([place_holder] * len(unique_delegation_addresses))
 
+# File details
 CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_'
 NUMBER_OF_CSV_FILES = 6
 CSV_FILES_SUFFIX = '.csv'
@@ -1538,21 +1514,22 @@ CSV_FILES_SUFFIX = '.csv'
 for i in range(1, NUMBER_OF_CSV_FILES + 1):
     ct_temp = datetime.datetime.now()
 
-    # Load CSV file
     file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
     df = pd.read_csv(file_name, delimiter='|')
+
     et_temp = datetime.datetime.now() - ct_temp
     print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
 
     ct_temp = datetime.datetime.now()
 
-    # Process each row in the DataFrame
     for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
         BLOCK_TIME = datetime.datetime.strptime(str(df.loc[index, 'BLOCK_TIME']), '%Y-%m-%d %H:%M:%S').date()
         tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
         if tx_delta_day != current_delta_day:
             current_delta_day = tx_delta_day
 
+        EPOCH_NO = str(df.loc[index, 'EPOCH_NO'])
         outputs_list = list(df.loc[index, 'OUTPUTs'].split(';'))
         for tx_output in outputs_list:
             address_raw = tx_output.split(',')[1]
@@ -1581,30 +1558,313 @@ for i in range(1, NUMBER_OF_CSV_FILES + 1):
                 addr_position = BinarySearch(unique_delegation_addresses, address_delegation_part)
                 if delegation_addresses_new_per_day_array[addr_position] == place_holder:
                     delegation_addresses_new_per_day_array[addr_position] = current_delta_day
-
-    et_temp = datetime.datetime.now() - ct_temp
-    print("elapsed time (New Addresses from CSV File " + file_name + "): ", et_temp)
-
-print('----------------------')
-et = datetime.datetime.now() - ct
-print("Total elapsed time (New Addresses): ", et)
-print('----------------------')
-print('done!')
-
 ```
 
+***
 
+# Load/Store Address Data per Day:
+
+This cell provides functionality to save and load arrays tracking the first appearance day of various types of Cardano addresses (Byron, Shelley, Stake delegation, and raw addresses) to and from files.
+
+#### Store Functionality
+1. **Timestamped Filenames**:
+   - Files are named using the current timestamp for versioning and identification.
+   - Arrays saved:
+     - `raw_addresses_new_per_day_array`
+     - `Byron_payment_addresses_new_per_day_array`
+     - `Shelley_payment_addresses_new_per_day_array`
+     - `delegation_addresses_new_per_day_array`
+2. **File Format**:
+   - Data is stored as Plain Text files using a custom array storage function.
+
+#### Load Functionality
+1. **File Names**:
+   - Arrays are loaded back into memory from specific `.txt` files.
+   - The filenames must match the saved timestamped names.
+2. **File Format**:
+   - Data is loaded using the custom function, which retrieves the array values.
+
+### File Details
+- **Filename Format for Saving**:
+  - `newPerDay_{AddressType}__Cardano_TXs_All__{Timestamp}.txt`
+  - Example: `newPerDay_rawAddresses__Cardano_TXs_All__2023-04-20_025121.txt`
+- **Data Format**: CSV-like `.txt` files
+- **Columns**: 
+  - Single column containing integers representing the first appearance day offset for each address.
+  - Placeholder values (`999999999999`) indicate that the address did not appear.
+
+### Code
+```python
+# Load/Store Address Data per Day:
+
+
+# Load/Store "raw_addresses_new_per_day_array" from/into file:
+#            "Byron_payment_addresses_new_per_day_array",
+#            "Shelley_payment_addresses_new_per_day_array",
+#            "delegation_addresses_new_per_day_array"
+
+print('----------------------')
+
+# Store arrays into files
+ct = datetime.datetime.now()
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+
+output_filename = BASE_ADDRESS + '/newPerDay_rawAddresses__Cardano_TXs_All__' + curr_timestamp 
+store_array_to_file(raw_addresses_new_per_day_array, output_filename)
+output_filename = BASE_ADDRESS + '/newPerDay_ByronAddresses__Cardano_TXs_All__' + curr_timestamp 
+store_array_to_file(Byron_payment_addresses_new_per_day_array, output_filename)
+output_filename = BASE_ADDRESS + '/newPerDay_ShelleyAddresses__Cardano_TXs_All__' + curr_timestamp 
+store_array_to_file(Shelley_payment_addresses_new_per_day_array, output_filename)
+output_filename = BASE_ADDRESS + '/newPerDay_delegationAddresses__Cardano_TXs_All__' + curr_timestamp 
+store_array_to_file(delegation_addresses_new_per_day_array, output_filename)
+
+# Load arrays from files
+file_name = BASE_ADDRESS + '/newPerDay_rawAddresses__Cardano_TXs_All__2023-04-20_025121'
+raw_addresses_new_per_day_array = load_file_to_array(file_name)
+file_name = BASE_ADDRESS + '/newPerDay_ByronAddresses__Cardano_TXs_All__2023-04-20_025121'
+Byron_payment_addresses_new_per_day_array = load_file_to_array(file_name)
+file_name = BASE_ADDRESS + '/newPerDay_ShelleyAddresses__Cardano_TXs_All__2023-04-20_025121'
+Shelley_payment_addresses_new_per_day_array = load_file_to_array(file_name)
+file_name = BASE_ADDRESS + '/newPerDay_delegationAddresses__Cardano_TXs_All__2023-04-20_025121'
+delegation_addresses_new_per_day_array = load_file_to_array(file_name)
+
+```
 
 
 ***
 
 
-### Calculate Active Users and Entities Per Day
+# Find Number of "New Addresses" Per Day
 
-This cell computes the number of unique active addresses and entities on a daily basis, using input transaction data from multiple CSV files.
+This cell calculates the daily count of new Cardano addresses, categorized as raw addresses, Byron payment addresses, Shelley payment addresses, and stake delegation addresses. The process involves loading precomputed arrays of address first-appearance days, sorting these arrays, and aggregating the daily counts.
+
+### Key Steps
+**Load Data**:
+   - Load arrays tracking the first appearance of each address type (`raw`, `Byron`, `Shelley`, `delegation`) from saved files.
+   - Remove placeholder values (`999999999999`), which indicate addresses that did not appear.
+
+**Aggregate New Addresses per Day**:
+   - Count the number of addresses for each day and store the results in arrays:
+     - `num_of_raw_addresses_per_day`
+     - `num_of_Byron_addresses_per_day`
+     - `num_of_Shelley_addresses_per_day`
+     - `num_of_delegation_addresses_per_day`
 
 
-### Calculate "Number of NFT/FT/ADA Entity-Level Transactions" Over Time
+### Code
+```python
+# Find number of "new addresses" in each "day":
+
+# Remove placeholder values
+place_holder = 999999999999
+
+raw_addresses_new_per_day_array = [value for value in raw_addresses_new_per_day_array if value != place_holder]
+Byron_payment_addresses_new_per_day_array = [value for value in Byron_payment_addresses_new_per_day_array if value != place_holder]
+Shelley_payment_addresses_new_per_day_array = [value for value in Shelley_payment_addresses_new_per_day_array if value != place_holder]
+delegation_addresses_new_per_day_array = [value for value in delegation_addresses_new_per_day_array if value != place_holder]
+
+# Sort arrays
+sorted_raw_addresses_new_per_day_array = np.sort(raw_addresses_new_per_day_array, axis=None)
+sorted_Byron_payment_addresses_new_per_day_array = np.sort(Byron_payment_addresses_new_per_day_array, axis=None)
+sorted_Shelley_payment_addresses_new_per_day_array = np.sort(Shelley_payment_addresses_new_per_day_array, axis=None)
+sorted_delegation_addresses_new_per_day_array = np.sort(delegation_addresses_new_per_day_array, axis=None)
+
+# Calculate number of days
+num_of_days_raw = max(sorted_raw_addresses_new_per_day_array) + 1
+num_of_days_byron = max(sorted_Byron_payment_addresses_new_per_day_array) + 1
+num_of_days_shelley = max(sorted_Shelley_payment_addresses_new_per_day_array) + 1
+num_of_days_delegation = max(sorted_delegation_addresses_new_per_day_array) + 1
+print('num_of_days_raw = ', num_of_days_raw)
+print('num_of_days_byron = ', num_of_days_byron)
+print('num_of_days_shelley = ', num_of_days_shelley)
+print('num_of_days_delegation = ', num_of_days_delegation)
+MAX_num_of_days = max(num_of_days_raw, num_of_days_byron, num_of_days_shelley, num_of_days_delegation)
+
+# Calculate new addresses per day
+num_of_raw_addresses_per_day = np.array([0] * MAX_num_of_days)
+for i in tqdm(range(MAX_num_of_days)):
+    x = BinarySearch_Find_start_end(sorted_raw_addresses_new_per_day_array, i)
+    if x != -1:
+        num_of_raw_addresses_per_day[i] = x[1] - x[0] + 1
+
+num_of_Byron_addresses_per_day = np.array([0] * MAX_num_of_days)
+for i in tqdm(range(MAX_num_of_days)):
+    x = BinarySearch_Find_start_end(sorted_Byron_payment_addresses_new_per_day_array, i)
+    if x != -1:
+        num_of_Byron_addresses_per_day[i] = x[1] - x[0] + 1
+
+num_of_Shelley_addresses_per_day = np.array([0] * MAX_num_of_days)
+for i in tqdm(range(MAX_num_of_days)):
+    x = BinarySearch_Find_start_end(sorted_Shelley_payment_addresses_new_per_day_array, i)
+    if x != -1:
+        num_of_Shelley_addresses_per_day[i] = x[1] - x[0] + 1
+
+num_of_delegation_addresses_per_day = np.array([0] * MAX_num_of_days)
+for i in tqdm(range(MAX_num_of_days)):
+    x = BinarySearch_Find_start_end(sorted_delegation_addresses_new_per_day_array, i)
+    if x != -1:
+        num_of_delegation_addresses_per_day[i] = x[1] - x[0] + 1
+```
+
+
+*** 
+
+## Calculate Active Users and Entities Per Day
+
+This cell calculates the number of active users (addresses) and active entities (clusters of addresses) per day based on transaction data. It processes transaction inputs to identify active participants and groups them by day.
+
+1. **Datetime Initialization**:
+   - The analysis covers the period from Cardano's launch (September 23, 2017) to January 21, 2023.
+   - Computes the total operational days.
+
+2. **Active User and Entity Tracking**:
+   - Initializes arrays to store the daily count of active addresses and entities:
+     - `active_addresses_per_day_array`
+     - `active_entities_per_day_array`
+
+3. **File Processing**:
+   - Reads transaction data from multiple CSV files.
+   - For each transaction:
+     - Extracts inputs.
+     - Identifies the address and its corresponding entity using a clustering array.
+     - Adds the address and entity to daily active sets.
+
+4. **Daily Aggregation**:
+   - At the end of each day, counts the unique active addresses and entities.
+   - Resets the daily tracking for the next day's processing.
+
+
+### CSV File Details
+- **Format**: `|` delimited
+- **Columns**:
+  - `TX_ID` (Transaction ID)
+  - `BLOCK_TIME` (Transaction timestamp in `%Y-%m-%d %H:%M:%S` format)
+  - `EPOCH_NO` (Epoch number)
+  - `INPUTs` (Semicolon-separated list containing input details)
+
+### Code
+```python
+# Calculate Active Users and Entities Per Day:
+
+# Initialize date range
+INITIAL_DATE_CARDANO = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
+FINAL_DATE_CARDANO = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
+total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds() / 86400) + 1
+
+current_delta_day = 0
+active_addresses = []
+active_entities = []
+
+# Initialize daily arrays
+active_addresses_per_day_array = [0] * total_time_length_CARDANO
+active_entities_per_day_array = [0] * total_time_length_CARDANO
+
+# File details
+CSV_FILES_NAME_FORMAT = BASE_ADDRESS + '/cardano_TXs_'
+NUMBER_OF_CSV_FILES = 6
+CSV_FILES_SUFFIX = '.csv'
+
+# Process each file
+for i in range(1, NUMBER_OF_CSV_FILES + 1):
+    ct_temp = datetime.datetime.now()
+
+    file_name = CSV_FILES_NAME_FORMAT + str(i) + CSV_FILES_SUFFIX
+    df = pd.read_csv(file_name, delimiter='|')
+
+    et_temp = datetime.datetime.now() - ct_temp
+    print("elapsed time (Load CSV File " + file_name + "): ", et_temp)
+
+    ct_temp = datetime.datetime.now()
+
+    for index, row in tqdm(df.iterrows()):
+        TX_ID = df.loc[index, 'TX_ID']
+        BLOCK_TIME = datetime.datetime.strptime(str(df.loc[index, 'BLOCK_TIME']), '%Y-%m-%d %H:%M:%S').date()
+        tx_delta_day = int((BLOCK_TIME - INITIAL_DATE_CARDANO).total_seconds() / 86400)
+
+        if tx_delta_day > current_delta_day:
+            # End of the current day, update counts
+            active_addresses_per_day_array[current_delta_day] = len(set(active_addresses))
+            active_entities_per_day_array[current_delta_day] = len(set(active_entities))
+            current_delta_day = tx_delta_day
+            active_addresses = []
+            active_entities = []
+
+        EPOCH_NO = str(df.loc[index, 'EPOCH_NO'])
+
+        # Process transaction inputs
+        inputs_list = list(df.loc[index, 'INPUTs'].split(';'))
+        for tx_input in inputs_list:
+            address_raw = tx_input.split(',')[4]
+            address_has_script = tx_input.split(',')[7]
+            payment_cred = tx_input.split(',')[8]
+            stake_address = tx_input.split(',')[9]
+
+            if address_has_script == 'f':  # Non-smart contract address
+                [address_payment_part, address_delegation_part] = extract_payment_delegation_parts(address_raw, payment_cred, stake_address)
+                if address_payment_part != '':
+                    addr_indx = BinarySearch(unique_payment_addresses, address_payment_part)
+                    entity_indx = clustering_array[addr_indx][0]
+                    active_addresses.append(addr_indx)
+                    active_entities.append(entity_indx)
+```
+
+*** 
+
+# Store/Load Active Users and Entities Per Day
+
+This cell provides functionality to save and load daily counts of active users (addresses) and entities (clusters) to and from files.
+
+#### Store Functionality
+1. **Timestamped Filenames**:
+   - Files are named with a timestamp to allow versioning and unique identification.
+   - Arrays saved:
+     - `active_addresses_per_day_array`
+     - `active_entities_per_day_array`
+2. **File Format**:
+   - Data is stored as `.txt` files in CSV format.
+
+#### Load Functionality
+1. **Input File Names**:
+   - Arrays are loaded from specified `.txt` files.
+   - The filenames must match the timestamped naming convention used during saving.
+2. **File Format**:
+   - Data is loaded as arrays using a custom file loading function.
+
+### File Details
+- **Filename Format for Saving**:
+  - `activeAddressesPerDayList__Cardano_TXs_All__{Timestamp}.txt`
+  - `activeEntitiesPerDayList__Cardano_TXs_All__{Timestamp}.txt`
+  - Example: `activeAddressesPerDayList__Cardano_TXs_All__2023-04-09_224357.txt`
+- **Data Format**: CSV-like `.txt` files
+- **Columns**: 
+  - Single column containing integers representing daily counts of active addresses or entities.
+
+### Code
+```python
+# Store/Load "active_addresses_per_day_array" and "active_entities_per_day_array" into/from file:
+
+ct = datetime.datetime.now()
+curr_timestamp = str(ct)[0:10] + '_' + str(ct)[11:13] + str(ct)[14:16] + str(ct)[17:19]
+
+# Store "active_addresses_per_day_array" and "active_entities_per_day_array" to file:
+output_filename = BASE_ADDRESS + '/activeAddressesPerDayList__Cardano_TXs_All__' + curr_timestamp + '.txt'
+store_array_to_file(active_addresses_per_day_array, output_filename)
+
+output_filename = BASE_ADDRESS + '/activeEntitiesPerDayList__Cardano_TXs_All__' + curr_timestamp + '.txt'
+store_array_to_file(active_entities_per_day_array, output_filename)
+
+# Load "active_addresses_per_day_array" and "active_entities_per_day_array" from File:
+file_name = BASE_ADDRESS + '/activeAddressesPerDayList__Cardano_TXs_All__2023-04-09_224357.txt'
+active_addresses_per_day_array = load_file_to_array(file_name)
+
+file_name = BASE_ADDRESS + '/activeEntitiesPerDayList__Cardano_TXs_All__2023-04-09_224357.txt'
+active_entities_per_day_array = load_file_to_array(file_name)
+
+```
+
+***
+
+# Calculate "Number of NFT/FT/ADA Entity-Level Transactions" Over Time
 
 This code processes multiple transaction CSV files to compute the number of transactions involving ADA, NFTs, and FTs at the entity level over time.
 
