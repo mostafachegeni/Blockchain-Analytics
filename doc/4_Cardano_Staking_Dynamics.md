@@ -1,6 +1,7 @@
 # 4. Cardano Staking Dynamics
 
-This '.md' file explains the implementation of the corresponding code "**4_Cardano_Staking_Dynamics.ipynb**". The code performs the following analyses:
+This `.md` file provides an explanation of the implementation in the corresponding notebook, **"4_Cardano_Staking_Dynamics.ipynb"**. The code performs the following analyses:
+
 - Calculate "Gini Index" of entities' balances per epoch
 - Calculate "Gini Index" of entities' stake delegations per epoch
 - Calculate "Gini Index" of entities rewards per epoch
