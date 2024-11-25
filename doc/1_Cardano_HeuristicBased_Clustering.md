@@ -1,4 +1,4 @@
-# 1_Cardano_HeuristicBased_Clustering
+# 1. Cardano Heuristic-Based Clustering
 
 This '.md' file explains the implementation of the corresponding code "**1_Cardano_HeuristicBased_Clustering**". The code analyzes Cardano transactions, applies two heuristics to cluster the addresses into entities, and creates/stores the clustering results as an array. The 'code' also generates/stores the edge list of the address network graph.
 
