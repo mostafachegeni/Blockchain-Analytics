@@ -2,7 +2,107 @@
 
 ***
 
-#### File: `parentsList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223712.txt`
+#### File: `AddressListRaw__Cardano_TXs_All__2023-02-28_143357`
+
+### Description
+This file contains a list of all raw addresses extracted from the outputs of transactions in the Cardano network. Raw addresses are complete address strings as they appear in the blockchain, prior to separating into payment and delegation components.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional list of raw addresses.
+  - Each line represents one unique raw address.
+- **Number of Elements**: Equal to the total number of unique raw addresses extracted.
+
+### Example
+```plaintext
+addr1q9xyvqldf3t...wex3npgz
+addr1qx57cde6vkl...87shlm3k
+addr1qqwxyg7xwfj...mlk78hrk
+...
+```
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each list of addresses to its respective text file. This method writes the array line by line.
+- **Loading**: The `load_file_to_array` method can be used to load the lists back into memory as arrays for further analysis.
+
+
+- **Generation Method**:
+  - Addresses were extracted from the `OUTPUTs` column in multiple transaction CSV files.
+  - For each transaction output:
+    - Raw addresses were added directly.
+    - Payment and delegation addresses were derived using the `extract_payment_delegation_parts` function and added to their respective lists.
+
+***
+
+#### File: `AddressListPayment__Cardano_TXs_All__2023-02-28_143953`
+
+### Description
+This file contains a list of all payment addresses extracted from the raw addresses in the Cardano network. Payment addresses are derived by processing raw addresses and represent the payment credential part.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional list of payment addresses.
+  - Each line represents one unique payment address.
+- **Number of Elements**: Equal to the total number of unique payment addresses extracted.
+
+### Example
+```plaintext
+payment1qvl0jxud3vl...asdef34j
+payment1qwz57cjmvlk...67aqds21
+payment1qqvtygkdxvj...as34lmnk
+...
+```
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each list of addresses to its respective text file. This method writes the array line by line.
+- **Loading**: The `load_file_to_array` method can be used to load the lists back into memory as arrays for further analysis.
+
+
+- **Generation Method**:
+  - Addresses were extracted from the `OUTPUTs` column in multiple transaction CSV files.
+  - For each transaction output:
+    - Raw addresses were added directly.
+    - Payment and delegation addresses were derived using the `extract_payment_delegation_parts` function and added to their respective lists.
+
+
+***
+
+#### File: `AddressListDelegation__Cardano_TXs_All__2023-02-28_144415`
+
+This file contains a list of all delegation (stake) addresses extracted from the raw addresses in the Cardano network. Delegation addresses represent the staking part of an address, derived from the raw address string.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional list of delegation addresses.
+  - Each line represents one unique delegation address.
+- **Number of Elements**: Equal to the total number of unique delegation addresses extracted.
+
+### Example
+```plaintext
+stake1uyvqldf3t...9opqkfg
+stake1u57cdexvl...afg123r
+stake1uqwyvgdxj...asdfe3j
+...
+```
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each list of addresses to its respective text file. This method writes the array line by line.
+- **Loading**: The `load_file_to_array` method can be used to load the lists back into memory as arrays for further analysis.
+
+
+- **Generation Method**:
+  - Addresses were extracted from the `OUTPUTs` column in multiple transaction CSV files.
+  - For each transaction output:
+    - Raw addresses were added directly.
+    - Payment and delegation addresses were derived using the `extract_payment_delegation_parts` function and added to their respective lists.
+
+
+***
+
+#### File: `parentsList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223712`
 
 This file contains the parent mapping of addresses in the Cardano transaction network based on **Heuristic 1 without considering smart contracts** (`noSC`). The parent array represents the Union-Find data structure where each index corresponds to a unique address, and the value represents its parent in the clustering hierarchy.
 
@@ -41,7 +141,7 @@ This file contains the parent mapping of addresses in the Cardano transaction ne
 
 ***
 
-#### File: `parentsList_Heuristic2__Cardano_TXs_All__2023-03-26_105842.txt`
+#### File: `parentsList_Heuristic2__Cardano_TXs_All__2023-03-26_105842`
 
 This file contains the parent mapping of addresses in the Cardano transaction network based on **Heuristic 2**. The parent array represents the clustering of addresses into entities, determined by analyzing address relationships specific to Heuristic 2.
 
@@ -79,7 +179,7 @@ This file contains the parent mapping of addresses in the Cardano transaction ne
 
 ***
 
-#### File: `parentsList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-03-26_140958.txt`
+#### File: `parentsList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-03-26_140958`
 
 This file contains the parent mapping of addresses in the Cardano transaction network based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**. The parent array represents the clustering of addresses determined by merging the parent mappings from both heuristics.
 
