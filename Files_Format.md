@@ -1,3 +1,95 @@
+
+***
+
+#### File: `EntityNFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-04-08_075547`
+
+This file contains a list of NFTs (Non-Fungible Tokens) minted by each entity in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**, and NFTs are associated with entities through their minting activity.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A two-dimensional array stored in a line-by-line JSON-like format.
+  - Each index corresponds to an entity.
+  - Each element at the index is a list of `MA_ID`s (Mint Asset IDs) representing NFTs minted by the entity.
+- **Number of Rows**: Equal to the total number of unique entities.
+
+### Example
+```plaintext
+[
+  ["NFT1", "NFT2"], 
+  ["NFT3"], 
+  [], 
+  ["NFT4", "NFT5", "NFT6"], 
+  ...
+]
+```
+- **Example Interpretation**:
+  - Entity 0 minted NFTs `NFT1` and `NFT2`.
+  - Entity 1 minted NFT `NFT3`.
+  - Entity 2 did not mint any NFTs.
+  - Entity 3 minted NFTs `NFT4`, `NFT5`, and `NFT6`, and so on.
+
+### Methods Used
+- **Saving**: The `store_array_to_file_2D` method was used to save the NFT and FT arrays to text files. This method writes the two-dimensional arrays in a JSON-like format, line by line.
+- **Loading**: The `load_file_to_array_2D` method was used to load the NFT and FT arrays back into memory. This method reads the files and converts them into two-dimensional arrays for further analysis.
+
+- **Generation Method**:
+  - **NFTs**:
+    - NFT minting data (`MINT_NFTs`) was extracted from transactions.
+    - For each NFT, the corresponding entity was identified based on the payment address in the transaction input.
+    - If the minting address was a smart contract, the NFT was counted as minted by a smart contract.
+  - **FTs**:
+    - FT minting data (`MINT_FTs`) was extracted similarly, and entities were identified using the same method.
+    - FTs minted by smart contracts were counted separately.
+  - The entity clustering was based on the combination of **Heuristic 1 (noSC)** and **Heuristic 2**.
+
+***
+
+#### File: `EntityFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-04-08_075547`
+
+This file contains a list of FTs (Fungible Tokens) minted by each entity in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**, and FTs are associated with entities through their minting activity.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A two-dimensional array stored in a line-by-line JSON-like format.
+  - Each index corresponds to an entity.
+  - Each element at the index is a list of `MA_ID`s (Mint Asset IDs) representing FTs minted by the entity.
+- **Number of Rows**: Equal to the total number of unique entities.
+
+### Example
+```plaintext
+[
+  ["FT1", "FT2", "FT3"], 
+  [], 
+  ["FT4"], 
+  ["FT5", "FT6"], 
+  ...
+]
+```
+- **Example Interpretation**:
+  - Entity 0 minted FTs `FT1`, `FT2`, and `FT3`.
+  - Entity 1 did not mint any FTs.
+  - Entity 2 minted FT `FT4`.
+  - Entity 3 minted FTs `FT5` and `FT6`, and so on.
+
+
+### Methods Used
+- **Saving**: The `store_array_to_file_2D` method was used to save the NFT and FT arrays to text files. This method writes the two-dimensional arrays in a JSON-like format, line by line.
+- **Loading**: The `load_file_to_array_2D` method was used to load the NFT and FT arrays back into memory. This method reads the files and converts them into two-dimensional arrays for further analysis.
+
+- **Generation Method**:
+  - **NFTs**:
+    - NFT minting data (`MINT_NFTs`) was extracted from transactions.
+    - For each NFT, the corresponding entity was identified based on the payment address in the transaction input.
+    - If the minting address was a smart contract, the NFT was counted as minted by a smart contract.
+  - **FTs**:
+    - FT minting data (`MINT_FTs`) was extracted similarly, and entities were identified using the same method.
+    - FTs minted by smart contracts were counted separately.
+  - The entity clustering was based on the combination of **Heuristic 1 (noSC)** and **Heuristic 2**.
+
+***
+
 #### File: `Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357`
 
 This file contains the sorted and deduplicated list of all raw addresses extracted from the Cardano transaction data. Raw addresses are the complete address strings as they appear in the blockchain.
