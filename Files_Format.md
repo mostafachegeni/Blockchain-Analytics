@@ -1,5 +1,47 @@
 
-#### File: `epochArray_rawAddresses__Cardano_TXs_All__2023-03-27_085508.txt`
+
+***
+
+#### File: `Entities_related_to_Stake_Addresses__Heuristic2__Cardano_TXs_All__2024-01-23_212107`
+
+This file contains the mapping of stake (delegation) addresses to the entities they are associated with, based on **Heuristic 2**. The mapping identifies the entity (cluster) of payment addresses linked to each stake address through transaction outputs. If a stake address does not have an associated entity, a placeholder value of `999999999999` is used.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique stake (delegation) address.
+  - Each value indicates the entity ID associated with the address or the placeholder `999999999999` if no entity is associated.
+- **Number of Elements**: Equal to the total number of unique delegation addresses.
+
+### Example
+```plaintext
+5
+12
+999999999999
+7
+18
+...
+```
+- **Example Interpretation**:
+  - Stake address 0 is linked to entity 5.
+  - Stake address 1 is linked to entity 12.
+  - Stake address 2 has no associated entity, as indicated by the placeholder value.
+  - Stake address 3 is linked to entity 7, and so on.
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save the `entity_of_stake_addresses` array to this text file. This method writes the array in JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the data back into memory. This method reads the text file and converts it into a NumPy array for further analysis.
+
+
+- **Generation Method**:
+  - The mapping was constructed by iterating over transaction outputs across multiple CSV files (`cardano_TXs_Velocity_*`) and linking stake addresses to entities of payment addresses when both address parts were present.
+  - The first observed link between a stake address and an entity was recorded.
+  - A placeholder value (`999999999999`) was assigned to stake addresses with no associated entities.
+
+***
+
+#### File: `epochArray_rawAddresses__Cardano_TXs_All__2023-03-27_085508`
 
 This file contains the epoch numbers when each raw address first appeared on the Cardano blockchain. Each entry corresponds to a unique raw address, and the value indicates the epoch during which the address was first recorded in a transaction output. If an address does not belong to this category, a placeholder value of `999999999999` is used.
 
@@ -34,7 +76,7 @@ This file contains the epoch numbers when each raw address first appeared on the
 
 ***
 
-## File: `epochArray_ByronAddresses__Cardano_TXs_All__2023-03-27_085508.txt`
+## File: `epochArray_ByronAddresses__Cardano_TXs_All__2023-03-27_085508`
 
 ### Description
 This file contains the epoch numbers when each Byron payment address first appeared on the Cardano blockchain. Byron addresses are identified as non-smart contract addresses starting with a specific prefix. If an address does not belong to this category, a placeholder value of `999999999999` is used.
@@ -69,7 +111,7 @@ This file contains the epoch numbers when each Byron payment address first appea
 
 ***
 
-#### File: `epochArray_ShelleyAddresses__Cardano_TXs_All__2023-03-27_085508.txt`
+#### File: `epochArray_ShelleyAddresses__Cardano_TXs_All__2023-03-27_085508`
 
 This file contains the epoch numbers when each Shelley payment address first appeared on the Cardano blockchain. Shelley addresses are identified as non-Byron addresses used in Cardano transactions. If an address does not belong to this category, a placeholder value of `999999999999` is used.
 
@@ -102,7 +144,7 @@ This file contains the epoch numbers when each Shelley payment address first app
 
 ***
 
-#### File: `epochArray_delegationAddresses__Cardano_TXs_All__2023-03-27_085508.txt`
+#### File: `epochArray_delegationAddresses__Cardano_TXs_All__2023-03-27_085508`
 
 This file contains the epoch numbers when each delegation address (stake address) first appeared on the Cardano blockchain. Delegation addresses are associated with stake key identifiers used for staking purposes. If an address does not belong to this category, a placeholder value of `999999999999` is used.
 
@@ -139,7 +181,7 @@ This file contains the epoch numbers when each delegation address (stake address
 
 ***
 
-#### File: `graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_224222.txt`
+#### File: `graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_224222`
 
 This file represents the adjacency list of a graph constructed from Cardano transaction data. The graph edges were generated using **Heuristic 1** without considering smart contracts (`noSC`), and links were created between each payment address and all other addresses involved in the same transaction. Each list in the adjacency array corresponds to a node (payment address) and contains the indices of all other addresses it is linked to.
 
@@ -175,7 +217,7 @@ This file represents the adjacency list of a graph constructed from Cardano tran
 
 ***
 
-#### File: `clusteringArrayList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223957.txt`
+#### File: `clusteringArrayList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223957`
 
 This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 1 without considering smart contracts` (`noSC`). Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
 
@@ -215,7 +257,7 @@ This file contains the clustering results for payment addresses on the Cardano n
 ***
 
 
-#### File: `clusteringArrayList_Heuristic2__Cardano_TXs_All__2023-03-26_110150.txt`
+#### File: `clusteringArrayList_Heuristic2__Cardano_TXs_All__2023-03-26_110150`
 
 This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 2`. Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
 
@@ -253,7 +295,7 @@ This file contains the clustering results for payment addresses on the Cardano n
 
 ***
 
-#### File: `clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-03-26_141212.txt`
+#### File: `clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-03-26_141212`
 
 This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 1 without considering smart contracts` (`noSC`) and `Heuristic 2`. Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
 
@@ -293,7 +335,7 @@ This file contains the clustering results for payment addresses on the Cardano n
 
 ***
 
-#### File: **`activeAddressesPerDayList__Cardano_TXs_All__2023-04-09_224357.txt`**
+#### File: **`activeAddressesPerDayList__Cardano_TXs_All__2023-04-09_224357`**
 
 This file contains the count of unique active payment addresses on the Cardano network for each day within the dataset's date range (from 2017-09-23 to 2023-01-21). Each value corresponds to the number of distinct payment addresses observed in transactions on that day.
 
@@ -321,7 +363,7 @@ This file contains the count of unique active payment addresses on the Cardano n
 
 ***
 
-#### File: `activeEntitiesPerDayList__Cardano_TXs_All__2023-04-09_224357.txt`
+#### File: `activeEntitiesPerDayList__Cardano_TXs_All__2023-04-09_224357`
 
 This file contains the count of unique active entities on the Cardano network for each day within the dataset's date range. An entity represents a group of payment addresses clustered based on their interaction patterns (e.g., input-output relationships).
 
@@ -458,13 +500,13 @@ Each file stores the delegation amounts for entities per epoch. These files trac
 
 - **File Name**:
   ```
-  /Cardano_StakeDelegation_Entities/StakeDelegPerEntityEpoch_XXXX__Cardano_TXs_All.txt
+  /Cardano_StakeDelegation_Entities/StakeDelegPerEntityEpoch_XXXX__Cardano_TXs_All
   ```
   - `XXXX`: Zero-padded epoch number.
-  - Example: `StakeDelegPerEntityEpoch_0210__Cardano_TXs_All.txt`.
+  - Example: `StakeDelegPerEntityEpoch_0210__Cardano_TXs_All`.
 
 - **File Format**:
-  - **Type**: Plain text file (`.txt`).
+  - **Type**: Plain text 
   - **Structure**: Each line represents the total delegation amount for an entity in the epoch.
   - **Length**: The number of lines corresponds to the total number of entities (indexed by clustering array).
 
@@ -520,13 +562,13 @@ This data is aggregated for each epoch and stored in arrays, not individual file
 
 | **Output**                                  | **Format**        | **Details**                                                                                           | **Example**                           |
 |---------------------------------------------|-------------------|-------------------------------------------------------------------------------------------------------|---------------------------------------|
-| **Active Delegators (Entities)**            | Text file (`.txt`) | Lines correspond to delegation amounts for entities in a specific epoch.                              | `0\n100000\n500000\n...`              |
+| **Active Delegators (Entities)**            | Text file          | Lines correspond to delegation amounts for entities in a specific epoch.                              | `0\n100000\n500000\n...`              |
 | **Active Delegators (Stake Addresses)**     | Python arrays      | Two arrays tracking the number of active delegator addresses and entities per epoch.                  | `[1000, 1200, 1100, ...]`             |
 
 ***
 
 
-#### **File: `Num_Delegator_addresses_per_epoch__Cardano_TXs_All__<timestamp>.txt`**
+#### **File: `Num_Delegator_addresses_per_epoch__Cardano_TXs_All__<timestamp>`**
 
 - **Purpose**: 
   Tracks the number of unique delegator addresses active during each epoch.
@@ -551,7 +593,7 @@ This data is aggregated for each epoch and stored in arrays, not individual file
 
 ***
 
-#### **File: `Num_Delegator_entities_per_epoch__Cardano_TXs_All__<timestamp>.txt`**
+#### **File: `Num_Delegator_entities_per_epoch__Cardano_TXs_All__<timestamp>`**
 
 - **Purpose**:
   Tracks the number of unique delegator entities active during each epoch.
@@ -576,13 +618,13 @@ This data is aggregated for each epoch and stored in arrays, not individual file
 
 ***
 
-#### **File: `Num_Rewarder_addresses_per_epoch__Cardano_TXs_All__<timestamp>.txt`**
+#### **File: `Num_Rewarder_addresses_per_epoch__Cardano_TXs_All__<timestamp>`**
 
 - **Purpose**:
   Tracks the number of unique rewarder addresses active during each epoch.
 
 - **File Format**:
-  - **Type**: Plain text file (`.txt`).
+  - **Type**: Plain text 
   - **Structure**:
     - Each line contains the count of unique rewarder addresses for one epoch.
   - **Number of Columns**: 1 (Count of rewarder addresses per epoch).
