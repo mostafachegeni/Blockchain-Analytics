@@ -1,7 +1,8 @@
 # 3. Cardano Create "Address Network" Graph
 
+This '.md' file explains the implementation of the corresponding code "**3_Cardano_CreateAddrsNetworkGraph.ipynb**". The code analyzes creates the address network graph for Cardano addresses based on heuristic-based address clustering. Afterward, the largest connected components (superclusters) are identified, and a community detection algorithm (label propagation) is applied to them.
 
-In the following sections, each cell in the corresponding 'code' (with a similar filename in the code directory of this repository) is documented with a brief description of its purpose and functionality, followed by the summarized cell code.
+In the following sections, each cell in the corresponding 'code' is documented with a brief description of its purpose and functionality, followed by the summarized cell code.
 
 ***
 
