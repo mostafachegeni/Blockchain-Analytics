@@ -1023,3 +1023,462 @@ _EOF_
 
 ***
 
+
+#### **`cardano_pools.csv`**
+
+This query generates a CSV file containing details of staking pools in the Cardano network, including their stake amounts and rewards for each epoch.
+
+- **File Format**: CSV with `,` as the delimiter and a header row.
+- **File Content**: The file includes aggregated information about active staking pools and their rewards.
+- **Scope**:
+  - Stake amounts (`POOL_STAKES`) by epoch and pool
+  - Rewards earned (`POOL_REWARDS`) by epoch and pool
+
+
+### Column Details
+
+#### 1. **EPOCH**
+   - **Type**: Integer
+   - **Description**: The epoch number during which the stakes and rewards were recorded.
+
+#### 2. **POOL_ID**
+   - **Type**: String
+   - **Description**: Unique identifier of the staking pool.
+
+#### 3. **POOL_STAKES**
+   - **Type**: Numeric
+   - **Description**: Total amount of ADA staked in the pool for the corresponding epoch.
+
+#### 4. **POOL_REWARDS**
+   - **Type**: Numeric
+   - **Description**: Total rewards distributed to the pool for the corresponding epoch. If no rewards were distributed, this value is `0`.
+
+- **Joins**:
+  - Combines data from:
+    - `epoch_stake`: To calculate total stakes per epoch and pool.
+    - `reward`: To calculate total rewards distributed per epoch and pool.
+  - Pools with stakes but no rewards are included using a `LEFT JOIN` with `COALESCE` to handle null rewards.
+- **Grouping**: Data is grouped by `EPOCH` and `POOL_ID`.
+- **Order**: Results are ordered by `EPOCH` and descending `POOL_REWARDS`.
+
+
+For schema details, refer to the [Cardano DB Schema Documentation](https://github.com/IntersectMBO/cardano-db-sync/blob/13.3.0.0/doc/schema.md).
+
+```sql
+# Epoch | pool_id | stake amount | rewards amount
+cat <<_EOF_ | tr '\n' ' ' | PGPASSWORD='???' \psql -h <IP> -p <PORT> -U postgres cexplorer 
+\copy ( 
+    WITH things as (
+        WITH    active_pools    as (select epoch_no     as "EPOCH", pool_id as "POOL_ID", sum(amount) as "POOL_STAKES"  from epoch_stake group by epoch_no, pool_id ), 
+                rewarded_pools  as (select earned_epoch as "EPOCH", pool_id as "POOL_ID", sum(amount) as "POOL_REWARDS" from reward      group by earned_epoch, pool_id) 
+        SELECT  a."EPOCH" as "EPOCH", a."POOL_ID" as "POOL_ID", a."POOL_STAKES", COALESCE(r."POOL_REWARDS",0) as "POOL_REWARDS" 
+            FROM active_pools a LEFT JOIN rewarded_pools r ON a."EPOCH"=r."EPOCH" AND a."POOL_ID"=r."POOL_ID") 
+    SELECT * FROM things t ORDER BY t."EPOCH", t."POOL_REWARDS" desc 
+) TO '/cardano_pools.csv' WITH CSV DELIMITER ',' HEADER 
+_EOF_
+```
+
+***
+
+#### **`cardano_pools_2.csv`**
+
+This query generates a CSV file containing information about staking pools in the Cardano network, including their stake amounts, rewards, and pool hash in Bech32 format for each epoch.
+
+- **File Format**: CSV with `,` as the delimiter and a header row.
+- **File Content**: Aggregates data about staking pools, including:
+  - Stake amounts (`POOL_STAKES`) for each pool in an epoch.
+  - Rewards distributed (`POOL_REWARDS`) to each pool.
+  - Staking pool hash in Bech32 format (`POOL_HASH_BECH32`).
+- **Scope**: Covers all pools, including those with stakes but no rewards (reward amount set to `0`).
+
+
+### Column Details
+
+#### 1. **EPOCH**
+   - **Type**: Integer
+   - **Description**: The epoch number during which the stakes and rewards were recorded.
+
+#### 2. **POOL_HASH_BECH32**
+   - **Type**: String
+   - **Description**: The Bech32 format of the staking pool's hash, representing the pool's unique identifier.
+
+#### 3. **POOL_STAKES**
+   - **Type**: Numeric
+   - **Description**: Total amount of ADA staked in the pool for the corresponding epoch.
+
+#### 4. **POOL_REWARDS**
+   - **Type**: Numeric
+   - **Description**: Total rewards distributed to the pool for the corresponding epoch. If no rewards were distributed, this value is `0`.
+
+
+- **Joins**:
+  - Combines data from:
+    - `epoch_stake`: To calculate total stakes per epoch and pool.
+    - `reward`: To calculate total rewards distributed per epoch and pool.
+    - `pool_hash`: To fetch the Bech32 hash representation of the pool.
+  - Pools with stakes but no rewards are included using a `LEFT JOIN` with `COALESCE` to handle null rewards.
+
+- **Grouping**: Data is grouped by `EPOCH` and `POOL_ID`.
+
+- **Order**: Results are ordered by `EPOCH` and descending `POOL_REWARDS`.
+
+
+
+For further details on the database schema, refer to the [Cardano DB Schema Documentation](https://github.com/IntersectMBO/cardano-db-sync/blob/13.3.0.0/doc/schema.md).
+
+```sql
+# Epoch | pool_hash | stake amount | rewards amount
+cat <<_EOF_ | tr '\n' ' ' | PGPASSWORD=postgres \psql -h <IP> -p <PORT> -U postgres cexplorer 
+\copy ( 
+    WITH things as (
+        WITH    active_pools    as (select epoch_no     as "EPOCH", pool_id as "POOL_ID", sum(amount) as "POOL_STAKES"  from epoch_stake group by epoch_no, pool_id), 
+                rewarded_pools  as (select earned_epoch as "EPOCH", pool_id as "POOL_ID", sum(amount) as "POOL_REWARDS" from reward      group by earned_epoch, pool_id) 
+        SELECT  a."EPOCH" as "EPOCH", p.view as "POOL_HASH_BECH32", a."POOL_STAKES", COALESCE(r."POOL_REWARDS",0) as "POOL_REWARDS" 
+            FROM active_pools a LEFT JOIN pool_hash p      ON a."POOL_ID" = p.id 
+                                LEFT JOIN rewarded_pools r ON a."EPOCH"=r."EPOCH" AND a."POOL_ID"=r."POOL_ID") 
+    SELECT * FROM things t ORDER BY t."EPOCH", t."POOL_REWARDS" desc 
+) TO '/cardano_pools_2.csv' WITH CSV DELIMITER ',' HEADER 
+_EOF_
+```
+
+
+***
+
+#### **`cardano_pools_3.csv`**
+
+
+This query generates a CSV file with aggregated information about staking pools in the Cardano network, including details on stakes, rewards, and the number of delegators and rewarders for each epoch.
+
+- **File Format**: CSV with `,` as the delimiter and a header row.
+- **File Content**: Contains aggregated data on staking pools:
+  - Total stake amounts (`POOL_STAKES`) for each pool in an epoch.
+  - Rewards distributed (`POOL_REWARDS`) to each pool.
+  - Number of unique delegators contributing to the pool (`NUM_OF_DELEGATORS`).
+  - Number of unique reward recipients in the pool (`NUM_OF_REWARDERS`).
+  - Staking pool hash (`POOL_HASH_BECH32`) for pool identification.
+
+
+### Column Details
+
+#### 1. **EPOCH**
+   - **Type**: Integer
+   - **Description**: The epoch number during which the stakes and rewards were recorded.
+
+#### 2. **POOL_HASH_BECH32**
+   - **Type**: String
+   - **Description**: Bech32-encoded hash representing the unique identifier of the staking pool.
+
+#### 3. **POOL_STAKES**
+   - **Type**: Numeric
+   - **Description**: Total amount of ADA staked in the pool during the epoch.
+
+#### 4. **POOL_REWARDS**
+   - **Type**: Numeric
+   - **Description**: Total rewards distributed to the pool for the epoch. If no rewards were distributed, this value is `0`.
+
+#### 5. **NUM_OF_DELEGATORS**
+   - **Type**: Integer
+   - **Description**: Number of unique delegators staking ADA in the pool during the epoch.
+
+#### 6. **NUM_OF_REWARDERS**
+   - **Type**: Integer
+   - **Description**: Number of unique reward recipients from the pool during the epoch. If no rewards were distributed, this value is `0`.
+
+
+
+### Query Design
+
+1. **Data Sources**:
+   - `epoch_stake`: Provides stake amounts and unique delegator counts (`NUM_OF_DELEGATORS`) for each pool in an epoch.
+   - `reward`: Provides reward amounts and unique reward recipient counts (`NUM_OF_REWARDERS`) for each pool in an epoch.
+   - `pool_hash`: Maps pool IDs to their Bech32 hash representations.
+
+2. **Joins**:
+   - `LEFT JOIN` with `rewarded_pools` ensures that pools with stakes but no rewards are included, setting `POOL_REWARDS` and `NUM_OF_REWARDERS` to `0` when necessary.
+   - `LEFT JOIN` with `pool_hash` fetches the Bech32 pool hash for each pool ID.
+
+3. **Grouping**:
+   - Aggregates data by `EPOCH` and `POOL_ID`.
+
+4. **Ordering**:
+   - Results are ordered by `EPOCH` (ascending) and `POOL_REWARDS` (descending).
+
+
+
+For schema details, refer to the [Cardano DB Schema Documentation](https://github.com/IntersectMBO/cardano-db-sync/blob/13.3.0.0/doc/schema.md).
+
+```sql
+# Epoch | pool_hash | stake amount | rewards amount | num of delegators | num of rewarders 
+cat <<_EOF_ | tr '\n' ' ' | PGPASSWORD=postgres \psql -h <IP> -p <PORT> -U postgres cexplorer 
+\copy ( 
+    WITH things as (
+        WITH    active_pools    as (select epoch_no     as "EPOCH", pool_id as "POOL_ID", sum(amount) as "POOL_STAKES",  count(distinct addr_id) as "NUM_OF_DELEGATORS"  from epoch_stake group by epoch_no, pool_id), 
+                rewarded_pools  as (select earned_epoch as "EPOCH", pool_id as "POOL_ID", sum(amount) as "POOL_REWARDS", count(distinct addr_id) as "NUM_OF_REWARDERS"   from reward      group by earned_epoch, pool_id) 
+        SELECT  a."EPOCH"                        as "EPOCH", 
+                p.view                           as "POOL_HASH_BECH32", 
+                a."POOL_STAKES"                  as "POOL_STAKES", 
+                COALESCE(r."POOL_REWARDS",0)     as "POOL_REWARDS", 
+                a."NUM_OF_DELEGATORS"            as "NUM_OF_DELEGATORS", 
+                COALESCE(r."NUM_OF_REWARDERS",0) as "NUM_OF_REWARDERS" 
+            FROM active_pools a LEFT JOIN pool_hash p      ON a."POOL_ID" = p.id 
+                                LEFT JOIN rewarded_pools r ON a."EPOCH"=r."EPOCH" AND a."POOL_ID"=r."POOL_ID"
+    ) 
+    SELECT * FROM things t ORDER BY t."EPOCH", t."POOL_REWARDS" desc 
+) TO '/cardano_pools_3.csv' WITH CSV DELIMITER ',' HEADER 
+_EOF_
+```
+
+
+***
+
+#### **`cardano_pools_4.csv`**
+
+
+This query generates a CSV file containing detailed information about Cardano staking pools, including their stake and rewards data, the number of delegators and rewarders, and detailed lists of delegators and rewarders.
+
+
+- **File Format**: CSV with `|` as the delimiter and a header row.
+- **File Content**: Includes aggregated and detailed information about staking pools:
+  - Total stake and rewards (`POOL_STAKES`, `POOL_REWARDS`) for each pool in an epoch.
+  - The number of delegators (`NUM_OF_DELEGATORS`) and rewarders (`NUM_OF_REWARDERS`) for each pool.
+  - Detailed lists of delegators and rewarders, including their stake address IDs, delegated amounts, and raw stake addresses.
+
+
+### Column Details
+
+#### 1. **EPOCH**
+   - **Type**: Integer
+   - **Description**: The epoch number during which the stakes and rewards were recorded.
+
+#### 2. **POOL_ID**
+   - **Type**: Integer
+   - **Description**: Unique identifier of the staking pool.
+
+#### 3. **POOL_HASH_BECH32**
+   - **Type**: String
+   - **Description**: Bech32-encoded hash representing the unique identifier of the staking pool.
+
+#### 4. **POOL_STAKES**
+   - **Type**: Numeric
+   - **Description**: Total amount of ADA staked in the pool during the epoch.
+
+#### 5. **POOL_REWARDS**
+   - **Type**: Numeric
+   - **Description**: Total rewards distributed to the pool for the epoch. If no rewards were distributed, this value is `0`.
+
+#### 6. **NUM_OF_DELEGATORS**
+   - **Type**: Integer
+   - **Description**: Number of unique delegators staking ADA in the pool during the epoch.
+
+#### 7. **NUM_OF_REWARDERS**
+   - **Type**: Integer
+   - **Description**: Number of unique reward recipients from the pool during the epoch. If no rewards were distributed, this value is `0`.
+
+#### 8. **DELEGATORs**
+   - **Type**: String (Aggregated)
+   - **Description**: Aggregated details of all delegators staking ADA in the pool during the epoch.
+   - **Format**: Aggregated string separated by `;`, where each entry contains:
+     - `addr_id`: Stake address ID of the delegator.
+     - `amount`: Amount of ADA delegated.
+     - `hash_raw`: Raw stake address of the delegator.
+
+#### 9. **REWARDERs**
+   - **Type**: String (Aggregated)
+   - **Description**: Aggregated details of all reward recipients from the pool during the epoch.
+   - **Format**: Aggregated string separated by `;`, where each entry contains:
+     - `addr_id`: Stake address ID of the reward recipient.
+     - `amount`: Amount of ADA rewarded.
+     - `hash_raw`: Raw stake address of the reward recipient.
+
+
+### Query Design Notes
+
+1. **Data Sources**:
+   - `epoch_stake`: Provides stake amounts and unique delegator details (`NUM_OF_DELEGATORS`, `DELEGATORs`) for each pool in an epoch.
+   - `reward`: Provides reward amounts and unique reward recipient details (`NUM_OF_REWARDERS`, `REWARDERs`) for each pool in an epoch.
+   - `pool_hash`: Maps pool IDs to their Bech32 hash representations.
+
+2. **Joins**:
+   - Combines data from the `epoch_stake` and `reward` tables.
+   - `LEFT JOIN` with `pool_hash` fetches the Bech32 pool hash.
+   - `LEFT JOIN` with `stake_address` adds detailed delegator and rewarder information.
+
+3. **Grouping**:
+   - Aggregates data by `EPOCH` and `POOL_ID`.
+
+4. **Ordering**:
+   - Results are ordered by `EPOCH` (ascending) and `POOL_REWARDS` (descending).
+
+
+- **Breakdown Delegator and Rewarder Details**: Generate separate tables for delegators and rewarders with individual rows for each record.
+- **Reward Analysis**: Add a reward-to-stake ratio for each pool.
+
+
+For schema details, refer to the [Cardano DB Schema Documentation](https://github.com/IntersectMBO/cardano-db-sync/blob/13.3.0.0/doc/schema.md).
+
+```sql
+# Epoch | pool_id | pool_hash | stake amount | rewards amount | num of delegators | num of rewarders |
+# | delegators (stake address id, delegated amount, stake address) |
+# | rewarders  (stake address id, delegated amount, stake address) |
+
+cat <<_EOF_ | tr '\n' ' ' | PGPASSWORD='???' \psql -h <IP> -p <PORT> -U postgres cexplorer 
+\copy ( 
+    WITH things as (
+        WITH    active_pools    as (select  e.epoch_no     as "EPOCH", e.pool_id as "POOL_ID", sum(e.amount) as "POOL_STAKES",  count(distinct e.addr_id) as "NUM_OF_DELEGATORS", 
+                                            STRING_AGG(distinct concat(e.addr_id, ',', e.amount, ',', s.hash_raw, ','), E';') as "DELEGATORs" 
+                                        from epoch_stake e 
+                                            LEFT JOIN stake_address s ON e.addr_id = s.id 
+                                        group by e.epoch_no, e.pool_id 
+                ), 
+                rewarded_pools  as (select  r.earned_epoch as "EPOCH", r.pool_id as "POOL_ID", sum(r.amount) as "POOL_REWARDS", count(distinct r.addr_id) as "NUM_OF_REWARDERS", 
+                                            STRING_AGG(distinct concat(r.addr_id, ',', r.amount, ',', s.hash_raw, ','), E';') as "REWARDERs" 
+                                        from reward r 
+                                            LEFT JOIN stake_address s ON r.addr_id = s.id 
+                                        group by r.earned_epoch, r.pool_id 
+                ) 
+        SELECT  a."EPOCH"                        as "EPOCH", 
+                a."POOL_ID"                      as "POOL_ID", 
+                p.view                           as "POOL_HASH_BECH32", 
+                a."POOL_STAKES"                  as "POOL_STAKES", 
+                COALESCE(r."POOL_REWARDS",0)     as "POOL_REWARDS", 
+                a."NUM_OF_DELEGATORS"            as "NUM_OF_DELEGATORS", 
+                COALESCE(r."NUM_OF_REWARDERS",0) as "NUM_OF_REWARDERS", 
+                a."DELEGATORs"                   as "DELEGATORs", 
+                r."REWARDERs"                    as "REWARDERs" 
+            FROM active_pools a LEFT JOIN pool_hash p      ON a."POOL_ID" = p.id 
+                                LEFT JOIN rewarded_pools r ON a."EPOCH"=r."EPOCH" AND a."POOL_ID"=r."POOL_ID" 
+    ) 
+    SELECT * FROM things t ORDER BY t."EPOCH", t."POOL_REWARDS" desc 
+) TO '/cardano_pools_4.csv' WITH CSV DELIMITER '|' HEADER 
+_EOF_
+```
+
+
+***
+
+#### **`cardano_pools_5.csv`**
+
+This query generates a CSV file containing detailed information about Cardano staking pools for each epoch, including stakes, rewards, delegators, and rewarders. Additionally, it provides a detailed breakdown of delegator and rewarder data.
+
+
+- **File Format**: CSV with `|` as the delimiter and a header row.
+- **File Content**: Includes aggregated and detailed information for each pool, including:
+  - Epoch and pool identifiers (`EPOCH`, `POOL_ID`, `POOL_HASH_BECH32`).
+  - Total stake amounts (`POOL_STAKES`) and rewards distributed (`POOL_REWARDS`).
+  - Number of delegators and rewarders.
+  - Detailed lists of delegators and rewarders with their stake addresses, amounts, and reward types.
+
+
+### Column Details
+
+#### 1. **EPOCH**
+   - **Type**: Integer
+   - **Description**: The epoch number during which the stakes and rewards were recorded.
+
+#### 2. **POOL_ID**
+   - **Type**: Integer
+   - **Description**: Unique identifier for the staking pool.
+
+#### 3. **POOL_HASH_BECH32**
+   - **Type**: String
+   - **Description**: Bech32-encoded hash representing the staking pool.
+
+#### 4. **POOL_STAKES**
+   - **Type**: Numeric
+   - **Description**: Total amount of ADA staked in the pool during the epoch.
+
+#### 5. **POOL_REWARDS**
+   - **Type**: Numeric
+   - **Description**: Total rewards distributed to the pool during the epoch. If no rewards were distributed, this value is `0`.
+
+#### 6. **NUM_OF_DELEGATORS**
+   - **Type**: Integer
+   - **Description**: Number of unique delegators staking ADA in the pool during the epoch.
+
+#### 7. **NUM_OF_REWARDERS**
+   - **Type**: Integer
+   - **Description**: Number of unique reward recipients from the pool during the epoch. If no rewards were distributed, this value is `0`.
+
+#### 8. **DELEGATORs**
+   - **Type**: String (Aggregated)
+   - **Description**: Aggregated details of all delegators staking ADA in the pool during the epoch.
+   - **Format**: Aggregated string separated by `;`, where each entry contains:
+     - `addr_id`: Stake address ID of the delegator.
+     - `amount`: Amount of ADA delegated.
+     - `hash_raw`: Raw stake address of the delegator.
+
+#### 9. **REWARDERs**
+   - **Type**: String (Aggregated)
+   - **Description**: Aggregated details of all reward recipients from the pool during the epoch.
+   - **Format**: Aggregated string separated by `;`, where each entry contains:
+     - `addr_id`: Stake address ID of the reward recipient.
+     - `amount`: Amount of ADA rewarded.
+     - `hash_raw`: Raw stake address of the reward recipient.
+     - `type`: Type of reward (e.g., "leader", "member").
+
+
+### Query Design Notes
+
+1. **Data Sources**:
+   - `epoch_stake`: Provides stake amounts and unique delegator details for each pool in an epoch.
+   - `reward`: Provides reward amounts, reward recipient details, and reward types for each pool in an epoch.
+   - `pool_hash`: Maps pool IDs to their Bech32 hash representations.
+   - `stake_address`: Adds detailed address information for delegators and rewarders.
+
+2. **Joins**:
+   - Combines data from the `epoch_stake` and `reward` tables.
+   - `LEFT JOIN` with `pool_hash` to fetch Bech32 pool hashes.
+   - `LEFT JOIN` with `stake_address` for address details.
+
+3. **Grouping**:
+   - Aggregates data by `EPOCH` and `POOL_ID`.
+
+4. **Ordering**:
+   - Results are ordered by `EPOCH` (ascending) and `POOL_REWARDS` (descending).
+
+
+For schema details, refer to the [Cardano DB Schema Documentation](https://github.com/IntersectMBO/cardano-db-sync/blob/13.3.0.0/doc/schema.md).
+
+
+```sql
+# Epoch | pool_id | pool_hash | stake amount | rewards amount | num of delegators | num of rewarders |
+# | delegators (stake address id, delegated amount, stake address) |
+# | rewarders  (stake address id, delegated amount, stake address) |
+
+
+#cat <<_EOF_ | tr '\n' ' ' | PGPASSWORD=postgres \psql -h 172.23.38.242 -p 5432 -U postgres cexplorer 
+cat <<_EOF_ | tr '\n' ' ' | PGPASSWORD='???' \psql -h -h <IP> -p <PORT> -U utxoexplorer utxoexplorer 
+\copy ( 
+    WITH things as (
+        WITH    active_pools    as (select  e.epoch_no     as "EPOCH", e.pool_id as "POOL_ID", sum(e.amount) as "POOL_STAKES",  count(distinct e.addr_id) as "NUM_OF_DELEGATORS", 
+                                            STRING_AGG(distinct concat(e.addr_id, ',', e.amount, ',', s.hash_raw, ','), E';') as "DELEGATORs" 
+                                        from epoch_stake e 
+                                            LEFT JOIN stake_address s ON e.addr_id = s.id 
+                                        group by e.epoch_no, e.pool_id 
+                ), 
+                rewarded_pools  as (select  r.earned_epoch as "EPOCH", r.pool_id as "POOL_ID", sum(r.amount) as "POOL_REWARDS", count(distinct r.addr_id) as "NUM_OF_REWARDERS", 
+                                            STRING_AGG(distinct concat(r.addr_id, ',', r.amount, ',', s.hash_raw, ',', r.type, ','), E';') as "REWARDERs" 
+                                        from reward r 
+                                            LEFT JOIN stake_address s ON r.addr_id = s.id 
+                                        group by r.earned_epoch, r.pool_id 
+                ) 
+        SELECT  a."EPOCH"                        as "EPOCH", 
+                a."POOL_ID"                      as "POOL_ID", 
+                p.view                           as "POOL_HASH_BECH32", 
+                a."POOL_STAKES"                  as "POOL_STAKES", 
+                COALESCE(r."POOL_REWARDS",0)     as "POOL_REWARDS", 
+                a."NUM_OF_DELEGATORS"            as "NUM_OF_DELEGATORS", 
+                COALESCE(r."NUM_OF_REWARDERS",0) as "NUM_OF_REWARDERS", 
+                a."DELEGATORs"                   as "DELEGATORs", 
+                r."REWARDERs"                    as "REWARDERs" 
+            FROM active_pools a LEFT JOIN pool_hash p      ON a."POOL_ID" = p.id 
+                                LEFT JOIN rewarded_pools r ON a."EPOCH"=r."EPOCH" AND a."POOL_ID"=r."POOL_ID" 
+    ) 
+    SELECT * FROM things t ORDER BY t."EPOCH", t."POOL_REWARDS" desc 
+) TO './cardano_pools_5.csv' WITH CSV DELIMITER '|' HEADER 
+_EOF_
+```
+
+
+***
+
