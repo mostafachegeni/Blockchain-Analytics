@@ -1,4 +1,124 @@
 
+***
+
+#### File: `Largest<number>_cc_subgraph_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-26_131418.pickle`
+
+This file contains a serialized graph object representing the `<number>`th largest connected component (CC) of the Cardano address network, constructed using **Heuristic 1 without considering smart contracts** (`noSC`). The subgraph was extracted from the complete graph (`Graph G`) by isolating the `<number>`th largest set of connected nodes based on transaction co-occurrence data.
+
+### Format
+- **Type**: Pickle file (serialized Python object).
+- **Structure**:
+  - A graph object (`networkx.Graph`) where:
+    - Nodes represent unique addresses in the `<number>`th largest connected component.
+    - Edges represent connections between addresses, with weights indicating the frequency of interaction.
+    - The subgraph is a copy of the isolated component.
+
+### Example (Conceptual Representation)
+```python
+largest_cc_subgraph.nodes()
+# [3, 7, 12, 45, ...]
+
+largest_cc_subgraph.edges(data=True)
+# [(3, 7, {'weight': 2}), (7, 12, {'weight': 1}), ...]
+```
+
+- **Example Interpretation**:
+  - Node 3 is connected to Node 7 with a weight of 2.
+  - Node 7 is connected to Node 12 with a weight of 1, and so on.
+
+### Properties of the Subgraph
+- **Connectivity**: The subgraph is fully connected, as verified using `nx.is_connected()`.
+- **Number of Nodes**: `largest_cc_subgraph.number_of_nodes()`.
+- **Number of Edges**: `largest_cc_subgraph.number_of_edges()`.
+
+### Methods Used
+- **Saving**: **The `pickle.dump` method was used to serialize and save the subgraph object to a file. This ensures efficient storage of the graph structure and associated metadata.
+- **Loading**: **The `pickle.load` method was used to deserialize and load the subgraph object into memory for further analysis.
+
+- **Generation Method**:
+  - The `<number>`th largest connected component was identified by:
+    1. Sorting all connected components of the complete graph (`Graph G`) by size in descending order.
+    2. Extracting the `<number>`th component as a subgraph using `G.subgraph()`.
+
+
+***
+
+#### File: `Graph_G_AddrsNetwork_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-26_000507.pickle`
+
+This file contains a serialized graph object (`Graph G`) representing the Cardano transaction network. The graph was constructed using **Heuristic 1 without considering smart contracts** (`noSC`) and is based on the weighted adjacency list stored in `graphWeightsArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_234559.txt`. Nodes represent addresses, and edges represent co-occurrence relationships in transactions, with weights indicating the frequency of interactions.
+
+### Format
+- **Type**: Pickle file (serialized Python object).
+- **Structure**:
+  - A graph object (`networkx.Graph`) where:
+    - Nodes correspond to unique addresses in the Cardano transaction network.
+    - Weighted edges represent the strength of the connection between two addresses based on their frequency of co-occurrence.
+
+### Example (Conceptual Representation)
+```python
+G.nodes()
+# [0, 1, 2, 3, ...]
+
+G.edges(data=True)
+# [(0, 1, {'weight': 2}), (0, 2, {'weight': 3}), (1, 3, {'weight': 1}), ...]
+```
+
+- **Example Interpretation**:
+  - Node 0 is connected to Node 1 with a weight of 2.
+  - Node 0 is connected to Node 2 with a weight of 3.
+  - Node 1 is connected to Node 3 with a weight of 1, and so on.
+
+
+### Methods Used
+- **Saving**: The `pickle.dump` method was used to serialize and save the graph object to a file. This method ensures efficient storage of the graph structure and metadata.
+- **Loading**: The `pickle.load` method was used to deserialize and load the graph object into memory for analysis.
+
+
+- **Generation Method**:
+  - The graph was constructed using the weighted adjacency list (`graph_weights`) derived from Cardano transaction data.
+  - Each address was added as a node, and weighted edges were created using the `add_weighted_edges_from` method of the `networkx` library.
+
+***
+
+#### File: `graphWeightsArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_234559`
+
+### Description
+This file contains the weighted adjacency list of a graph representing the Cardano transaction network. The weights of edges between addresses indicate the number of times the addresses were identified together (clustered) in a transaction based on **Heuristic 1 without considering smart contracts** (`noSC`). The file captures all weighted connections between addresses.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A two-dimensional array stored in a line-by-line JSON-like format.
+  - Each index corresponds to a unique address.
+  - Each element is a list of tuples, where each tuple contains:
+    - The index of a connected address.
+    - The weight of the edge (an integer representing the frequency of co-occurrence in transactions).
+- **Number of Rows**: Equal to the total number of unique addresses (`unique_addresses_len`).
+
+### Example
+```plaintext
+[(1, 2), (2, 3)], 
+[(0, 2), (3, 1)], 
+[(0, 3)], 
+[(1, 1)]
+```
+
+- **Example Interpretation**:
+  - Address 0 is connected to Address 1 with a weight of 2 and to Address 2 with a weight of 3.
+  - Address 1 is connected to Address 0 with a weight of 2 and to Address 3 with a weight of 1.
+  - Address 2 is connected to Address 0 with a weight of 3, and so on.
+
+### Methods Used
+- **Saving**: The weighted adjacency list was saved to a text file using a custom method that writes each list of tuples line by line.
+- **Loading**: **The file was loaded back into memory by parsing each line as a list of tuples using Python's `ast.literal_eval` method.
+
+
+- **Generation Method**:
+  - The graph edges were first generated and stored in the file `graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_224222.txt`.
+  - Weights were calculated using the `find_weights_graphEdges` function:
+    - Each time two addresses were clustered together in a transaction, the weight of the edge between them was incremented by 1.
+  - The resulting weighted adjacency list was stored in the current file.
+
 
 ***
 
