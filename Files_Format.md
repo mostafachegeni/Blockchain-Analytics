@@ -1,7 +1,7 @@
 
 #### File: `clusteringArrayList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223957.txt`
 
-This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 1` without considering smart contracts (`noSC`). Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
+This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 1 without considering smart contracts` (`noSC`). Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
 
 ### Format
 - **Type**: Text file
@@ -77,9 +77,9 @@ This file contains the clustering results for payment addresses on the Cardano n
 
 ***
 
-#### File: `clusteringArrayList_Heuristic2__Cardano_TXs_All__2023-03-26_110150.txt`
+#### File: `clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-03-26_141212.txt`
 
-This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 1` and `Heuristic 2`. Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
+This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 1 without considering smart contracts` (`noSC`) and `Heuristic 2`. Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
 
 ### Format
 - **Type**: Text file
