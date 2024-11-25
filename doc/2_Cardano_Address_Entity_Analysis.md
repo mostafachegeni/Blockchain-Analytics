@@ -1,4 +1,4 @@
-# 2_Cardano Address/Entity Analysis
+# 2. Cardano Address/Entity Analysis
 
 This '.md' file explains the implementation of the corresponding code "**2_Cardano_Address_Entity_Analysis.ipynb**". The code performs the following analyses:
 - Calculate the number of members in each cluster (based on heuristic 1 and/or 2)
