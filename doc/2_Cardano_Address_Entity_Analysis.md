@@ -1,6 +1,7 @@
 # 2. Cardano Address/Entity Analysis
 
-This '.md' file explains the implementation of the corresponding code "**2_Cardano_Address_Entity_Analysis.ipynb**". The code performs the following analyses:
+This `.md` file provides an explanation of the implementation in the corresponding notebook, **"2_Cardano_Address_Entity_Analysis.ipynb"**. The code performs the following analyses:
+
 - Calculate the number of members in each cluster (based on heuristic 1 and/or 2)
 - Fitting power-law distributions to the distribution of cluster sizes
 - Finding the corresponding "Entity ID" for Each "Stake Address" (Delegation Address) based on Heuristic 2
