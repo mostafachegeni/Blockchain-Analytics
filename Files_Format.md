@@ -1,4 +1,110 @@
+#### File: `Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357`
 
+This file contains the sorted and deduplicated list of all raw addresses extracted from the Cardano transaction data. Raw addresses are the complete address strings as they appear in the blockchain.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional list of unique raw addresses, sorted lexicographically.
+  - Each line represents one unique raw address.
+- **Number of Elements**: Equal to the total number of unique raw addresses.
+
+### Example
+```plaintext
+addr1q57fghjsl...hxyzlmn
+addr1qxabcuvw...defmnop
+addr1qynopqrs...tuvwxyz
+...
+```
+
+### Methods Used
+
+#### Deduplication and Sorting
+- Duplicate entries were removed, and the lists were sorted using the `sort` command with the `-k 1 -u` options:
+  - `-k 1`: Specifies sorting by the first field (entire line for addresses).
+  - `-u`: Ensures only unique lines are retained.
+
+#### Loading
+- The `load_file_to_array` method was used to load the deduplicated and sorted lists back into memory as arrays for further analysis.
+
+- **Generation Method**:
+  - Raw, payment, and delegation addresses were extracted from transaction outputs in Cardano data.
+  - Deduplication and sorting were performed using the Unix `sort` command.
+  - Resulting files represent unique address lists for each category.
+
+
+***
+
+#### File: `Unique_AddressesListPayment__Cardano_TXs_All__2023-02-28_143953`
+
+This file contains the sorted and deduplicated list of all payment addresses extracted from the Cardano transaction data. Payment addresses represent the payment credential portion of raw addresses.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional list of unique payment addresses, sorted lexicographically.
+  - Each line represents one unique payment address.
+- **Number of Elements**: Equal to the total number of unique payment addresses.
+
+### Example
+```plaintext
+payment1qlmnopqr...yzabcd
+payment1qrstuabc...efghij
+payment1qvwxyzde...ghijkl
+...
+```
+
+### Methods Used
+
+#### Deduplication and Sorting
+- Duplicate entries were removed, and the lists were sorted using the `sort` command with the `-k 1 -u` options:
+  - `-k 1`: Specifies sorting by the first field (entire line for addresses).
+  - `-u`: Ensures only unique lines are retained.
+
+#### Loading
+- The `load_file_to_array` method was used to load the deduplicated and sorted lists back into memory as arrays for further analysis.
+
+- **Generation Method**:
+  - Raw, payment, and delegation addresses were extracted from transaction outputs in Cardano data.
+  - Deduplication and sorting were performed using the Unix `sort` command.
+  - Resulting files represent unique address lists for each category.
+
+
+***
+
+#### File: `Unique_AddressesListDelegation__Cardano_TXs_All__2023-02-28_144415`
+
+This file contains the sorted and deduplicated list of all delegation (stake) addresses extracted from the Cardano transaction data. Delegation addresses represent the staking portion of raw addresses.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional list of unique delegation addresses, sorted lexicographically.
+  - Each line represents one unique delegation address.
+- **Number of Elements**: Equal to the total number of unique delegation addresses.
+
+### Example
+```plaintext
+stake1ulmnopqr...xyzabcd
+stake1umnopabc...efghijk
+stake1uvwxdefg...ghijklm
+...
+```
+
+### Methods Used
+
+#### Deduplication and Sorting
+- Duplicate entries were removed, and the lists were sorted using the `sort` command with the `-k 1 -u` options:
+  - `-k 1`: Specifies sorting by the first field (entire line for addresses).
+  - `-u`: Ensures only unique lines are retained.
+
+#### Loading
+- The `load_file_to_array` method was used to load the deduplicated and sorted lists back into memory as arrays for further analysis.
+
+- **Generation Method**:
+  - Raw, payment, and delegation addresses were extracted from transaction outputs in Cardano data.
+  - Deduplication and sorting were performed using the Unix `sort` command.
+  - Resulting files represent unique address lists for each category.
 
 ***
 
