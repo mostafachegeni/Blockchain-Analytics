@@ -1,4 +1,188 @@
 
+#### File: `epochArray_rawAddresses__Cardano_TXs_All__2023-03-27_085508.txt`
+
+This file contains the epoch numbers when each raw address first appeared on the Cardano blockchain. Each entry corresponds to a unique raw address, and the value indicates the epoch during which the address was first recorded in a transaction output. If an address does not belong to this category, a placeholder value of `999999999999` is used.
+
+### Format
+- **Type**: Text file
+- **Structure**: 
+  - A one-dimensional array.
+  - Each index corresponds to a unique raw address.
+  - Each value indicates the epoch number when the address was first observed, or `999999999999` if the address belongs to another type.
+- **Number of Elements**: Equal to the total number of unique raw addresses.
+
+### Example
+```plaintext
+0
+12
+999999999999
+7
+18
+...
+```
+- **Example Interpretation**:
+  - Address 0 appeared in epoch 0.
+  - Address 1 appeared in epoch 12.
+  - Address 2 is of another type, indicated by the placeholder value.
+  - Address 3 appeared in epoch 7, and so on.
+
+
+## Methods Used
+### Saving
+- The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
+### Loading
+- The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
+
+
+***
+
+## File: `epochArray_ByronAddresses__Cardano_TXs_All__2023-03-27_085508.txt`
+
+### Description
+This file contains the epoch numbers when each Byron payment address first appeared on the Cardano blockchain. Byron addresses are identified as non-smart contract addresses starting with a specific prefix. If an address does not belong to this category, a placeholder value of `999999999999` is used.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique Byron payment address.
+  - Each value indicates the epoch number when the address was first observed, or `999999999999` if the address belongs to another type.
+- **Number of Elements**: Equal to the total number of unique Byron payment addresses.
+
+### Example
+```plaintext
+2
+10
+999999999999
+14
+5
+...
+```
+- **Example Interpretation**:
+  - Address 0 appeared in epoch 2.
+  - Address 1 appeared in epoch 10.
+  - Address 2 is of another type, indicated by the placeholder value.
+  - Address 3 appeared in epoch 14, and so on.
+
+## Methods Used
+### Saving
+- The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
+### Loading
+- The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
+
+
+***
+
+#### File: `epochArray_ShelleyAddresses__Cardano_TXs_All__2023-03-27_085508.txt`
+
+This file contains the epoch numbers when each Shelley payment address first appeared on the Cardano blockchain. Shelley addresses are identified as non-Byron addresses used in Cardano transactions. If an address does not belong to this category, a placeholder value of `999999999999` is used.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique Shelley payment address.
+  - Each value indicates the epoch number when the address was first observed, or `999999999999` if the address belongs to another type.
+- **Number of Elements**: Equal to the total number of unique Shelley payment addresses.
+
+### Example
+```plaintext
+3
+7
+10
+999999999999
+11
+...
+```
+- **Example Interpretation**:
+  - Address 0 appeared in epoch 3.
+  - Address 1 appeared in epoch 7.
+  - Address 3 is of another type, indicated by the placeholder value.
+  - Address 4 appeared in epoch 11, and so on.
+
+## Methods Used
+### Saving
+- The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
+### Loading
+- The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
+
+***
+
+#### File: `epochArray_delegationAddresses__Cardano_TXs_All__2023-03-27_085508.txt`
+
+This file contains the epoch numbers when each delegation address (stake address) first appeared on the Cardano blockchain. Delegation addresses are associated with stake key identifiers used for staking purposes. If an address does not belong to this category, a placeholder value of `999999999999` is used.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique delegation address.
+  - Each value indicates the epoch number when the address was first observed, or `999999999999` if the address belongs to another type.
+- **Number of Elements**: Equal to the total number of unique delegation addresses.
+
+### Example
+```plaintext
+5
+999999999999
+14
+12
+17
+...
+```
+- **Example Interpretation**:
+  - Address 0 appeared in epoch 5.
+  - Address 1 is of another type, indicated by the placeholder value.
+  - Address 2 appeared in epoch 14, and so on.
+
+## Methods Used
+### Saving
+- The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
+### Loading
+- The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
+
+- **Generation Method**:
+  - Epoch numbers were calculated using transaction IDs and their corresponding epochs.
+  - The first occurrence of each address in transaction outputs determined its associated epoch.
+  - A placeholder value (`999999999999`) was assigned when an address did not belong to the relevant category.
+
+***
+
+#### File: `graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_224222.txt`
+
+This file represents the adjacency list of a graph constructed from Cardano transaction data. The graph edges were generated using **Heuristic 1** without considering smart contracts (`noSC`), and links were created between each payment address and all other addresses involved in the same transaction. Each list in the adjacency array corresponds to a node (payment address) and contains the indices of all other addresses it is linked to.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A two-dimensional array stored as a JSON-like text file.
+  - Each index corresponds to a unique payment address.
+  - Each element at the index is a list of indices representing linked payment addresses.
+
+### Example
+```plaintext
+[
+  [1, 2, 3], 
+  [0, 3], 
+  [0], 
+  [0, 1]
+]
+```
+- **Example Interpretation**:
+  - Address 0 is linked to addresses 1, 2, and 3.
+  - Address 1 is linked to addresses 0 and 3.
+  - Address 2 is linked only to address 0.
+  - Address 3 is linked to addresses 0 and 1, and so on.
+
+### Methods Used
+- **Saving**: The `store_array_to_file_2D` method was used to save the adjacency list (2D array) to this text file. This method writes the array into a `.txt` file in JSON-like format.
+- **Loading**: The `load_file_to_array_2D` method can be used to load the adjacency list back into memory for further analysis.
+
+- **Generation Method**:
+  - The edges were generated by linking each address in a transaction to all other addresses in the same transaction.
+  - The `merge_graphEdges` function was used to combine multiple adjacency lists into the final merged graph.
+
+***
+
 #### File: `clusteringArrayList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223957.txt`
 
 This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 1 without considering smart contracts` (`noSC`). Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
