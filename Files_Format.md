@@ -1425,6 +1425,118 @@ This file contains a dataset representing the relationship between entity wealth
 
 ***
 
+#### File: `/Cardano_StakeDelegation_Entities_Heur2__PICKLE/StakeDelegPerEntityEpoch_Heur2_<number>__Cardano_TXs_All`
+
+This file contains data about stake delegation amounts per entity for a specific epoch in the Cardano network. Entities are identified using **Heuristic 2**, and the dataset tracks the total amount of ADA delegated by each entity during the corresponding epoch `<number>`.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to an entity.
+  - Each value represents the total stake (in ADA) delegated by the entity during the epoch.
+- **Number of Elements**: Equal to the total number of entities.
+
+### Example
+```plaintext
+[0, 50000, 200000, 0, ...]
+```
+- **Example Interpretation**:
+  - Entity 0 did not delegate any stake in this epoch.
+  - Entity 1 delegated 50,000 ADA.
+  - Entity 2 delegated 200,000 ADA, and so on.
+
+### Methods Used
+- **Saving**: The `pickle.dump` method was used to serialize and save the arrays to files. This ensures efficient storage and retrieval of large datasets.
+- **Loading**: The `pickle.load` method is used to deserialize and load the arrays back into memory for analysis.
+
+**Generation Method**:
+  - **Stake Delegations**:
+    - Delegation data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
+  - **Rewards**:
+    - Reward data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
+  - **Balances**:
+    - Daily transaction data was processed to calculate the net ADA balance for each entity based on inputs and outputs.
+  - Entity clustering was determined using **Heuristic 2**.
+
+
+***
+
+#### File: `/Cardano_Reward_Entities_Heur2__PICKLE/RewardPerEntityEpoch_Heur2_<number>__Cardano_TXs_All`
+
+This file contains data about rewards received by entities for a specific epoch in the Cardano network. Entities are identified using **Heuristic 2**, and the dataset tracks the total rewards (in ADA) received by each entity during the corresponding epoch `<number>`.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to an entity.
+  - Each value represents the total rewards (in ADA) received by the entity during the epoch.
+- **Number of Elements**: Equal to the total number of entities.
+
+### Example
+```plaintext
+[100, 0, 500, 200, ...]
+```
+- **Example Interpretation**:
+  - Entity 0 received 100 ADA as a reward in this epoch.
+  - Entity 1 did not receive any rewards.
+  - Entity 2 received 500 ADA, and so on.
+
+### Methods Used
+- **Saving**: The `pickle.dump` method was used to serialize and save the arrays to files. This ensures efficient storage and retrieval of large datasets.
+- **Loading**: The `pickle.load` method is used to deserialize and load the arrays back into memory for analysis.
+
+**Generation Method**:
+  - **Stake Delegations**:
+    - Delegation data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
+  - **Rewards**:
+    - Reward data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
+  - **Balances**:
+    - Daily transaction data was processed to calculate the net ADA balance for each entity based on inputs and outputs.
+  - Entity clustering was determined using **Heuristic 2**.
+
+
+***
+
+#### File: `/Cardano_Balances_Entities_Heur2__PICKLE/BalancesPerEntityDay_Heur2_<number>__Cardano_TXs_All`
+
+This file contains daily balances of entities in the Cardano network. Entities are identified using **Heuristic 2**, and the dataset records the net ADA balance of each entity at the end of a specific day `<number>`.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to an entity.
+  - Each value represents the entity's balance (in ADA) at the end of the day.
+- **Number of Elements**: Equal to the total number of entities.
+
+### Example
+```plaintext
+[1000000, 500000, 0, 300000, ...]
+```
+- **Example Interpretation**:
+  - Entity 0 had a balance of 1,000,000 ADA at the end of the day.
+  - Entity 1 had a balance of 500,000 ADA.
+  - Entity 2 had no ADA (0 balance), and so on.
+
+
+### Methods Used
+- **Saving**: The `pickle.dump` method was used to serialize and save the arrays to files. This ensures efficient storage and retrieval of large datasets.
+- **Loading**: The `pickle.load` method is used to deserialize and load the arrays back into memory for analysis.
+
+**Generation Method**:
+  - **Stake Delegations**:
+    - Delegation data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
+  - **Rewards**:
+    - Reward data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
+  - **Balances**:
+    - Daily transaction data was processed to calculate the net ADA balance for each entity based on inputs and outputs.
+  - Entity clustering was determined using **Heuristic 2**.
+
+
+***
+
 
 #### File: `Num_Delegator_addresses_per_epoch__Cardano_TXs_All__<timestamp>`
 
@@ -1540,118 +1652,6 @@ This file contains a dataset representing the relationship between entity wealth
 ### Methods Used
 - **Saving**: The `store_array_to_file` method was used to save a list to a text file. This method writes the array line by line.
 - **Loading**: The `load_file_to_array` method can be used to load the lists back into memory as arrays for further analysis.
-
-***
-
-#### File: `/Cardano_StakeDelegation_Entities_Heur2__PICKLE/StakeDelegPerEntityEpoch_Heur2_<number>__Cardano_TXs_All`
-
-This file contains data about stake delegation amounts per entity for a specific epoch in the Cardano network. Entities are identified using **Heuristic 2**, and the dataset tracks the total amount of ADA delegated by each entity during the corresponding epoch `<number>`.
-
-### Format
-- **Type**: Serialized Python object (Pickle file).
-- **Structure**:
-  - A one-dimensional array.
-  - Each index corresponds to an entity.
-  - Each value represents the total stake (in ADA) delegated by the entity during the epoch.
-- **Number of Elements**: Equal to the total number of entities.
-
-### Example
-```plaintext
-[0, 50000, 200000, 0, ...]
-```
-- **Example Interpretation**:
-  - Entity 0 did not delegate any stake in this epoch.
-  - Entity 1 delegated 50,000 ADA.
-  - Entity 2 delegated 200,000 ADA, and so on.
-
-### Methods Used
-- **Saving**: The `pickle.dump` method was used to serialize and save the arrays to files. This ensures efficient storage and retrieval of large datasets.
-- **Loading**: The `pickle.load` method is used to deserialize and load the arrays back into memory for analysis.
-
-**Generation Method**:
-  - **Stake Delegations**:
-    - Delegation data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
-  - **Rewards**:
-    - Reward data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
-  - **Balances**:
-    - Daily transaction data was processed to calculate the net ADA balance for each entity based on inputs and outputs.
-  - Entity clustering was determined using **Heuristic 2**.
-
-
-***
-
-#### File: `/Cardano_Reward_Entities_Heur2__PICKLE/RewardPerEntityEpoch_Heur2_<number>__Cardano_TXs_All`
-
-This file contains data about rewards received by entities for a specific epoch in the Cardano network. Entities are identified using **Heuristic 2**, and the dataset tracks the total rewards (in ADA) received by each entity during the corresponding epoch `<number>`.
-
-### Format
-- **Type**: Serialized Python object (Pickle file).
-- **Structure**:
-  - A one-dimensional array.
-  - Each index corresponds to an entity.
-  - Each value represents the total rewards (in ADA) received by the entity during the epoch.
-- **Number of Elements**: Equal to the total number of entities.
-
-### Example
-```plaintext
-[100, 0, 500, 200, ...]
-```
-- **Example Interpretation**:
-  - Entity 0 received 100 ADA as a reward in this epoch.
-  - Entity 1 did not receive any rewards.
-  - Entity 2 received 500 ADA, and so on.
-
-### Methods Used
-- **Saving**: The `pickle.dump` method was used to serialize and save the arrays to files. This ensures efficient storage and retrieval of large datasets.
-- **Loading**: The `pickle.load` method is used to deserialize and load the arrays back into memory for analysis.
-
-**Generation Method**:
-  - **Stake Delegations**:
-    - Delegation data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
-  - **Rewards**:
-    - Reward data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
-  - **Balances**:
-    - Daily transaction data was processed to calculate the net ADA balance for each entity based on inputs and outputs.
-  - Entity clustering was determined using **Heuristic 2**.
-
-
-***
-
-#### File: `/Cardano_Balances_Entities_Heur2__PICKLE/BalancesPerEntityDay_Heur2_<number>__Cardano_TXs_All`
-
-This file contains daily balances of entities in the Cardano network. Entities are identified using **Heuristic 2**, and the dataset records the net ADA balance of each entity at the end of a specific day `<number>`.
-
-### Format
-- **Type**: Serialized Python object (Pickle file).
-- **Structure**:
-  - A one-dimensional array.
-  - Each index corresponds to an entity.
-  - Each value represents the entity's balance (in ADA) at the end of the day.
-- **Number of Elements**: Equal to the total number of entities.
-
-### Example
-```plaintext
-[1000000, 500000, 0, 300000, ...]
-```
-- **Example Interpretation**:
-  - Entity 0 had a balance of 1,000,000 ADA at the end of the day.
-  - Entity 1 had a balance of 500,000 ADA.
-  - Entity 2 had no ADA (0 balance), and so on.
-
-
-### Methods Used
-- **Saving**: The `pickle.dump` method was used to serialize and save the arrays to files. This ensures efficient storage and retrieval of large datasets.
-- **Loading**: The `pickle.load` method is used to deserialize and load the arrays back into memory for analysis.
-
-**Generation Method**:
-  - **Stake Delegations**:
-    - Delegation data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
-  - **Rewards**:
-    - Reward data was extracted from pool transaction files, and the amounts were aggregated for each entity during an epoch.
-  - **Balances**:
-    - Daily transaction data was processed to calculate the net ADA balance for each entity based on inputs and outputs.
-  - Entity clustering was determined using **Heuristic 2**.
-
 
 ***
 
