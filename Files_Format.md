@@ -1,6 +1,122 @@
 
 ***
 
+#### File: `EntityTXsADA_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
+
+This file contains a list of ADA-based transactions at the entity level in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**. Each transaction includes details about the sender, recipient, transaction day, and entity balances before and after the transaction.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A list of tuples where each tuple represents a transaction.
+  - Each tuple contains:
+    - `tx_delta_day` (int): The day (relative to Cardano's initial date) when the transaction occurred.
+    - `entity_from` (int): The index of the sending entity.
+    - `entity_to` (int): The index of the receiving entity.
+    - `balance_entity_from` (int): The sender's balance before the transaction.
+    - `balance_entity_to` (int): The recipient's balance before the transaction.
+
+### Example
+```plaintext
+[
+  (100, 2, 5, 1000000, 500000), 
+  (105, 3, 8, 200000, 700000), 
+  ...
+]
+```
+- **Example Interpretation**:
+  - On day 100, entity 2 sent ADA to entity 5, starting with balances of 1,000,000 and 500,000 respectively.
+  - On day 105, entity 3 sent ADA to entity 8, starting with balances of 200,000 and 700,000 respectively.
+
+### Methods Used
+- **Saving**: The `pickle.dump` method was used to serialize and save the transaction lists to files. This ensures efficient storage and retrieval of large datasets.
+- **Loading**: The `pickle.load` method was used to deserialize and load the transaction lists back into memory for analysis.
+
+- **Generation Method**:
+  - ADA, NFT, and FT transactions were identified by analyzing inputs and outputs in the Cardano transaction data.
+  - Entities were determined using a combination of **Heuristic 1 (noSC)** and **Heuristic 2**.
+  - The balance changes for each entity were tracked to calculate balances.
+  - Transactions were filtered to exclude smart contract addresses.
+
+
+***
+
+#### File: `EntityTXsNFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
+
+This file contains a list of NFT-based transactions at the entity level in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**. Each transaction includes details about the sender, recipient, transaction day, and entity balances before and after the transaction.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A list of tuples where each tuple represents a transaction.
+  - Each tuple contains:
+    - `tx_delta_day` (int): The day (relative to Cardano's initial date) when the transaction occurred.
+    - `entity_from` (int): The index of the sending entity.
+    - `entity_to` (int): The index of the receiving entity.
+    - `balance_entity_from` (int): The sender's balance before the transaction.
+    - `balance_entity_to` (int): The recipient's balance before the transaction.
+
+### Example
+```plaintext
+[
+  (101, 4, 9, 500000, 300000), 
+  (120, 6, 10, 800000, 450000), 
+  ...
+]
+```
+- **Example Interpretation**:
+  - On day 101, entity 4 sent an NFT to entity 9, starting with balances of 500,000 and 300,000 respectively.
+  - On day 120, entity 6 sent an NFT to entity 10, starting with balances of 800,000 and 450,000 respectively.
+
+### Methods Used
+- **Saving**: The `pickle.dump` method was used to serialize and save the transaction lists to files. This ensures efficient storage and retrieval of large datasets.
+- **Loading**: The `pickle.load` method was used to deserialize and load the transaction lists back into memory for analysis.
+
+- **Generation Method**:
+  - ADA, NFT, and FT transactions were identified by analyzing inputs and outputs in the Cardano transaction data.
+  - Entities were determined using a combination of **Heuristic 1 (noSC)** and **Heuristic 2**.
+  - The balance changes for each entity were tracked to calculate balances.
+  - Transactions were filtered to exclude smart contract addresses.
+
+***
+
+#### File: `EntityTXsFT_AllTXs_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
+
+This file contains a list of FT-based transactions at the entity level in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**. Each transaction includes details about the sender, recipient, transaction day, and entity balances before and after the transaction.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A list of tuples where each tuple represents a transaction.
+  - Each tuple contains:
+    - `tx_delta_day` (int): The day (relative to Cardano's initial date) when the transaction occurred.
+    - `entity_from` (int): The index of the sending entity.
+    - `entity_to` (int): The index of the receiving entity.
+    - `balance_entity_from` (int): The sender's balance before the transaction.
+    - `balance_entity_to` (int): The recipient's balance before the transaction.
+
+### Example
+```plaintext
+[
+  (110, 7, 11, 600000, 550000), 
+  (130, 12, 15, 300000, 800000), 
+  ...
+]
+```
+- **Example Interpretation**:
+  - On day 110, entity 7 sent an FT to entity 11, starting with balances of 600,000 and 550,000 respectively.
+  - On day 130, entity 12 sent an FT to entity 15, starting with balances of 300,000 and 800,000 respectively.
+
+
+### Methods Used
+- **Saving**: The `pickle.dump` method was used to serialize and save the transaction lists to files. This ensures efficient storage and retrieval of large datasets.
+- **Loading**: The `pickle.load` method was used to deserialize and load the transaction lists back into memory for analysis.
+
+- **Generation Method**:
+  - ADA, NFT, and FT transactions were identified by analyzing inputs and outputs in the Cardano transaction data.
+  - Entities were determined using a combination of **Heuristic 1 (noSC)** and **Heuristic 2**.
+  - The balance changes for each entity were tracked to calculate balances.
+  - Transactions were filtered to exclude smart contract addresses.
 
 
 ***
