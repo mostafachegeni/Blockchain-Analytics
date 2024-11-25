@@ -1,3 +1,153 @@
+***
+
+#### File: `newPerDay_rawAddresses__Cardano_TXs_All__2023-04-20_025121`
+
+### Description
+This file contains the day number (relative to the Cardano blockchain's initial date) when each raw address first appeared in a transaction. If a raw address has not been observed in any transaction, a placeholder value of `999999999999` is used.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique raw address.
+  - Each value indicates the day number when the address first appeared or `999999999999` if not observed.
+- **Number of Elements**: Equal to the total number of unique raw addresses.
+
+### Example
+```plaintext
+0
+15
+999999999999
+42
+...
+```
+- **Example Interpretation**:
+  - Address 0 appeared on Day 0.
+  - Address 1 appeared on Day 15.
+  - Address 2 has not been observed, as indicated by the placeholder value.
+  - Address 3 appeared on Day 42, and so on.
+
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each array to its corresponding text file. This method writes the data in a JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the arrays from the text files. This method reads the files and converts them into NumPy arrays for further analysis.
+
+- **Generation Method**:
+  - For each type of address (raw, Byron, Shelley, delegation), the day number was determined when the address first appeared in a transaction output.
+  - A placeholder value (`999999999999`) was assigned to addresses that were not observed.
+
+
+***
+
+#### File: `newPerDay_ByronAddresses__Cardano_TXs_All__2023-04-20_025121`
+
+This file contains the day number when each Byron payment address first appeared in a transaction. Byron addresses are identified as non-smart contract addresses with a specific prefix. If a Byron address has not been observed in any transaction, a placeholder value of `999999999999` is used.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique Byron payment address.
+  - Each value indicates the day number when the address first appeared or `999999999999` if not observed.
+- **Number of Elements**: Equal to the total number of unique Byron payment addresses.
+
+### Example
+```plaintext
+10
+20
+999999999999
+35
+...
+```
+- **Example Interpretation**:
+  - Address 0 appeared on Day 10.
+  - Address 1 appeared on Day 20.
+  - Address 2 has not been observed, as indicated by the placeholder value.
+  - Address 3 appeared on Day 35, and so on.
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each array to its corresponding text file. This method writes the data in a JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the arrays from the text files. This method reads the files and converts them into NumPy arrays for further analysis.
+
+- **Generation Method**:
+  - For each type of address (raw, Byron, Shelley, delegation), the day number was determined when the address first appeared in a transaction output.
+  - A placeholder value (`999999999999`) was assigned to addresses that were not observed.
+
+
+***
+
+#### File: `newPerDay_ShelleyAddresses__Cardano_TXs_All__2023-04-20_025121`
+
+This file contains the day number when each Shelley payment address first appeared in a transaction. Shelley addresses are identified as non-Byron addresses. If a Shelley address has not been observed in any transaction, a placeholder value of `999999999999` is used.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique Shelley payment address.
+  - Each value indicates the day number when the address first appeared or `999999999999` if not observed.
+- **Number of Elements**: Equal to the total number of unique Shelley payment addresses.
+
+### Example
+```plaintext
+5
+18
+999999999999
+27
+...
+```
+- **Example Interpretation**:
+  - Address 0 appeared on Day 5.
+  - Address 1 appeared on Day 18.
+  - Address 2 has not been observed, as indicated by the placeholder value.
+  - Address 3 appeared on Day 27, and so on.
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each array to its corresponding text file. This method writes the data in a JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the arrays from the text files. This method reads the files and converts them into NumPy arrays for further analysis.
+
+- **Generation Method**:
+  - For each type of address (raw, Byron, Shelley, delegation), the day number was determined when the address first appeared in a transaction output.
+  - A placeholder value (`999999999999`) was assigned to addresses that were not observed.
+
+
+***
+
+#### File: `newPerDay_delegationAddresses__Cardano_TXs_All__2023-04-20_025121`
+
+This file contains the day number when each delegation (stake) address first appeared in a transaction. Delegation addresses are associated with staking operations. If a delegation address has not been observed in any transaction, a placeholder value of `999999999999` is used.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique delegation address.
+  - Each value indicates the day number when the address first appeared or `999999999999` if not observed.
+- **Number of Elements**: Equal to the total number of unique delegation addresses.
+
+### Example
+```plaintext
+7
+25
+999999999999
+38
+...
+```
+- **Example Interpretation**:
+  - Address 0 appeared on Day 7.
+  - Address 1 appeared on Day 25.
+  - Address 2 has not been observed, as indicated by the placeholder value.
+  - Address 3 appeared on Day 38, and so on.
+
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each array to its corresponding text file. This method writes the data in a JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the arrays from the text files. This method reads the files and converts them into NumPy arrays for further analysis.
+
+- **Generation Method**:
+  - For each type of address (raw, Byron, Shelley, delegation), the day number was determined when the address first appeared in a transaction output.
+  - A placeholder value (`999999999999`) was assigned to addresses that were not observed.
+
 
 ***
 
@@ -45,7 +195,7 @@ largest_cc_subgraph.edges(data=True)
 
 #### File: `Graph_G_AddrsNetwork_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-26_000507.pickle`
 
-This file contains a serialized graph object (`Graph G`) representing the Cardano transaction network. The graph was constructed using **Heuristic 1 without considering smart contracts** (`noSC`) and is based on the weighted adjacency list stored in `graphWeightsArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_234559.txt`. Nodes represent addresses, and edges represent co-occurrence relationships in transactions, with weights indicating the frequency of interactions.
+This file contains a serialized graph object (`Graph G`) representing the Cardano transaction network. The graph was constructed using **Heuristic 1 without considering smart contracts** (`noSC`) and is based on the weighted adjacency list stored in `graphWeightsArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_234559`. Nodes represent addresses, and edges represent co-occurrence relationships in transactions, with weights indicating the frequency of interactions.
 
 ### Format
 - **Type**: Pickle file (serialized Python object).
@@ -114,7 +264,7 @@ This file contains the weighted adjacency list of a graph representing the Carda
 
 
 - **Generation Method**:
-  - The graph edges were first generated and stored in the file `graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_224222.txt`.
+  - The graph edges were first generated and stored in the file `graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_224222`.
   - Weights were calculated using the `find_weights_graphEdges` function:
     - Each time two addresses were clustered together in a transaction, the weight of the edge between them was incremented by 1.
   - The resulting weighted adjacency list was stored in the current file.
@@ -328,7 +478,7 @@ This file represents the adjacency list of a graph constructed from Cardano tran
   - Address 3 is linked to addresses 0 and 1, and so on.
 
 ### Methods Used
-- **Saving**: The `store_array_to_file_2D` method was used to save the adjacency list (2D array) to this text file. This method writes the array into a `.txt` file in JSON-like format.
+- **Saving**: The `store_array_to_file_2D` method was used to save the adjacency list (2D array) to this text file. This method writes the array into a text file in JSON-like format.
 - **Loading**: The `load_file_to_array_2D` method can be used to load the adjacency list back into memory for further analysis.
 
 - **Generation Method**:
@@ -365,7 +515,7 @@ This file contains the clustering results for payment addresses on the Cardano n
   - Address 4 belongs to cluster 2, and so on.
 
 ### Methods Used
-- **Saving**: The `store_array_to_file` method was used to save the clustering array to this text file. This method writes the array into a `.txt` file in JSON-like format.
+- **Saving**: The `store_array_to_file` method was used to save the clustering array to this text file. This method writes the array into a text file in JSON-like format.
 - **Loading**: The `load_file_to_array` method was used to load the data back into an array for further analysis. This method reads the text file and converts it into a NumPy array.
 
 
@@ -405,7 +555,7 @@ This file contains the clustering results for payment addresses on the Cardano n
   - Address 4 belongs to cluster 2, and so on.
 
 ### Methods Used
-- **Saving**: The `store_array_to_file` method was used to save the clustering array to this text file. This method writes the array into a `.txt` file in JSON-like format.
+- **Saving**: The `store_array_to_file` method was used to save the clustering array to this text file. This method writes the array into a text file in JSON-like format.
 - **Loading**: The `load_file_to_array` method was used to load the data back into an array for further analysis. This method reads the text file and converts it into a NumPy array.
 
 
@@ -443,7 +593,7 @@ This file contains the clustering results for payment addresses on the Cardano n
   - Address 4 belongs to cluster 2, and so on.
 
 ### Methods Used
-- **Saving**: The `store_array_to_file` method was used to save the clustering array to this text file. This method writes the array into a `.txt` file in JSON-like format.
+- **Saving**: The `store_array_to_file` method was used to save the clustering array to this text file. This method writes the array into a text file in JSON-like format.
 - **Loading**: The `load_file_to_array` method was used to load the data back into an array for further analysis. This method reads the text file and converts it into a NumPy array.
 
 
@@ -478,7 +628,7 @@ This file contains the count of unique active payment addresses on the Cardano n
 - **Active Addresses**: Extracted directly from non-smart contract payment addresses in transaction inputs.
 
 ### Methods Used
-- **Saving**: The `store_array_to_file` method was used to save the array to this text file. This method writes the array into a `.txt` file in JSON-like format.
+- **Saving**: The `store_array_to_file` method was used to save the array to this text file. This method writes the array into a text file in JSON-like format.
 - **Loading**: The `load_file_to_array` method was used to load the data back into an array for processing. This method reads the text file and converts it into a NumPy array.
 
 ***
@@ -504,7 +654,7 @@ This file contains the count of unique active entities on the Cardano network fo
 - **Example Interpretation**: On Day 1 (2017-09-23), there were 3 active entities; on Day 2, 5 active entities; and so on.
 
 ### Methods Used
-- **Saving**: The `store_array_to_file` method was used to save the array to this text file. This method writes the array into a `.txt` file in JSON-like format.
+- **Saving**: The `store_array_to_file` method was used to save the array to this text file. This method writes the array into a text file in JSON-like format.
 - **Loading**: The `load_file_to_array` method was used to load the data back into an array for processing. This method reads the text file and converts it into a NumPy array.
 
 - **Active Entities**: Derived from clustering payment addresses using the Union-Find algorithm.
@@ -791,10 +941,10 @@ This data is aggregated for each epoch and stored in arrays, not individual file
 
 | **File Name**                                        | **Purpose**                          | **Columns**           | **Type**  | **Example**                  |
 |-----------------------------------------------------|--------------------------------------|-----------------------|-----------|------------------------------|
-| `Num_Delegator_addresses_per_epoch__<timestamp>.txt` | Count of delegator addresses per epoch | 1 (Count)            | `int`     | `1000\n1200\n1100\n...`      |
-| `Num_Delegator_entities_per_epoch__<timestamp>.txt`  | Count of delegator entities per epoch | 1 (Count)            | `int`     | `950\n1150\n1050\n...`       |
-| `Num_Rewarder_addresses_per_epoch__<timestamp>.txt`  | Count of rewarder addresses per epoch | 1 (Count)            | `int`     | `800\n900\n850\n...`         |
-| `Num_Rewarder_entities_per_epoch__<timestamp>.txt`   | Count of rewarder entities per epoch  | 1 (Count)            | `int`     | `780\n870\n820\n...`         |
+| `Num_Delegator_addresses_per_epoch__<timestamp>`     | Count of delegator addresses per epoch | 1 (Count)            | `int`     | `1000\n1200\n1100\n...`      |
+| `Num_Delegator_entities_per_epoch__<timestamp>`      | Count of delegator entities per epoch | 1 (Count)            | `int`     | `950\n1150\n1050\n...`       |
+| `Num_Rewarder_addresses_per_epoch__<timestamp>`      | Count of rewarder addresses per epoch | 1 (Count)            | `int`     | `800\n900\n850\n...`         |
+| `Num_Rewarder_entities_per_epoch__<timestamp>`       | Count of rewarder entities per epoch  | 1 (Count)            | `int`     | `780\n870\n820\n...`         |
 
 
 ### File Access
