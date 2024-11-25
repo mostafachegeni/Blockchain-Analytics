@@ -31,7 +31,7 @@ This `.md` file provides an explanation of the implementation in the correspondi
 - PLOT: Distribution of minted NFTs/FTs per Entity
 - PLOT: fitting a power-law distributions to the distribution of minted NFTs/FTs
 
-In the following sections, each cell in the corresponding 'code' (with a similar filename in the code directory of this repository) is documented with a brief description of its purpose and functionality, followed by the summarized cell code.
+In the following sections, each cell in the corresponding 'code' is documented with a brief description of its purpose and functionality, followed by the summarized cell code.
 
 
 ***
