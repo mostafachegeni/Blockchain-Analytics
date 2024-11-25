@@ -1,4 +1,120 @@
 
+
+***
+
+#### File: `EntityBalancesArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540`
+
+This file contains the balances of each entity in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**. The balance represents the net total of UTXO values associated with each entity.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to an entity.
+  - Each value represents the total balance (integer) of the entity.
+- **Number of Elements**: Equal to the total number of unique entities.
+
+### Example
+```plaintext
+[1000000, 200000, 0, -50000, ...]
+```
+- **Example Interpretation**:
+  - Entity 0 has a balance of 1,000,000.
+  - Entity 1 has a balance of 200,000.
+  - Entity 2 has a balance of 0.
+  - Entity 3 has a negative balance of -50,000 (indicating a debt), and so on.
+
+
+### Methods Used
+- **Saving**: The `pickle.dump` method was used to serialize and save the arrays to files. This ensures efficient storage of complex structures like two-dimensional arrays or lists of tuples.
+- **Loading**: The `pickle.load` method was used to deserialize and load the arrays back into memory for further analysis.
+
+
+- **Generation Method**:
+  - Balances were calculated by summing the UTXO values in transaction inputs and outputs for each entity.
+  - NFTs and FTs owned were determined by tracking `MA_ID`s in inputs and outputs, updating the corresponding entity's ownership.
+  - Entity clustering was based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**.
+
+
+***
+
+#### File: `EntityOwnNFTsNumberArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540`
+
+### Description
+This file contains the number of NFTs (Non-Fungible Tokens) owned by each entity in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to an entity.
+  - Each value represents the number of NFTs owned by the entity.
+- **Number of Elements**: Equal to the total number of unique entities.
+
+### Example
+```plaintext
+[2, 0, 5, 10, ...]
+```
+- **Example Interpretation**:
+  - Entity 0 owns 2 NFTs.
+  - Entity 1 owns no NFTs.
+  - Entity 2 owns 5 NFTs.
+  - Entity 3 owns 10 NFTs, and so on.
+
+
+### Methods Used
+- **Saving**: The `pickle.dump` method was used to serialize and save the arrays to files. This ensures efficient storage of complex structures like two-dimensional arrays or lists of tuples.
+- **Loading**: The `pickle.load` method was used to deserialize and load the arrays back into memory for further analysis.
+
+
+- **Generation Method**:
+  - Balances were calculated by summing the UTXO values in transaction inputs and outputs for each entity.
+  - NFTs and FTs owned were determined by tracking `MA_ID`s in inputs and outputs, updating the corresponding entity's ownership.
+  - Entity clustering was based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**.
+
+
+***
+
+#### File: `EntityOwnNFTsWithNameArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540`
+
+This file contains the detailed list of NFTs (Non-Fungible Tokens) owned by each entity in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**. Each NFT is represented by its `MA_ID` and associated metadata.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A two-dimensional array.
+  - Each index corresponds to an entity.
+  - Each element at the index is a list of tuples, where each tuple contains:
+    - `MA_ID`: The unique identifier of the NFT.
+    - Associated metadata (e.g., quantity, name, policy).
+- **Number of Rows**: Equal to the total number of unique entities.
+
+### Example
+```plaintext
+[
+  [("NFT1", 1, "ArtToken", "Policy123"), ("NFT2", 1, "GameAsset", "Policy456")],
+  [],
+  [("NFT3", 1, "DigitalArt", "Policy789")],
+  ...
+]
+```
+- **Example Interpretation**:
+  - Entity 0 owns NFTs `NFT1` and `NFT2` with metadata indicating their type and policy.
+  - Entity 1 owns no NFTs.
+  - Entity 2 owns NFT `NFT3` with the associated metadata, and so on.
+
+
+### Methods Used
+- **Saving**: The `pickle.dump` method was used to serialize and save the arrays to files. This ensures efficient storage of complex structures like two-dimensional arrays or lists of tuples.
+- **Loading**: The `pickle.load` method was used to deserialize and load the arrays back into memory for further analysis.
+
+
+- **Generation Method**:
+  - Balances were calculated by summing the UTXO values in transaction inputs and outputs for each entity.
+  - NFTs and FTs owned were determined by tracking `MA_ID`s in inputs and outputs, updating the corresponding entity's ownership.
+  - Entity clustering was based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**.
+
+
 ***
 
 #### File: `EntityNFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-04-08_075547`
