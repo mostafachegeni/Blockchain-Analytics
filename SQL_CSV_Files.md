@@ -565,7 +565,7 @@ cexplorer=# CREATE TABLE TBL_TXOUT_NFTs_FTs_MAs AS
 
 
 # Dump all TXs: include all NFTs/FTs transacted in the transaction:
-cat <<_EOF_ | tr '\n' ' ' | PGPASSWORD=postgres \psql -h 172.23.38.242 -p 5432 -U postgres cexplorer 
+cat <<_EOF_ | tr '\n' ' ' | PGPASSWORD='???' \psql -h <IP> -p <PORT> -U postgres cexplorer 
 \copy ( 
     WITH things as ( 
         WITH TXs_INs_OUTs as ( 
@@ -705,6 +705,67 @@ This CSV file contains information on Cardano transactions, their inputs, output
 
 
 For schema details, refer to the [Cardano DB Schema Documentation](https://github.com/IntersectMBO/cardano-db-sync/blob/13.3.0.0/doc/schema.md).
+
+### Query
+```sql
+cat <<_EOF_ | tr '\n' ' ' | PGPASSWORD='???' \psql -h 172.23.38.242 -p 5432 -U postgres cexplorer 
+\copy ( 
+    WITH things as ( 
+        WITH TXs_INs_OUTs as ( 
+            SELECT  tx.id                                                      as "TX_ID", 
+                    block.time                                                 as "BLOCK_TIME", 
+                    block.epoch_no                                             as "EPOCH_NO", 
+                    tx_in.tx_in_id                                             as "INPUT_TXID", 
+                    tx_out.tx_id                                               as "OUTPUT_TXID", 
+                    tx_in.id                                                   as "INPUT_ID",  
+                    tx_out.id                                                  as "OUTPUT_ID", 
+                    tx_in.tx_out_id                                            as "INPUT_REFTX_ID", 
+                    tx_in.tx_out_index                                         as "INPUT_REFTX_OUTINDX", 
+                    tx_out.address_raw                                         as "OUTPUT_RAWADDR", 
+                    tx_out.value                                               as "OUTPUT_VALUE", 
+                    tx_out.address_has_script                                  as "OUTPUT_ADDR_HAS_SCRIPT", 
+                    tx_out.payment_cred                                        as "OUTPUT_PAYMENT_CRED", 
+                    tx_out.stake_address_id                                    as "OUTPUT_STAKE_ADDR_ID", 
+                    stake_address.hash_raw                                     as "OUTPUT_STAKE_ADDR" 
+                FROM    tx LEFT JOIN block                   ON tx.block_id             = block.id 
+                           LEFT JOIN tx_in                   ON tx.id                   = tx_in.tx_in_id 
+                           LEFT JOIN tx_out                  ON tx.id                   = tx_out.tx_id 
+                           LEFT JOIN stake_address           ON tx_out.stake_address_id = stake_address.id 
+                WHERE   tx.id BETWEEN (50000001) AND (60000000) 
+        ) 
+        SELECT  TXs_INs_OUTs.*, 
+                block.time                                                 as "INPUT_REFOUT_BLOCK_TIME", 
+                REF_OUT.tx_id                                              as "INPUT_REFOUT_TXID", 
+                REF_OUT.index                                              as "INPUT_REFOUT_INDEX", 
+                REF_OUT.id                                                 as "INPUT_REFOUT_ID", 
+                REF_OUT.address_raw                                        as "INPUT_REFOUT_RAWADDR", 
+                REF_OUT.value                                              as "INPUT_REFOUT_VALUE", 
+                REF_OUT.address_has_script                                 as "INPUT_REFOUT_ADDR_HAS_SCRIPT", 
+                REF_OUT.payment_cred                                       as "INPUT_REFOUT_PAYMENT_CRED", 
+                REF_OUT.stake_address_id                                   as "INPUT_REFOUT_STAKE_ADDR_ID", 
+                stake_address.hash_raw                                     as "INPUT_REFOUT_STAKE_ADDR" 
+            FROM    TXs_INs_OUTs LEFT JOIN tx_out REF_OUT   ON   TXs_INs_OUTs."INPUT_REFTX_ID"       = REF_OUT.tx_id 
+                                                             AND TXs_INs_OUTs."INPUT_REFTX_OUTINDX"  = REF_OUT.index 
+                                 LEFT JOIN stake_address    ON   REF_OUT.stake_address_id            = stake_address.id 
+                                 LEFT JOIN tx               ON   REF_OUT.tx_id                       = tx.id 
+                                 LEFT JOIN block            ON   tx.block_id                         = block.id 
+    ) 
+    SELECT  things."TX_ID", 
+            things."BLOCK_TIME", 
+            things."EPOCH_NO", 
+            STRING_AGG(distinct concat(things."INPUT_ID",                  ',', things."INPUT_REFTX_ID",                      ',', things."INPUT_REFTX_OUTINDX",                    ',', things."INPUT_REFOUT_ID",               ',', 
+                                       things."INPUT_REFOUT_RAWADDR",      ',', things."INPUT_REFOUT_STAKE_ADDR_ID",          ',', things."INPUT_REFOUT_VALUE",                     ',', things."INPUT_REFOUT_ADDR_HAS_SCRIPT",  ',', 
+                                       things."INPUT_REFOUT_PAYMENT_CRED", ',', things."INPUT_REFOUT_STAKE_ADDR",             ',', things."INPUT_REFOUT_BLOCK_TIME",                                                             ','     ), E';') as "INPUTs", 
+            STRING_AGG(distinct concat(things."OUTPUT_ID",                 ',', things."OUTPUT_RAWADDR",                      ',', things."OUTPUT_STAKE_ADDR_ID",                   ',', things."OUTPUT_VALUE",                  ',', 
+                                       things."OUTPUT_ADDR_HAS_SCRIPT",    ',', things."OUTPUT_PAYMENT_CRED",                 ',', things."OUTPUT_STAKE_ADDR",                                                                   ','     ), E';') as "OUTPUTs" 
+        FROM things 
+        GROUP BY things."TX_ID", things."BLOCK_TIME", things."EPOCH_NO" 
+        ORDER BY things."TX_ID", things."BLOCK_TIME", things."EPOCH_NO"
+) TO '/cardano_TXs_Velocity_<filenumber>.csv' WITH CSV DELIMITER '|' HEADER 
+_EOF_
+
+```
+
 
 
 ***
@@ -954,7 +1015,7 @@ cat <<_EOF_ | tr '\n' ' ' | PGPASSWORD='???' \psql -h <IP> -p <PORT> -U postgres
             LEFT JOIN TBL_MINT_FTs  ON things."TX_ID" = TBL_MINT_FTs."MA_FIRST_TX_ID" 
         GROUP BY things."TX_ID", things."TX_FEE", things."BLOCK_TIME", things."EPOCH_NO" 
         ORDER BY things."TX_ID", things."TX_FEE", things."BLOCK_TIME", things."EPOCH_NO" 
-) TO '/cardano_TXs_MAs_6.csv' WITH CSV DELIMITER '|' HEADER 
+) TO '/cardano_TXs_MAs_<filenumber>.csv' WITH CSV DELIMITER '|' HEADER 
 _EOF_
 
 ```
