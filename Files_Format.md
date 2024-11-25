@@ -1,3 +1,122 @@
+
+
+***
+
+#### File: `parentsList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223712.txt`
+
+This file contains the parent mapping of addresses in the Cardano transaction network based on **Heuristic 1 without considering smart contracts** (`noSC`). The parent array represents the Union-Find data structure where each index corresponds to a unique address, and the value represents its parent in the clustering hierarchy.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique address.
+  - Each value represents the parent of the address in the clustering hierarchy.
+- **Number of Elements**: Equal to the total number of unique addresses.
+
+### Example
+```plaintext
+0
+0
+2
+3
+3
+0
+...
+```
+- **Example Interpretation**:
+  - Address 0 is its own parent (root of a cluster).
+  - Address 1 belongs to the cluster rooted at Address 0.
+  - Address 2 is its own parent (root of a cluster).
+  - Address 3 belongs to the cluster rooted at Address 3, and so on.
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each parent array to its corresponding text file. This method writes the array in a JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the parent arrays from the text files. This method reads the files and converts them into NumPy arrays for further analysis.
+
+- **Generation Method**:
+  - **Heuristic 1 (noSC)**: Clustering was performed using transactions excluding smart contract addresses, with multiple parent arrays merged into one.
+  - **Heuristic 2**: Clustering was performed using relationships derived from Heuristic 2-specific analysis.
+  - **Combined Heuristic**: The `merge_parents` function was used to combine the parent mappings from Heuristic 1 (noSC) and Heuristic 2.
+
+***
+
+#### File: `parentsList_Heuristic2__Cardano_TXs_All__2023-03-26_105842.txt`
+
+This file contains the parent mapping of addresses in the Cardano transaction network based on **Heuristic 2**. The parent array represents the clustering of addresses into entities, determined by analyzing address relationships specific to Heuristic 2.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique address.
+  - Each value represents the parent of the address in the clustering hierarchy.
+- **Number of Elements**: Equal to the total number of unique addresses.
+
+### Example
+```plaintext
+0
+1
+2
+2
+3
+3
+...
+```
+- **Example Interpretation**:
+  - Address 0 is its own parent (root of a cluster).
+  - Address 1 is its own parent.
+  - Address 2 and Address 3 belong to the cluster rooted at Address 2, and so on.
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each parent array to its corresponding text file. This method writes the array in a JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the parent arrays from the text files. This method reads the files and converts them into NumPy arrays for further analysis.
+
+- **Generation Method**:
+  - **Heuristic 1 (noSC)**: Clustering was performed using transactions excluding smart contract addresses, with multiple parent arrays merged into one.
+  - **Heuristic 2**: Clustering was performed using relationships derived from Heuristic 2-specific analysis.
+  - **Combined Heuristic**: The `merge_parents` function was used to combine the parent mappings from Heuristic 1 (noSC) and Heuristic 2.
+
+***
+
+#### File: `parentsList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-03-26_140958.txt`
+
+This file contains the parent mapping of addresses in the Cardano transaction network based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**. The parent array represents the clustering of addresses determined by merging the parent mappings from both heuristics.
+
+### Format
+- **Type**: Text file
+- **Structure**:
+  - A one-dimensional array.
+  - Each index corresponds to a unique address.
+  - Each value represents the parent of the address in the merged clustering hierarchy.
+- **Number of Elements**: Equal to the total number of unique addresses.
+
+### Example
+```plaintext
+0
+1
+1
+3
+3
+1
+...
+```
+- **Example Interpretation**:
+  - Address 0 is its own parent (root of a cluster).
+  - Address 1 is the root of a cluster that includes Address 2.
+  - Address 3 is the root of a cluster that includes Address 4, and so on.
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each parent array to its corresponding text file. This method writes the array in a JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the parent arrays from the text files. This method reads the files and converts them into NumPy arrays for further analysis.
+
+- **Generation Method**:
+  - **Heuristic 1 (noSC)**: Clustering was performed using transactions excluding smart contract addresses, with multiple parent arrays merged into one.
+  - **Heuristic 2**: Clustering was performed using relationships derived from Heuristic 2-specific analysis.
+  - **Combined Heuristic**: The `merge_parents` function was used to combine the parent mappings from Heuristic 1 (noSC) and Heuristic 2.
+
+
+
 ***
 
 #### File: `newPerDay_rawAddresses__Cardano_TXs_All__2023-04-20_025121`
