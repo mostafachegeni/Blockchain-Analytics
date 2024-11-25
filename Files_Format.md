@@ -173,7 +173,7 @@ This file contains the count of unique active entities on the Cardano network fo
 
 ***
 
-#### **`DelegEvents__entityWealth_poolStakes_pairs__AllEpochs__<timestamp>.txt`**
+#### **`DelegEvents__entityWealth_poolStakes_pairs__AllEpochs__<timestamp>`**
 
 - **File Format**:
   - Binary file using Python's `pickle` serialization.
@@ -202,7 +202,7 @@ This file contains the count of unique active entities on the Cardano network fo
 ***
 
 
-#### **`DelegEvents__entityWealth_numOfPools_pairs__AllEpochs__<timestamp>.txt`**
+#### **`DelegEvents__entityWealth_numOfPools_pairs__AllEpochs__<timestamp>`**
 
 - **File Format**:
   - Binary file using Python's `pickle` serialization.
@@ -230,7 +230,7 @@ This file contains the count of unique active entities on the Cardano network fo
 
 ***
 
-#### **`DelegEvents__entityWealth_rewardAmount_pairs__AllEpochs__<timestamp>.txt`**
+#### **`DelegEvents__entityWealth_rewardAmount_pairs__AllEpochs__<timestamp>`**
 
 - **File Format**:
   - Binary file using Python's `pickle` serialization.
@@ -260,9 +260,9 @@ This file contains the count of unique active entities on the Cardano network fo
 
 | **File Name**                                                  | **Columns**                    | **Types**               | **Example**                                       |
 |----------------------------------------------------------------|--------------------------------|-------------------------|---------------------------------------------------|
-| `DelegEvents__entityWealth_poolStakes_pairs__AllEpochs__.txt`  | 1. Entity Wealth<br>2. Pool Stakes | `float`, `int`          | `[(5000.0, 10000), (10000.0, 25000), ...]`       |
-| `DelegEvents__entityWealth_numOfPools_pairs__AllEpochs__.txt`  | 1. Entity Wealth<br>2. Num Pools | `float`, `int`          | `[(5000.0, 2), (10000.0, 3), ...]`               |
-| `DelegEvents__entityWealth_rewardAmount_pairs__AllEpochs__.txt`| 1. Entity Wealth<br>2. Rewards  | `float`, `int`          | `[(5000.0, 1000), (10000.0, 2000), ...]`         |
+| `DelegEvents__entityWealth_poolStakes_pairs__AllEpochs__`      | 1. Entity Wealth<br>2. Pool Stakes | `float`, `int`          | `[(5000.0, 10000), (10000.0, 25000), ...]`       |
+| `DelegEvents__entityWealth_numOfPools_pairs__AllEpochs__`      | 1. Entity Wealth<br>2. Num Pools | `float`, `int`          | `[(5000.0, 2), (10000.0, 3), ...]`               |
+| `DelegEvents__entityWealth_rewardAmount_pairs__AllEpochs__`    | 1. Entity Wealth<br>2. Rewards  | `float`, `int`          | `[(5000.0, 1000), (10000.0, 2000), ...]`         |
 
 
 ### File Access
@@ -282,7 +282,7 @@ Each file stores the delegation amounts for entities per epoch. These files trac
 
 - **File Name**:
   ```
-  /YuZhang_Cardano_StakeDelegation_Entities/StakeDelegPerEntityEpoch_XXXX__Cardano_TXs_All.txt
+  /Cardano_StakeDelegation_Entities/StakeDelegPerEntityEpoch_XXXX__Cardano_TXs_All.txt
   ```
   - `XXXX`: Zero-padded epoch number.
   - Example: `StakeDelegPerEntityEpoch_0210__Cardano_TXs_All.txt`.
@@ -356,7 +356,7 @@ This data is aggregated for each epoch and stored in arrays, not individual file
   Tracks the number of unique delegator addresses active during each epoch.
 
 - **File Format**:
-  - **Type**: Plain text file (`.txt`).
+  - **Type**: Plain text
   - **Structure**: 
     - Each line contains the count of unique delegator addresses for one epoch.
   - **Number of Columns**: 1 (Count of delegator addresses per epoch).
@@ -381,7 +381,7 @@ This data is aggregated for each epoch and stored in arrays, not individual file
   Tracks the number of unique delegator entities active during each epoch.
 
 - **File Format**:
-  - **Type**: Plain text file (`.txt`).
+  - **Type**: Plain text 
   - **Structure**:
     - Each line contains the count of unique delegator entities for one epoch.
   - **Number of Columns**: 1 (Count of delegator entities per epoch).
@@ -425,13 +425,13 @@ This data is aggregated for each epoch and stored in arrays, not individual file
 
 ***
 
-#### **File: `Num_Rewarder_entities_per_epoch__Cardano_TXs_All__<timestamp>.txt`**
+#### **File: `Num_Rewarder_entities_per_epoch__Cardano_TXs_All__<timestamp>`**
 
 - **Purpose**:
   Tracks the number of unique rewarder entities active during each epoch.
 
 - **File Format**:
-  - **Type**: Plain text file (`.txt`).
+  - **Type**: Plain text 
   - **Structure**:
     - Each line contains the count of unique rewarder entities for one epoch.
   - **Number of Columns**: 1 (Count of rewarder entities per epoch).
@@ -471,10 +471,10 @@ num_delegator_addresses_per_epoch = load_file_to_array(file_name)
 ### **Output Files for "Calculate Entities Balances"**
 
 - **Filename Format**:
-  - `YuZhang__BalancesPerEntityDay_{day_offset}__Cardano_TXs_All.txt`
-  - Example: `YuZhang__BalancesPerEntityDay_0001__Cardano_TXs_All.txt`
+  - `BalancesPerEntityDay_{day_offset}__Cardano_TXs_All`
+  - Example: `BalancesPerEntityDay_0001__Cardano_TXs_All`
 
-- **File Format**: CSV (`.txt` files saved as comma-separated values)
+- **File Format**: CSV (plain text files saved as comma-separated values)
 
 - **Number of Columns**: 1
 
@@ -510,8 +510,8 @@ num_delegator_addresses_per_epoch = load_file_to_array(file_name)
 1. **Daily Output**: Each file represents data for a single day, identified by the `day_offset` starting from the initial date (`2017-09-23`).
 2. **Consistency**: The index or order of rows in both file formats aligns with the entity IDs defined in the clustering array (`clustering_array`).
 3. **Storage Location**:
-   - Balances: Stored in `YuZhang_Cardano_Balances_Entities` directory.
-   - Transaction Volumes: Stored in `YuZhang_Cardano_TX_Vols_Entities__PICKLE` directory.
+   - Balances: Stored in `Cardano_Balances_Entities` directory.
+   - Transaction Volumes: Stored in `Cardano_TX_Vols_Entities__PICKLE` directory.
 4. **File Size**: As both formats iterate over entities daily, the file sizes scale with the number of entities and daily transactions processed.
 
 ***
