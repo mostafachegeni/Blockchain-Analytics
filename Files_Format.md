@@ -1,8 +1,11 @@
 
+***
+
+
 
 ***
 
-#### File: `EntityBalancesArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540`
+#### File: `EntityBalancesArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
 
 This file contains the balances of each entity in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**. The balance represents the net total of UTXO values associated with each entity.
 
@@ -38,7 +41,7 @@ This file contains the balances of each entity in the Cardano network. Entities 
 
 ***
 
-#### File: `EntityOwnNFTsNumberArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540`
+#### File: `EntityOwnNFTsNumberArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
 
 ### Description
 This file contains the number of NFTs (Non-Fungible Tokens) owned by each entity in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**.
@@ -75,7 +78,7 @@ This file contains the number of NFTs (Non-Fungible Tokens) owned by each entity
 
 ***
 
-#### File: `EntityOwnNFTsWithNameArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-06-05_085540`
+#### File: `EntityOwnNFTsWithNameArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
 
 This file contains the detailed list of NFTs (Non-Fungible Tokens) owned by each entity in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**. Each NFT is represented by its `MA_ID` and associated metadata.
 
@@ -161,7 +164,7 @@ This file contains a list of NFTs (Non-Fungible Tokens) minted by each entity in
 
 ***
 
-#### File: `EntityFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-04-08_075547`
+#### File: `EntityFTsArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
 
 This file contains a list of FTs (Fungible Tokens) minted by each entity in the Cardano network. Entities are identified based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**, and FTs are associated with entities through their minting activity.
 
@@ -206,7 +209,7 @@ This file contains a list of FTs (Fungible Tokens) minted by each entity in the 
 
 ***
 
-#### File: `Unique_AddressesListRaw__Cardano_TXs_All__2023-02-28_143357`
+#### File: `Unique_AddressesListRaw__Cardano_TXs_All__<timestamp>`
 
 This file contains the sorted and deduplicated list of all raw addresses extracted from the Cardano transaction data. Raw addresses are the complete address strings as they appear in the blockchain.
 
@@ -243,7 +246,7 @@ addr1qynopqrs...tuvwxyz
 
 ***
 
-#### File: `Unique_AddressesListPayment__Cardano_TXs_All__2023-02-28_143953`
+#### File: `Unique_AddressesListPayment__Cardano_TXs_All__<timestamp>`
 
 This file contains the sorted and deduplicated list of all payment addresses extracted from the Cardano transaction data. Payment addresses represent the payment credential portion of raw addresses.
 
@@ -280,7 +283,7 @@ payment1qvwxyzde...ghijkl
 
 ***
 
-#### File: `Unique_AddressesListDelegation__Cardano_TXs_All__2023-02-28_144415`
+#### File: `Unique_AddressesListDelegation__Cardano_TXs_All__<timestamp>`
 
 This file contains the sorted and deduplicated list of all delegation (stake) addresses extracted from the Cardano transaction data. Delegation addresses represent the staking portion of raw addresses.
 
@@ -316,7 +319,7 @@ stake1uvwxdefg...ghijklm
 
 ***
 
-#### File: `AddressListRaw__Cardano_TXs_All__2023-02-28_143357`
+#### File: `AddressListRaw__Cardano_TXs_All__<timestamp>`
 
 ### Description
 This file contains a list of all raw addresses extracted from the outputs of transactions in the Cardano network. Raw addresses are complete address strings as they appear in the blockchain, prior to separating into payment and delegation components.
@@ -349,7 +352,7 @@ addr1qqwxyg7xwfj...mlk78hrk
 
 ***
 
-#### File: `AddressListPayment__Cardano_TXs_All__2023-02-28_143953`
+#### File: `AddressListPayment__Cardano_TXs_All__<timestamp>`
 
 ### Description
 This file contains a list of all payment addresses extracted from the raw addresses in the Cardano network. Payment addresses are derived by processing raw addresses and represent the payment credential part.
@@ -383,7 +386,7 @@ payment1qqvtygkdxvj...as34lmnk
 
 ***
 
-#### File: `AddressListDelegation__Cardano_TXs_All__2023-02-28_144415`
+#### File: `AddressListDelegation__Cardano_TXs_All__<timestamp>`
 
 This file contains a list of all delegation (stake) addresses extracted from the raw addresses in the Cardano network. Delegation addresses represent the staking part of an address, derived from the raw address string.
 
@@ -416,7 +419,7 @@ stake1uqwyvgdxj...asdfe3j
 
 ***
 
-#### File: `parentsList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223712`
+#### File: `parentsList_Heuristic1noSC__Cardano_TXs_All__<timestamp>`
 
 This file contains the parent mapping of addresses in the Cardano transaction network based on **Heuristic 1 without considering smart contracts** (`noSC`). The parent array represents the Union-Find data structure where each index corresponds to a unique address, and the value represents its parent in the clustering hierarchy.
 
@@ -455,7 +458,7 @@ This file contains the parent mapping of addresses in the Cardano transaction ne
 
 ***
 
-#### File: `parentsList_Heuristic2__Cardano_TXs_All__2023-03-26_105842`
+#### File: `parentsList_Heuristic2__Cardano_TXs_All__<timestamp>`
 
 This file contains the parent mapping of addresses in the Cardano transaction network based on **Heuristic 2**. The parent array represents the clustering of addresses into entities, determined by analyzing address relationships specific to Heuristic 2.
 
@@ -493,7 +496,7 @@ This file contains the parent mapping of addresses in the Cardano transaction ne
 
 ***
 
-#### File: `parentsList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-03-26_140958`
+#### File: `parentsList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
 
 This file contains the parent mapping of addresses in the Cardano transaction network based on a combination of **Heuristic 1 (noSC)** and **Heuristic 2**. The parent array represents the clustering of addresses determined by merging the parent mappings from both heuristics.
 
@@ -533,7 +536,7 @@ This file contains the parent mapping of addresses in the Cardano transaction ne
 
 ***
 
-#### File: `newPerDay_rawAddresses__Cardano_TXs_All__2023-04-20_025121`
+#### File: `newPerDay_rawAddresses__Cardano_TXs_All__<timestamp>`
 
 ### Description
 This file contains the day number (relative to the Cardano blockchain's initial date) when each raw address first appeared in a transaction. If a raw address has not been observed in any transaction, a placeholder value of `999999999999` is used.
@@ -572,7 +575,7 @@ This file contains the day number (relative to the Cardano blockchain's initial 
 
 ***
 
-#### File: `newPerDay_ByronAddresses__Cardano_TXs_All__2023-04-20_025121`
+#### File: `newPerDay_ByronAddresses__Cardano_TXs_All__<timestamp>`
 
 This file contains the day number when each Byron payment address first appeared in a transaction. Byron addresses are identified as non-smart contract addresses with a specific prefix. If a Byron address has not been observed in any transaction, a placeholder value of `999999999999` is used.
 
@@ -609,7 +612,7 @@ This file contains the day number when each Byron payment address first appeared
 
 ***
 
-#### File: `newPerDay_ShelleyAddresses__Cardano_TXs_All__2023-04-20_025121`
+#### File: `newPerDay_ShelleyAddresses__Cardano_TXs_All__<timestamp>`
 
 This file contains the day number when each Shelley payment address first appeared in a transaction. Shelley addresses are identified as non-Byron addresses. If a Shelley address has not been observed in any transaction, a placeholder value of `999999999999` is used.
 
@@ -646,7 +649,7 @@ This file contains the day number when each Shelley payment address first appear
 
 ***
 
-#### File: `newPerDay_delegationAddresses__Cardano_TXs_All__2023-04-20_025121`
+#### File: `newPerDay_delegationAddresses__Cardano_TXs_All__<timestamp>`
 
 This file contains the day number when each delegation (stake) address first appeared in a transaction. Delegation addresses are associated with staking operations. If a delegation address has not been observed in any transaction, a placeholder value of `999999999999` is used.
 
@@ -684,7 +687,7 @@ This file contains the day number when each delegation (stake) address first app
 
 ***
 
-#### File: `Largest<number>_cc_subgraph_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-26_131418.pickle`
+#### File: `Largest<number>_cc_subgraph_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__<timestamp>`
 
 This file contains a serialized graph object representing the `<number>`th largest connected component (CC) of the Cardano address network, constructed using **Heuristic 1 without considering smart contracts** (`noSC`). The subgraph was extracted from the complete graph (`Graph G`) by isolating the `<number>`th largest set of connected nodes based on transaction co-occurrence data.
 
@@ -726,7 +729,7 @@ largest_cc_subgraph.edges(data=True)
 
 ***
 
-#### File: `Graph_G_AddrsNetwork_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-26_000507.pickle`
+#### File: `Graph_G_AddrsNetwork_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__<timestamp>`
 
 This file contains a serialized graph object (`Graph G`) representing the Cardano transaction network. The graph was constructed using **Heuristic 1 without considering smart contracts** (`noSC`) and is based on the weighted adjacency list stored in `graphWeightsArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_234559`. Nodes represent addresses, and edges represent co-occurrence relationships in transactions, with weights indicating the frequency of interactions.
 
@@ -763,7 +766,7 @@ G.edges(data=True)
 
 ***
 
-#### File: `graphWeightsArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_234559`
+#### File: `graphWeightsArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__<timestamp>`
 
 ### Description
 This file contains the weighted adjacency list of a graph representing the Cardano transaction network. The weights of edges between addresses indicate the number of times the addresses were identified together (clustered) in a transaction based on **Heuristic 1 without considering smart contracts** (`noSC`). The file captures all weighted connections between addresses.
@@ -805,7 +808,7 @@ This file contains the weighted adjacency list of a graph representing the Carda
 
 ***
 
-#### File: `Entities_related_to_Stake_Addresses__Heuristic2__Cardano_TXs_All__2024-01-23_212107`
+#### File: `Entities_related_to_Stake_Addresses__Heuristic2__Cardano_TXs_All__<timestamp>`
 
 This file contains the mapping of stake (delegation) addresses to the entities they are associated with, based on **Heuristic 2**. The mapping identifies the entity (cluster) of payment addresses linked to each stake address through transaction outputs. If a stake address does not have an associated entity, a placeholder value of `999999999999` is used.
 
@@ -844,7 +847,7 @@ This file contains the mapping of stake (delegation) addresses to the entities t
 
 ***
 
-#### File: `epochArray_rawAddresses__Cardano_TXs_All__2023-03-27_085508`
+#### File: `epochArray_rawAddresses__Cardano_TXs_All__<timestamp>`
 
 This file contains the epoch numbers when each raw address first appeared on the Cardano blockchain. Each entry corresponds to a unique raw address, and the value indicates the epoch during which the address was first recorded in a transaction output. If an address does not belong to this category, a placeholder value of `999999999999` is used.
 
@@ -879,7 +882,7 @@ This file contains the epoch numbers when each raw address first appeared on the
 
 ***
 
-## File: `epochArray_ByronAddresses__Cardano_TXs_All__2023-03-27_085508`
+## File: `epochArray_ByronAddresses__Cardano_TXs_All__<timestamp>`
 
 ### Description
 This file contains the epoch numbers when each Byron payment address first appeared on the Cardano blockchain. Byron addresses are identified as non-smart contract addresses starting with a specific prefix. If an address does not belong to this category, a placeholder value of `999999999999` is used.
@@ -914,7 +917,7 @@ This file contains the epoch numbers when each Byron payment address first appea
 
 ***
 
-#### File: `epochArray_ShelleyAddresses__Cardano_TXs_All__2023-03-27_085508`
+#### File: `epochArray_ShelleyAddresses__Cardano_TXs_All__<timestamp>`
 
 This file contains the epoch numbers when each Shelley payment address first appeared on the Cardano blockchain. Shelley addresses are identified as non-Byron addresses used in Cardano transactions. If an address does not belong to this category, a placeholder value of `999999999999` is used.
 
@@ -947,7 +950,7 @@ This file contains the epoch numbers when each Shelley payment address first app
 
 ***
 
-#### File: `epochArray_delegationAddresses__Cardano_TXs_All__2023-03-27_085508`
+#### File: `epochArray_delegationAddresses__Cardano_TXs_All__<timestamp>`
 
 This file contains the epoch numbers when each delegation address (stake address) first appeared on the Cardano blockchain. Delegation addresses are associated with stake key identifiers used for staking purposes. If an address does not belong to this category, a placeholder value of `999999999999` is used.
 
@@ -984,7 +987,7 @@ This file contains the epoch numbers when each delegation address (stake address
 
 ***
 
-#### File: `graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__2023-02-25_224222`
+#### File: `graphEdgesArrayList_Heuristic1noSC_LinkToALLAddressesInTX__Cardano_TXs_All__<timestamp>`
 
 This file represents the adjacency list of a graph constructed from Cardano transaction data. The graph edges were generated using **Heuristic 1** without considering smart contracts (`noSC`), and links were created between each payment address and all other addresses involved in the same transaction. Each list in the adjacency array corresponds to a node (payment address) and contains the indices of all other addresses it is linked to.
 
@@ -1020,7 +1023,7 @@ This file represents the adjacency list of a graph constructed from Cardano tran
 
 ***
 
-#### File: `clusteringArrayList_Heuristic1noSC__Cardano_TXs_All__2023-02-25_223957`
+#### File: `clusteringArrayList_Heuristic1noSC__Cardano_TXs_All__<timestamp>`
 
 This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 1 without considering smart contracts` (`noSC`). Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
 
@@ -1060,7 +1063,7 @@ This file contains the clustering results for payment addresses on the Cardano n
 ***
 
 
-#### File: `clusteringArrayList_Heuristic2__Cardano_TXs_All__2023-03-26_110150`
+#### File: `clusteringArrayList_Heuristic2__Cardano_TXs_All__<timestamp>`
 
 This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 2`. Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
 
@@ -1098,7 +1101,7 @@ This file contains the clustering results for payment addresses on the Cardano n
 
 ***
 
-#### File: `clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__2023-03-26_141212`
+#### File: `clusteringArrayList_Heuristic1noSC_AND_Heuristic2__Cardano_TXs_All__<timestamp>`
 
 This file contains the clustering results for payment addresses on the Cardano network, derived using `Heuristic 1 without considering smart contracts` (`noSC`) and `Heuristic 2`. Each element in the array corresponds to a payment address, and the value represents the cluster ID to which the address belongs. Clusters are identified through a Union-Find algorithm-based heuristic clustering method.
 
@@ -1138,7 +1141,7 @@ This file contains the clustering results for payment addresses on the Cardano n
 
 ***
 
-#### File: **`activeAddressesPerDayList__Cardano_TXs_All__2023-04-09_224357`**
+#### File: `activeAddressesPerDayList__Cardano_TXs_All__<timestamp>`
 
 This file contains the count of unique active payment addresses on the Cardano network for each day within the dataset's date range (from 2017-09-23 to 2023-01-21). Each value corresponds to the number of distinct payment addresses observed in transactions on that day.
 
@@ -1166,7 +1169,7 @@ This file contains the count of unique active payment addresses on the Cardano n
 
 ***
 
-#### File: `activeEntitiesPerDayList__Cardano_TXs_All__2023-04-09_224357`
+#### File: `activeEntitiesPerDayList__Cardano_TXs_All__<timestamp>`
 
 This file contains the count of unique active entities on the Cardano network for each day within the dataset's date range. An entity represents a group of payment addresses clustered based on their interaction patterns (e.g., input-output relationships).
 
@@ -1371,7 +1374,7 @@ This data is aggregated for each epoch and stored in arrays, not individual file
 ***
 
 
-#### **File: `Num_Delegator_addresses_per_epoch__Cardano_TXs_All__<timestamp>`**
+#### File: `Num_Delegator_addresses_per_epoch__Cardano_TXs_All__<timestamp>`
 
 - **Purpose**: 
   Tracks the number of unique delegator addresses active during each epoch.
@@ -1396,7 +1399,7 @@ This data is aggregated for each epoch and stored in arrays, not individual file
 
 ***
 
-#### **File: `Num_Delegator_entities_per_epoch__Cardano_TXs_All__<timestamp>`**
+#### File: `Num_Delegator_entities_per_epoch__Cardano_TXs_All__<timestamp>`
 
 - **Purpose**:
   Tracks the number of unique delegator entities active during each epoch.
@@ -1421,7 +1424,7 @@ This data is aggregated for each epoch and stored in arrays, not individual file
 
 ***
 
-#### **File: `Num_Rewarder_addresses_per_epoch__Cardano_TXs_All__<timestamp>`**
+#### File: `Num_Rewarder_addresses_per_epoch__Cardano_TXs_All__<timestamp>`
 
 - **Purpose**:
   Tracks the number of unique rewarder addresses active during each epoch.
@@ -1446,7 +1449,7 @@ This data is aggregated for each epoch and stored in arrays, not individual file
 
 ***
 
-#### **File: `Num_Rewarder_entities_per_epoch__Cardano_TXs_All__<timestamp>`**
+#### File: `Num_Rewarder_entities_per_epoch__Cardano_TXs_All__<timestamp>`
 
 - **Purpose**:
   Tracks the number of unique rewarder entities active during each epoch.
