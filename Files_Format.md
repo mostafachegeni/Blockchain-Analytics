@@ -1,3 +1,60 @@
+
+#### File: **`activeAddressesPerDayList__Cardano_TXs_All__2023-04-09_224357.txt`**
+
+This file contains the count of unique active payment addresses on the Cardano network for each day within the dataset's date range (from 2017-09-23 to 2023-01-21). Each value corresponds to the number of distinct payment addresses observed in transactions on that day.
+
+### Format
+- **Type**: Text file
+- **Structure**: A single column, where each row represents the count of active addresses for one day.
+- **Number of Rows**: 1,947 (total days from 2017-09-23 to 2023-01-21).
+
+### Example
+```plaintext
+5
+7
+10
+8
+15
+...
+```
+- **Example Interpretation**: On Day 1 (2017-09-23), there were 5 active addresses; on Day 2, 7 active addresses; and so on.
+
+- **Active Addresses**: Extracted directly from non-smart contract payment addresses in transaction inputs.
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save the array to this text file. This method writes the array into a `.txt` file in JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the data back into an array for processing. This method reads the text file and converts it into a NumPy array.
+
+***
+
+#### File: `activeEntitiesPerDayList__Cardano_TXs_All__2023-04-09_224357.txt`
+
+This file contains the count of unique active entities on the Cardano network for each day within the dataset's date range. An entity represents a group of payment addresses clustered based on their interaction patterns (e.g., input-output relationships).
+
+### Format
+- **Type**: Text file
+- **Structure**: A single column, where each row represents the count of active entities for one day.
+- **Number of Rows**: 1,947 (total days from 2017-09-23 to 2023-01-21).
+
+### Example
+```plaintext
+3
+5
+6
+4
+9
+...
+```
+- **Example Interpretation**: On Day 1 (2017-09-23), there were 3 active entities; on Day 2, 5 active entities; and so on.
+
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save the array to this text file. This method writes the array into a `.txt` file in JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the data back into an array for processing. This method reads the text file and converts it into a NumPy array.
+
+- **Active Entities**: Derived from clustering payment addresses using the Union-Find algorithm.
+```
+***
+
 #### **`DelegEvents__entityWealth_poolStakes_pairs__AllEpochs__<timestamp>.txt`**
 
 - **File Format**:
