@@ -27,7 +27,7 @@ In the following sections, each cell in the corresponding 'code' is documented w
 This cell imports a comprehensive set of libraries and modules required for data analysis, visualization, multiprocessing, and Spark-based operations. It also initializes certain environment variables, constants, and performs some basic computations.
 
 #### Explanation of the Code:
-1. **Library Imports**:
+**Library Imports**:
    - **Core libraries**: `numpy`, `array`, `csv`, `datetime`, and `os`.
    - **Search and sorting**: `bisect`.
    - **Visualization**: `matplotlib.pyplot`.
@@ -38,70 +38,34 @@ This cell imports a comprehensive set of libraries and modules required for data
    - **Progress tracking**: `tqdm`.
    - **Serialization**: `pickle`.
 
-2. **Environment Variable Setup**:
-   - Disables timezone warnings for PyArrow with `os.environ`.
-
-3. **Cardano Blockchain Date and Address Analysis**:
-   - Sets constants for unique address counts and calculates the total time length of the Cardano blockchain in days.
-
-4. **Outputs**:
-   - Prints address count statistics and a success message.
 
 #### Cell Code:
 ```python
-# Import libraries and set constant variables:
-
 import numpy as np
 from array import *
 import csv
-
-# using datetime module
 import datetime;
-
-# Binary Search
 from bisect import bisect_left
 from bisect import bisect_right
-
 import matplotlib.pyplot as plt
 import json
-
 import multiprocessing as mp
 from multiprocessing import Process, Queue
 from multiprocessing import current_process
 import queue
 import threading
-
 import os
 os.environ["PYARROW_IGNORE_TIMEZONE"] = "1"
 from pyspark.sql import SparkSession
 import pyspark.pandas as ps
 from pyspark.sql.functions import col
 import pandas as pd
-
 import random
 import networkx as nx
 from tqdm import tqdm
-
-# https://python-louvain.readthedocs.io/en/latest/api.html
-# community.modularity(partition, graph, weight='weight')
 from community import modularity
-
 import pickle
-
 import powerlaw
-
-print('----------------------')
-# unique_payment_addresses_len = len(unique_payment_addresses)
-unique_raw_addresses_len        = 40330345
-unique_payment_addresses_len    = 40324960
-unique_delegation_addresses_len = 3868049
-print('unique_raw_addresses_len        = ', unique_raw_addresses_len)
-print('unique_payment_addresses_len    = ', unique_payment_addresses_len)
-print('unique_delegation_addresses_len = ', unique_delegation_addresses_len)
-
-INITIAL_DATE_CARDANO      = datetime.datetime.strptime('2017-09-23 21:44:51', '%Y-%m-%d %H:%M:%S').date()
-FINAL_DATE_CARDANO        = datetime.datetime.strptime('2023-01-21 17:39:30', '%Y-%m-%d %H:%M:%S').date()
-total_time_length_CARDANO = int((FINAL_DATE_CARDANO - INITIAL_DATE_CARDANO).total_seconds()/86400) + 1
 
 print('----------------------')
 print('done!')
@@ -114,14 +78,12 @@ print('done!')
 
 This cell sets up the base and temporary directory paths to organize and manage file storage for the Cardano project.
 
-#### Explanation of the Code:
-1. **`BASE_ADDRESS`**:
+**`BASE_ADDRESS`**:
    - Defines the base directory for storing exported data related to the project.
 
-2. **`TEMP_ADDRESS`**:
+**`TEMP_ADDRESS`**:
    - Defines a subdirectory within the base directory to store temporary files.
 
-These paths centralize file storage management and ensure consistent directory usage throughout the project.
 
 #### Cell Code:
 ```python
@@ -130,7 +92,6 @@ TEMP_ADDRESS = BASE_ADDRESS + '/temp_files/'
 ```
 
 ***
-
 
 
 ### Define Required Methods
