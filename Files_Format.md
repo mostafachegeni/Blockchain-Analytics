@@ -27,11 +27,9 @@ This file contains the epoch numbers when each raw address first appeared on the
   - Address 3 appeared in epoch 7, and so on.
 
 
-## Methods Used
-### Saving
-- The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
-### Loading
-- The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
 
 
 ***
@@ -64,11 +62,9 @@ This file contains the epoch numbers when each Byron payment address first appea
   - Address 2 is of another type, indicated by the placeholder value.
   - Address 3 appeared in epoch 14, and so on.
 
-## Methods Used
-### Saving
-- The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
-### Loading
-- The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
 
 
 ***
@@ -100,11 +96,9 @@ This file contains the epoch numbers when each Shelley payment address first app
   - Address 3 is of another type, indicated by the placeholder value.
   - Address 4 appeared in epoch 11, and so on.
 
-## Methods Used
-### Saving
-- The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
-### Loading
-- The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
 
 ***
 
@@ -134,11 +128,9 @@ This file contains the epoch numbers when each delegation address (stake address
   - Address 1 is of another type, indicated by the placeholder value.
   - Address 2 appeared in epoch 14, and so on.
 
-## Methods Used
-### Saving
-- The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
-### Loading
-- The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
+### Methods Used
+- **Saving**: The `store_array_to_file` method was used to save each epoch array to a text file. This method writes the one-dimensional array in JSON-like format.
+- **Loading**: The `load_file_to_array` method was used to load the epoch arrays back into memory for further analysis. This method reads the text file and converts it into a NumPy array.
 
 - **Generation Method**:
   - Epoch numbers were calculated using transaction IDs and their corresponding epochs.
