@@ -1313,104 +1313,114 @@ This file contains the count of unique active entities on the Cardano network fo
 
 ***
 
-#### **`DelegEvents__entityWealth_poolStakes_pairs__AllEpochs__<timestamp>`**
+#### File: `DelegEvents__entityWealth_numOfPools_pairs__AllEpochs__<timestamp>`
 
-- **File Format**:
-  - Binary file using Python's `pickle` serialization.
+This file contains a dataset representing the relationship between entity wealth and the number of unique pools an entity has delegated to during all epochs. Each entry in the dataset is a pair consisting of an entity's wealth and the count of pools they delegated to.
 
+### Format
+- **Type**: Serialized Python object (Pickle file).
 - **Structure**:
-  - A list of tuples.
-  - Each tuple contains:
-    1. **Entity Wealth**: (float) The wealth of the entity.
-    2. **Pool Stakes**: (int) The stake delegated by the entity to the pool.
+  - A list of tuples where each tuple represents:
+    - `entity_wealth` (int): The wealth of the entity at a specific epoch.
+    - `num_of_pools` (int): The number of unique pools delegated by the entity.
+- **Number of Entries**: Equal to the total number of delegation events across all epochs.
 
-- **Number of Columns**: 2 (per tuple).
-
-- **Column Types**:
-  - Column 1: `float` (Entity Wealth).
-  - Column 2: `int` (Pool Stakes).
-
-- **Example**:
-  ```python
-  [
-      (5000.0, 10000),
-      (10000.0, 25000),
-      (7500.0, 15000)
-  ]
-  ```
-
-***
-
-
-#### **`DelegEvents__entityWealth_numOfPools_pairs__AllEpochs__<timestamp>`**
-
-- **File Format**:
-  - Binary file using Python's `pickle` serialization.
-
-- **Structure**:
-  - A list of tuples.
-  - Each tuple contains:
-    1. **Entity Wealth**: (float) The wealth of the entity.
-    2. **Number of Pools**: (int) The number of pools the entity delegated to.
-
-- **Number of Columns**: 2 (per tuple).
-
-- **Column Types**:
-  - Column 1: `float` (Entity Wealth).
-  - Column 2: `int` (Number of Pools).
-
-- **Example**:
-  ```python
-  [
-      (5000.0, 2),
-      (10000.0, 3),
-      (7500.0, 1)
-  ]
-  ```
-
-***
-
-#### **`DelegEvents__entityWealth_rewardAmount_pairs__AllEpochs__<timestamp>`**
-
-- **File Format**:
-  - Binary file using Python's `pickle` serialization.
-
-- **Structure**:
-  - A list of tuples.
-  - Each tuple contains:
-    1. **Entity Wealth**: (float) The wealth of the entity.
-    2. **Reward Amount**: (int) The total rewards received by the entity.
-
-- **Number of Columns**: 2 (per tuple).
-
-- **Column Types**:
-  - Column 1: `float` (Entity Wealth).
-  - Column 2: `int` (Reward Amount).
-
-- **Example**:
-  ```python
-  [
-      (5000.0, 1000),
-      (10000.0, 2000),
-      (7500.0, 1500)
-  ]
-  ```
-
-### Summary Table
-
-| **File Name**                                                  | **Columns**                    | **Types**               | **Example**                                       |
-|----------------------------------------------------------------|--------------------------------|-------------------------|---------------------------------------------------|
-| `DelegEvents__entityWealth_poolStakes_pairs__AllEpochs__`      | 1. Entity Wealth<br>2. Pool Stakes | `float`, `int`          | `[(5000.0, 10000), (10000.0, 25000), ...]`       |
-| `DelegEvents__entityWealth_numOfPools_pairs__AllEpochs__`      | 1. Entity Wealth<br>2. Num Pools | `float`, `int`          | `[(5000.0, 2), (10000.0, 3), ...]`               |
-| `DelegEvents__entityWealth_rewardAmount_pairs__AllEpochs__`    | 1. Entity Wealth<br>2. Rewards  | `float`, `int`          | `[(5000.0, 1000), (10000.0, 2000), ...]`         |
-
-
-### File Access
-To read these files, use Python's `pickle` module with:
-```python
-with open(filename, 'rb') as file:
-    data = pickle.load(file)
+### Example
+```plaintext
+[
+  (100000, 5),
+  (200000, 3),
+  (500000, 10),
+  ...
+]
 ```
+- **Example Interpretation**:
+  - An entity with 100,000 ADA wealth delegated to 5 unique pools.
+  - An entity with 200,000 ADA wealth delegated to 3 unique pools, and so on.
+
+### Methods Used
+- **Saving**: The datasets were serialized and saved using the `pickle.dump` method. This allows for efficient storage of large datasets while maintaining structure and metadata.
+- **Loading**: The datasets can be deserialized and loaded back into memory using the `pickle.load` method.
+
+- **Generation Method**:
+  - Delegation and reward data were extracted from CSV files containing pool, delegation, and reward information for all epochs.
+  - Entity wealth data was cross-referenced with delegation and reward events using entity clustering information (`clustering_array_heur1and2`).
+  - Delegation events were grouped by epochs, and metrics such as the number of pools, pool stakes, and rewards were aggregated.
+
+
+***
+
+#### File: `DelegEvents__entityWealth_poolStakes_pairs__AllEpochs__<timestamp>`
+
+This file contains a dataset representing the relationship between entity wealth and pool stakes during delegation events across all epochs. Each entry in the dataset is a pair consisting of an entity's wealth and the stake amount in the pool they delegated to.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A list of tuples where each tuple represents:
+    - `entity_wealth` (int): The wealth of the entity at a specific epoch.
+    - `pool_stake` (int): The total stake amount in the pool the entity delegated to.
+- **Number of Entries**: Equal to the total number of delegation events across all epochs.
+
+### Example
+```plaintext
+[
+  (150000, 3000000),
+  (250000, 5000000),
+  (400000, 2000000),
+  ...
+]
+```
+- **Example Interpretation**:
+  - An entity with 150,000 ADA wealth delegated to a pool with a total stake of 3,000,000 ADA.
+  - An entity with 250,000 ADA wealth delegated to a pool with a total stake of 5,000,000 ADA, and so on.
+
+### Methods Used
+- **Saving**: The datasets were serialized and saved using the `pickle.dump` method. This allows for efficient storage of large datasets while maintaining structure and metadata.
+- **Loading**: The datasets can be deserialized and loaded back into memory using the `pickle.load` method.
+
+- **Generation Method**:
+  - Delegation and reward data were extracted from CSV files containing pool, delegation, and reward information for all epochs.
+  - Entity wealth data was cross-referenced with delegation and reward events using entity clustering information (`clustering_array_heur1and2`).
+  - Delegation events were grouped by epochs, and metrics such as the number of pools, pool stakes, and rewards were aggregated.
+
+
+***
+
+#### File: `DelegEvents__entityWealth_rewardAmount_pairs__AllEpochs__<timestamp>`
+
+This file contains a dataset representing the relationship between entity wealth and the reward amounts they received during all epochs. Each entry in the dataset is a pair consisting of an entity's wealth and the total rewards received.
+
+### Format
+- **Type**: Serialized Python object (Pickle file).
+- **Structure**:
+  - A list of tuples where each tuple represents:
+    - `entity_wealth` (int): The wealth of the entity at a specific epoch.
+    - `reward_amount` (int): The total rewards received by the entity.
+- **Number of Entries**: Equal to the total number of reward events across all epochs.
+
+### Example
+```plaintext
+[
+  (100000, 500),
+  (300000, 1500),
+  (500000, 3000),
+  ...
+]
+```
+- **Example Interpretation**:
+  - An entity with 100,000 ADA wealth received a total reward of 500 ADA.
+  - An entity with 300,000 ADA wealth received a total reward of 1,500 ADA, and so on.
+
+
+### Methods Used
+- **Saving**: The datasets were serialized and saved using the `pickle.dump` method. This allows for efficient storage of large datasets while maintaining structure and metadata.
+- **Loading**: The datasets can be deserialized and loaded back into memory using the `pickle.load` method.
+
+- **Generation Method**:
+  - Delegation and reward data were extracted from CSV files containing pool, delegation, and reward information for all epochs.
+  - Entity wealth data was cross-referenced with delegation and reward events using entity clustering information (`clustering_array_heur1and2`).
+  - Delegation events were grouped by epochs, and metrics such as the number of pools, pool stakes, and rewards were aggregated.
 
 
 ***
