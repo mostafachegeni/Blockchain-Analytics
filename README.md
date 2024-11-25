@@ -64,4 +64,22 @@ Below, you will find a list of notebooks along with a brief overview of each.
     - PLOT: "Entity Stake Delegation (ADA)" vs. "Entity Wealth (ADA)"
 
 
+- **`Plotting___Cardano_Low_Reward_Pools_Analysis.ipynb`**: The code plots the following figures:
+    - PLOT: Scatter Plot "Reward per epoch" vs "Entity Wealth" for all delegation events in all epochs
+    - PLOT: Periodic/Cumulative number of low reward pools
+    - PLOT: Number of pools that have frequently performed as low reward pools
+    - PLOT: "Reward Amount" vs "Deleg Amount" of stake addresses for low reward pools
+
+
+
+- **`Plotting___Cardano_Pool_Stake_Reward_Analysis.ipynb`**: The code plots the following figures:
+    - PLOT: Calculate cumulative/periodic number of active/rewarded pools per epoch
+    - PLOT: Calculate "Gini Index" of the pools' stakes/rewards across all epochs
+    - PLOT: Cumulative number of entities
+    - PLOT: "Number of pools per address" vs "number of addresses"
+    - PLOT: "Cumulative number of pools per entity" vs "cumulative number of entities"
+    - PLOT: Derivative number of pools vs. entities
+    - PLOT: Number of active/rewarded pools over time
+    - PLOT: Calculate "Gini Index" of the entities' wealth over time
+    - PLOT: Calculate "Gini Index" of the payment addresses' wealth over time
 
